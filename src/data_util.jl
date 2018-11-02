@@ -5,7 +5,7 @@ const LEARNING_LABEL_ENCODING = LabelEnc.NativeLabels([:Lin,:Lout])
 
 function load_data(file_path; header=false, native_label_encoding=NATIVE_LABEL_ENCODING)
     raw_data, _ = header ? readdlm(file_path, ',', header=header) : (readdlm(file_path, ','), nothing)
-    data = convert(Array{Float64}, raw_data[:, 1:end-1])'
+    data = copy(transpose(float.(raw_data[:, 1:end-1])))
     labels = convert_labels_from_raw(raw_data[:,end])
     return data, labels
 end
@@ -20,12 +20,12 @@ end
 
 abstract type SplitStrategy end
 
-type FullSplitStrat <: SplitStrategy end
-type UnlabeledSplitStrat <: SplitStrategy end
-type UnlabeledAndLabeledInlierSplitStrat <: SplitStrategy end
-type LabeledSplitStrat <: SplitStrategy end
-type LabeledInlierSplitStrat <: SplitStrategy end
-type LabeledOutlierSplitStrat <: SplitStrategy end
+struct FullSplitStrat <: SplitStrategy end
+struct UnlabeledSplitStrat <: SplitStrategy end
+struct UnlabeledAndLabeledInlierSplitStrat <: SplitStrategy end
+struct LabeledSplitStrat <: SplitStrategy end
+struct LabeledInlierSplitStrat <: SplitStrategy end
+struct LabeledOutlierSplitStrat <: SplitStrategy end
 
 struct DataSplits
     train::BitArray
@@ -47,7 +47,7 @@ get_query(ds::DataSplits, data::Array{T, 2}, pools::Vector{Symbol}) where T <: R
 
 function select_subset(strat::SplitStrategy, init_mask::BitArray, data::Array{T, 2}, pools::Vector{Symbol}) where T <: Real
     mask = calc_mask(strat, init_mask, pools)
-    return (data[:, mask], pools[mask], find(mask))
+    return (data[:, mask], pools[mask], findall(mask))
 end
 
 calc_mask(strat::FullSplitStrat, init_mask::BitArray, pools::Vector{Symbol}) = init_mask
@@ -65,13 +65,13 @@ function get_initial_pools(data, labels, data_splits, initial_pool_strategy; n=2
     if initial_pool_strategy == "Pa"
         n = min(size(data, 1) + x, size(data, 2))
         l = fill(:U, size(data, 2))
-        label_candidates = find(data_splits.train .& (labels .== :inlier))
-        l[label_candidates[1:n]] = convert_labels_to_learning(labels[label_candidates[1:n]])
+        label_candidates = findall(data_splits.train .& (labels .== :inlier))
+        l[label_candidates[1:n]] .= convert_labels_to_learning(labels[label_candidates[1:n]])
     elseif initial_pool_strategy ∈ ["Pp", "Pn"]
         p = initial_pool_strategy == "Pp" ? p : min(1.0, n / sum(data_splits.train))
-        label_candidates = find(data_splits.train)
+        label_candidates = findall(data_splits.train)
         (label_indices, _), _ = stratifiedobs((label_candidates, labels[data_splits.train]), p=p)
-        l[label_indices] = convert_labels_to_learning(labels[label_indices])
+        l[label_indices] .= convert_labels_to_learning(labels[label_indices])
     end
     return l
 end
@@ -82,7 +82,7 @@ function get_splits_and_init_pools(data, labels, split_strategy, initial_pool_st
         data_splits = DataSplits(train, FullSplitStrat())
     elseif split_strategy == "Sh"
         (train_indices, train_labels), (test_indices, test_labels) = stratifiedobs((collect(1:length(labels)), labels), p=0.8)
-        train[test_indices] = false
+        train[test_indices] .= false
         data_splits = DataSplits(train, .~train, FullSplitStrat())
     elseif split_strategy == "Si"
         data_splits = DataSplits(train, LabeledInlierSplitStrat(), FullSplitStrat(), FullSplitStrat())

@@ -8,11 +8,17 @@ using ROCAnalysis
 using ValueHistories
 using JSON, Unmarshal
 using DataStructures
+using Printf
+using DelimitedFiles
+using Statistics
+using LinearAlgebra
+using Dates
+using Pkg
+using JuMP
 import StatsBase: countmap
 
 using Formatting
 using Memento
-using Compat: @__MODULE__
 
 include("QueryStrategies/QueryStrategies.jl")
 @reexport using .QueryStrategies

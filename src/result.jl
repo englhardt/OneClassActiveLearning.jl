@@ -31,16 +31,13 @@ struct Result
     Result(id, experiment, worker_info, data_stats, al_history, al_summary, status) = new(id, experiment, worker_info, data_stats, al_history, al_summary, status)
 end
 
-Base.keys(history::MVHistory) = keys(history.storage)
-Base.values(history::MVHistory, key::Symbol) = get(history, key)[2]
-
 function set_data_stats!(res::Result, x::Array{T, 2}, ds::DataSplits) where T <: Real
     res.data_stats.num_observations = size(x, 2)
     res.data_stats.num_dimensions = size(x, 1)
     res.data_stats.train_fraction = sum(ds.train) / res.data_stats.num_observations
     res.data_stats.test_fraction = sum(ds.test) / res.data_stats.num_observations
-    res.data_stats.train_indices = find(ds.train)
-    res.data_stats.test_indices = find(ds.test)
+    res.data_stats.train_indices = findall(ds.train)
+    res.data_stats.test_indices = findall(ds.test)
     return nothing
 end
 
@@ -54,8 +51,8 @@ function get_worker_info(;debug = false)
     worker_info = Dict{Symbol, String}()
     worker_info[:julia_version] = string(VERSION)
     debug && (worker_info[:installed_packages] = join( ["$k [$v]" for (k,v) in Pkg.installed()], ','))
-    cmd = is_windows() ? `cmd /c git -C $(@__DIR__) rev-parse HEAD` : `git -C $(@__DIR__) rev-parse HEAD`
-    worker_info[:git_commit] = strip(string(readstring(cmd)))
+    cmd = Sys.iswindows() ? `cmd /c git -C $(@__DIR__) rev-parse HEAD` : `git -C $(@__DIR__) rev-parse HEAD`
+    worker_info[:git_commit] = strip(string(read(cmd, String)))
     worker_info[:utc_time] = string(Dates.now(Dates.UTC))
     worker_info[:hostname] = gethostname()
     return worker_info
@@ -79,8 +76,8 @@ function al_summarize!(res::Result)
         res.al_summary[e][:start_quality] = scores[1]
         res.al_summary[e][:end_quality] = scores[end]
         res.al_summary[e][:maximum] = maximum(scores)
-        res.al_summary[e][:ramp_up] = scores[2:end] - scores[1]
-        res.al_summary[e][:quality_range] = scores[end] - scores[1]
+        res.al_summary[e][:ramp_up] = scores[2:end] .- scores[1]
+        res.al_summary[e][:quality_range] = scores[end] .- scores[1]
         res.al_summary[e][:total_quality_range] = maximum(scores) - minimum(scores)
         res.al_summary[e][:average_end_quality] = [mean(scores[k:end]) for k in 1:length(scores)]
         res.al_summary[e][:average_quality_change] = mean(score_changes)
@@ -89,8 +86,8 @@ function al_summarize!(res::Result)
         else
             res.al_summary[e][:learning_stability] = [0.0 for k in 1:(length(scores) - 1)]
         end
-        res.al_summary[e][:average_gain] = any(score_changes .> 0)? mean(score_changes[score_changes .> 0]) : 0
-        res.al_summary[e][:average_loss] = any(score_changes .< 0)? mean(score_changes[score_changes .< 0]) : 0
+        res.al_summary[e][:average_gain] = any(score_changes .> 0) ? mean(score_changes[score_changes .> 0]) : 0
+        res.al_summary[e][:average_loss] = any(score_changes .< 0) ? mean(score_changes[score_changes .< 0]) : 0
         query_labels = values(res.al_history, :query_label)
         if :outlier in query_labels
             res.al_summary[e][:ratio_of_outlier_queries] = sum(query_labels .== :outlier) / length(query_labels)

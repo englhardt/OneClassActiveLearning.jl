@@ -1,14 +1,20 @@
 using OneClassActiveLearning
 using SVDD
-using Base.Test
-using Ipopt
+using Test
+using Random
+using JuMP, Ipopt
 using MLDataUtils, MLLabelUtils, MLKernels
 using ValueHistories
 using PyCall
+using Statistics
+using LinearAlgebra
+using Dates
+using JSON, Unmarshal
+using InteractiveUtils
 
-TEST_SOLVER = IpoptSolver(print_level=0)
+TEST_SOLVER =  with_optimizer(Ipopt.Optimizer, print_level=0)
 
-srand(0)
+Random.seed!(0)
 
 @testset "OneClassActiveLearning" begin
     include("QueryStrategies/qs_test.jl")

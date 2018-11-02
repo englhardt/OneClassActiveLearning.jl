@@ -4,9 +4,9 @@
     dummy_data, _ = load_data("$(@__DIR__)/../../example/dummy.csv")
 
     @testset "multi kde" begin
-        data = vcat(fill([1 2 3 4], 3)...)'
+        data = hcat(fill([1, 2, 3, 4,], 3)...)
         @test_throws KDEException multi_kde(data)
-        data2 = hcat(data, vcat(fill([1 2 3 4], 2)...)')
+        data2 = hcat(data, hcat(fill([1, 2, 3, 4,], 2)...))
         @test_throws KDEException multi_kde(data2)
         data3 = hcat(data2, rand(4,20) * 4)
         @test isa(OneClassActiveLearning.multi_kde(data3), PyObject)

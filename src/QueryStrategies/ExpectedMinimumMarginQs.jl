@@ -15,5 +15,5 @@ end
 function qs_score(qs::ExpectedMinimumMarginQs, x::Array{T, 2}, labels::Dict{Symbol, Array{Int, 1}})::Array{Float64, 1} where T <: Real
     haskey(labels, :Lin) || throw(MissingLabelTypeException(:Lin))
     p_x_inlier = multi_kde(x[:, labels[:Lin]], qs.bw_method)(x)
-    return (p_x_inlier ./ qs.p_x - 1) .* sign.(0.5 - p_x_inlier ./ qs.p_x)
+    return (p_x_inlier ./ qs.p_x .- 1) .* sign.(0.5 .- p_x_inlier ./ qs.p_x)
 end

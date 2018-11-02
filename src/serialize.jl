@@ -19,7 +19,7 @@ function ValueHistories.MVHistory(x::Dict{Symbol, UnivalueHistory})
     return mvh
 end
 
-function Unmarshal.unmarshal(DT::Type{MVHistory}, parsedJson:: Associative, verbose::Bool = false, verboseLvl::Int = 0)
+function Unmarshal.unmarshal(DT::Type{MVHistory}, parsedJson::AbstractDict, verbose::Bool = false, verboseLvl::Int = 0)
     mvh = Dict{Symbol, UnivalueHistory}()
     for (k,v) in parsedJson["mvhistory"]
         itype = eval(Symbol(parsedJson["mv_itypes"][k]))
@@ -74,7 +74,7 @@ function write_result_to_file(output_file, r::OneClassActiveLearning.Result)
     return nothing
 end
 
-function unmarshal_al_summary(parsedJson::Associative)
+function unmarshal_al_summary(parsedJson::AbstractDict)
     al_summary = Dict()
     for (k_metric, v_metric) in parsedJson
         d = Dict{Symbol, Any}()
@@ -103,13 +103,13 @@ function convert_to_symbol_keys(x)
 end
 
 
-function Unmarshal.unmarshal(DT::Type{OneClassActiveLearning.Result}, parsedJson::Associative)
+function Unmarshal.unmarshal(DT::Type{OneClassActiveLearning.Result}, parsedJson::AbstractDict)
     id = parsedJson["id"]
     al_history = Unmarshal.unmarshal(MVHistory, parsedJson["al_history"])
     experiment = convert_to_symbol_keys(parsedJson["experiment"])
     worker_info = convert_to_symbol_keys(parsedJson["worker_info"])
     data_stats = Unmarshal.unmarshal(DataStats, parsedJson["data_stats"])
     al_summary = unmarshal_al_summary(parsedJson["al_summary"])
-    status = convert(Dict{Symbol, Symbol}, parsedJson["status"])
+    status = Dict(:exit_code => Symbol(parsedJson["status"]["exit_code"]))
     return OneClassActiveLearning.Result(id, experiment, worker_info, data_stats, al_history, al_summary, status)
 end

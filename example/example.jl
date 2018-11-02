@@ -1,10 +1,10 @@
-using SVDD, OneClassActiveLearning, JSON, Memento, Ipopt
+using SVDD, OneClassActiveLearning, JSON, Logging, JuMP, Ipopt, Random
 
 function run_experiment(experiment::Dict)
-    srand(0)
-    info("host: $(gethostname()) worker: $(getpid()) exp_hash: $(experiment[:hash])")
+    Random.seed!(0)
+    @info "host: $(gethostname()) worker: $(getpid()) exp_hash: $(experiment[:hash])"
     if isfile(experiment[:output_file])
-        warn("Aborting experiment because the output file already exists. Filename: $(experiment[:output_file])")
+        @warn "Aborting experiment because the output file already exists. Filename: $(experiment[:output_file])"
         return nothing
     end
 
@@ -15,16 +15,16 @@ function run_experiment(experiment::Dict)
         res.al_summary[:runtime] = Dict(:time_exp => time_exp)
     catch e
         res.status[:exit_code] = Symbol(typeof(e))
-        warn("Experiment $(experiment[:hash]) finished with unkown error.")
-        warn(e)
+        @warn "Experiment $(experiment[:hash]) finished with unkown error."
+        @warn e
     finally
         if res.status[:exit_code] != :success
-            info("Writing error hash to $errorfile.error.")
+            @info "Writing error hash to $errorfile.error."
             open("$errorfile.error", "a") do f
                 print(f, "$(experiment[:hash])\n")
             end
         end
-        info("Writing result to $(experiment[:output_file]).")
+        @info "Writing result to $(experiment[:output_file])."
         OneClassActiveLearning.write_result_to_file(experiment[:output_file], res)
     end
 end
@@ -46,7 +46,7 @@ experiment = Dict{Symbol, Any}(
                             :param => Dict{Symbol, Any}()),
     :split_strategy => OneClassActiveLearning.DataSplits(trues(NUM_OBSERVATIONS)),
     :param => Dict(:num_al_iterations => 10,
-                   :solver => IpoptSolver(print_level=0),
+                   :solver => with_optimizer(Ipopt.Optimizer; print_level=0),
                    :initial_pools => fill(:U, NUM_OBSERVATIONS),
                    :adjust_K => true,
                    :initial_pool_resample_version => 1))

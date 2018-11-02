@@ -66,14 +66,14 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
 
         debug(LOGGER, "[FIT] Start fitting model on $(format_observations(train_data)) observations.")
         # Workaround: redirect solver output
-        STDOUT_orig, STDERR_orig = STDOUT, STDERR
+        stdout_orig, stderr_orig = stdout, stderr
         redirect_stdout(open("/dev/null", "w")); redirect_stderr(open("/dev/null", "w"))
         status, time_fit, mem_fit = @timed fit!(model, solver)
-        redirect_stdout(STDOUT_orig); redirect_stderr(STDERR_orig)
+        redirect_stdout(stdout_orig); redirect_stderr(stderr_orig)
         debug(LOGGER, "[FIT] Fitting done ($(time_fit) s, $(format_bytes(mem_fit))).")
 
         @trace res.al_history i time_fit mem_fit time_set_data
-        if status != :Optimal
+        if status !== JuMP.MathOptInterface.Success && status != :Optimal
             warn(LOGGER, "Not solved to optimality. Solver status: $status.")
             res.status[:exit_code] = :solver_error
             return res
@@ -149,7 +149,7 @@ function get_query_object(qs::QueryStrategy, query_data::Array{T, 2}, pools::Vec
     @assert length(scores) == size(query_data, 2)
     candidates = [i for i in pool_map[:U] if global_indices[i] ∉ history]
     debug(LOGGER, "[QS] Selecting from $(format_number(length(candidates))) candidates.")
-    local_query_index = candidates[indmax(scores[candidates])]
+    local_query_index = candidates[argmax(scores[candidates])]
     return global_indices[local_query_index]
 end
 
