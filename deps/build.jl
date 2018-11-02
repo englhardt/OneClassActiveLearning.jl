@@ -2,7 +2,7 @@ using PyCall
 const PACKAGES = ["scipy"]
 
 try
-    @pyimport pip
+    pip = pyimport("pip")
 catch
     get_pip = joinpath(dirname(@__FILE__), "get-pip.py")
     download("https://bootstrap.pypa.io/get-pip.py", get_pip)

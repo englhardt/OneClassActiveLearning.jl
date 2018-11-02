@@ -6,7 +6,19 @@ abstract type DataBasedQs <: QueryStrategy end
 abstract type ModelBasedQs <: QueryStrategy end
 abstract type NeighborBasedQs <: QueryStrategy end
 
+using MLKernels
+using NearestNeighbors
+using Statistics
+using LinearAlgebra
+using InteractiveUtils
+using PyCall
 using SVDD
+
+const gaussian_kde = PyNULL()
+
+function __init__()
+    copy!(gaussian_kde, pyimport_conda("scipy.stats", "scipy")[:gaussian_kde])
+end
 
 include("qs_utils.jl")
 

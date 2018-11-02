@@ -1,7 +1,3 @@
-using MLKernels
-using NearestNeighbors
-using PyCall
-@pyimport scipy.stats as scipystats
 
 struct KDEException <: Exception
     n::Int
@@ -9,7 +5,7 @@ struct KDEException <: Exception
     cov_det::Float64
     unique_values::Int
     KDEException(n, d, cov_det, unique_values) = new(n, d, cov_det, unique_values)
-    KDEException(data) = new(size(data, 2), size(data, 1), det(cov(data, 2)), size(unique(data, 2), 2))
+    KDEException(data) = new(size(data, 2), size(data, 1), det(cov(data; dims=2)), size(unique(data; dims=2), 2))
 end
 
 function Base.showerror(io::IO, kdee::KDEException)
@@ -45,8 +41,8 @@ end
 
 function multi_kde(x::Array{Float64, 2}, bw_method="scott")::PyCall.PyObject
     size(x, 2) >= size(x, 1) || throw(KDEException(x))
-    !(det(cov(x, 2)) ≈ 0) || throw(KDEException(x))
-    return scipystats.gaussian_kde(x, bw_method)
+    !(det(cov(x; dims=2)) ≈ 0) || throw(KDEException(x))
+    return gaussian_kde(x, bw_method)
 end
 
 function leave_out_one_cv_kde(x::Array{T, 2}, bw_method="scott")::Float64 where T <: Real
@@ -71,7 +67,7 @@ function initialize_qs(qs::DataType, model::OCClassifier, data::Array{T, 2}, par
     elseif qs <: DataBasedQs
         kernel = get_kernel(model)
         if typeof(kernel) == GaussianKernel
-            return qs(data, bw_method=kernel.alpha.value.x; params...)
+            return qs(data, bw_method=MLKernels.getvalue(strategy.kernel.alpha); params...)
         else
             return qs(data; params...)
         end

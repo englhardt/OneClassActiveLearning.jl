@@ -19,7 +19,7 @@ function qs_score(qs::BoundaryNeighborCombinationQs, x::Array{T, 2}, labels::Dic
         return rand(size(x,2))
     end
     prediction = abs.(predict(qs.occ, x))
-    d_hyp = (prediction - minimum(prediction[labels[:U]])) ./ maximum(prediction[labels[:U]])
-    d_nn = (qs.nn_dist - minimum(qs.nn_dist[labels[:U]])) ./ maximum(qs.nn_dist[labels[:U]])
+    d_hyp = (prediction .- minimum(prediction[labels[:U]])) ./ maximum(prediction[labels[:U]])
+    d_nn = (qs.nn_dist .- minimum(qs.nn_dist[labels[:U]])) ./ maximum(qs.nn_dist[labels[:U]])
     return qs.η * (-d_hyp) + (1 - qs.η) * (-d_nn)
 end

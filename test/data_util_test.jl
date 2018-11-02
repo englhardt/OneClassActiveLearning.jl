@@ -47,7 +47,7 @@ end
 @testset "splits and init pools" begin
     data = zeros(2, 100)
     labels = fill(:inlier, 100)
-    labels[1:10] = :outlier
+    labels[1:10] .= :outlier
     @test_throws ArgumentError OneClassActiveLearning.get_splits_and_init_pools(data, labels, "foo", "Pu")
     @test_throws ArgumentError OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sf", "foo")
     @testset "full split strategy" begin
@@ -56,16 +56,16 @@ end
         @test ip == fill(:U, size(data, 2))
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sf", "Pp")
         @test ds.train == ds.test == trues(size(data, 2))
-        @test length(find(x -> (x == :Lin) || (x == :Lout), ip)) == size(data, 2) * 0.1
+        @test length(findall(x -> (x == :Lin) || (x == :Lout), ip)) == size(data, 2) * 0.1
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sf", "Pn")
         @test ds.train == ds.test == trues(size(data, 2))
-        @test length(find(x -> (x == :Lin) || (x == :Lout), ip)) == 20
+        @test length(findall(x -> (x == :Lin) || (x == :Lout), ip)) == 20
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sf", "Pa", x=10)
         @test ds.train == ds.test == trues(size(data, 2))
-        @test length(find(x -> x == :Lin, ip)) == size(data, 1) + 10
+        @test length(findall(x -> x == :Lin, ip)) == size(data, 1) + 10
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sf", "Pa", x=5)
         @test ds.train == ds.test == trues(size(data, 2))
-        @test length(find(x -> x == :Lin, ip)) == size(data, 1) + 5
+        @test length(findall(x -> x == :Lin, ip)) == size(data, 1) + 5
     end
     @testset "80 20 holdout" begin
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sh", "Pu")
@@ -73,13 +73,13 @@ end
         @test ip == fill(:U, size(data, 2))
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sh", "Pp")
         @test (sum(ds.train) == 80) && (sum(ds.test) == 20) && all(ds.train .⊻ ds.test)
-        @test length(find(x -> (x == :Lin) || (x == :Lout), ip[ds.train])) == sum(ds.train) * 0.1
+        @test length(findall(x -> (x == :Lin) || (x == :Lout), ip[ds.train])) == sum(ds.train) * 0.1
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sh", "Pn")
         @test (sum(ds.train) == 80) && (sum(ds.test) == 20) && all(ds.train .⊻ ds.test)
-        @test length(find(x -> (x == :Lin) || (x == :Lout), ip[ds.train])) == 20
+        @test length(findall(x -> (x == :Lin) || (x == :Lout), ip[ds.train])) == 20
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sh", "Pa", x=10)
         @test (sum(ds.train) == 80) && (sum(ds.test) == 20) && all(ds.train .⊻ ds.test)
-        @test length(find(x -> x == :Lin, ip[ds.train])) == size(data, 1) + 10
+        @test length(findall(x -> x == :Lin, ip[ds.train])) == size(data, 1) + 10
     end
     @testset "inff" begin
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Si", "Pu")
@@ -87,12 +87,12 @@ end
         @test ip == fill(:U, size(data, 2))
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Si", "Pp")
         @test ds.train == ds.test == trues(size(data, 2))
-        @test length(find(x -> (x == :Lin) || (x == :Lout), ip)) == sum(ds.train) * 0.1
+        @test length(findall(x -> (x == :Lin) || (x == :Lout), ip)) == sum(ds.train) * 0.1
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Si", "Pn")
         @test ds.train == ds.test == trues(size(data, 2))
-        @test length(find(x -> (x == :Lin) || (x == :Lout), ip)) == 20
+        @test length(findall(x -> (x == :Lin) || (x == :Lout), ip)) == 20
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Si", "Pa", x=10)
         @test ds.train == ds.test == trues(size(data, 2))
-        @test length(find(x -> x == :Lin, ip)) == size(data, 1) + 10
+        @test length(findall(x -> x == :Lin, ip)) == size(data, 1) + 10
     end
 end
