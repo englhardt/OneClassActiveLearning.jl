@@ -4,7 +4,7 @@ abstract type QueryStrategy end
 
 abstract type DataBasedQs <: QueryStrategy end
 abstract type ModelBasedQs <: QueryStrategy end
-abstract type NeighborBasedQs <: QueryStrategy end
+abstract type HybridQs <: QueryStrategy end
 
 using MLKernels
 using NearestNeighbors
@@ -37,7 +37,7 @@ include("BoundaryNeighborCombinationQs.jl")
 export
     QueryStrategy,
     DataBasedQs,
-    ModelBasedQs, NeighborBasedQs,
+    ModelBasedQs, HybridQs,
 
     # data-based query strategies
     TestQs, RandomQs, MinimumMarginQs, ExpectedMinimumMarginQs, ExpectedMaximumEntropyQs,

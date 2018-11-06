@@ -5,7 +5,7 @@ Toward supervised anomaly detection. Journal of
 Artificial Intelligence Research (JAIR), pages
 235–262, Jan. 2013.
 """
-struct NeighborhoodBasedQs <: NeighborBasedQs
+struct NeighborhoodBasedQs <: HybridQs
     occ::OCClassifier
     knn::Array{Int,2}
     η::Float64

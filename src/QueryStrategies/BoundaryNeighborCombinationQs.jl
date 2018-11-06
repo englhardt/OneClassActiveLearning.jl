@@ -5,7 +5,7 @@ support vector data description method for robust
 novelty detection. Knowledge-Based Systems, pages
 40–52, Aug. 2018.
 """
-struct BoundaryNeighborCombinationQs <: NeighborBasedQs
+struct BoundaryNeighborCombinationQs <: HybridQs
     occ::OCClassifier
     nn_dist::Array{Float64,1}
     η::Float64
