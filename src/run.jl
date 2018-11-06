@@ -1,5 +1,5 @@
 
-function init_from_experiment(experiment, data, res)
+function init_from_experiment(experiment, data, labels, res)
     debug(LOGGER, "[INIT] Start initialization of experiment.")
     pools = copy(experiment[:param][:initial_pools])
     split_strategy = experiment[:split_strategy]
@@ -19,8 +19,11 @@ function init_from_experiment(experiment, data, res)
     query_data, _, _ = get_query(split_strategy, data, pools)
     qs = QueryStrategies.initialize_qs(eval(experiment[:query_strategy][:type]), model, query_data, experiment[:query_strategy][:param])
 
+    debug(LOGGER, "[INIT] Initializing oracle.")
+    oracle = initialize_oracle(eval(experiment[:oracle]), labels)
+
     info(LOGGER, "[INIT] Initialization done.")
-    return (model, pools, solver, qs, split_strategy)
+    return (model, pools, solver, qs, split_strategy, oracle)
 end
 
 function check_active_learn_args(data, labels)
@@ -41,8 +44,8 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
     set_worker_info!(res)
     set_data_stats!(res, data, experiment[:split_strategy])
 
-    model, pools, solver, qs, split_strategy = try
-        init_from_experiment(experiment, data, res)
+    model, pools, solver, qs, split_strategy, oracle = try
+        init_from_experiment(experiment, data, labels, res)
     catch e
         warn(LOGGER, e)
         if isa(e, KDEException)
@@ -112,8 +115,9 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
                 query_id, time_qs, mem_qs = @timed get_query_object(qs, query_data, query_pools, query_indices, values(res.al_history, :query_history))
             end
             debug(LOGGER, "[QS] Query strategy scoring done ($(time_qs) s, $(format_bytes(mem_qs))).")
-            update_pools!(pools, query_id, labels)
-            push_query!(res.al_history, i, query_id, labels[query_id], time_qs, mem_qs)
+            query_label = ask_oracle(oracle, query_id)
+            update_pools!(pools, query_id, query_label)
+            push_query!(res.al_history, i, query_id, query_label, time_qs, mem_qs)
             debug(LOGGER, "[QS] Query(id = $(query_id), label = $(labels[query_id]))")
             debug(LOGGER, "[QS] Query strategy done.")
 
@@ -129,8 +133,8 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
     return res
 end
 
-function update_pools!(pools, query_id, labels)
-    pools[query_id] = labels[query_id] == :inlier ? :Lin : :Lout
+function update_pools!(pools, query_id, query_label)
+    pools[query_id] = query_label == :inlier ? :Lin : :Lout
     return nothing
 end
 
