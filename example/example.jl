@@ -45,6 +45,7 @@ experiment = Dict{Symbol, Any}(
     :query_strategy => Dict(:type => :RandomOutlierQs,
                             :param => Dict{Symbol, Any}()),
     :split_strategy => OneClassActiveLearning.DataSplits(trues(NUM_OBSERVATIONS)),
+    :oracle => :PoolOracle,
     :param => Dict(:num_al_iterations => 10,
                    :solver => with_optimizer(Ipopt.Optimizer; print_level=0),
                    :initial_pools => fill(:U, NUM_OBSERVATIONS),

@@ -14,6 +14,7 @@
                            :init_strategy => SVDD.FixedParameterInitialization(GaussianKernel(2), 0.5)),
             :query_strategy => Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomQs), :param => Dict{Symbol, Any}()),
             :split_strategy => OneClassActiveLearning.DataSplits(trues(number_observations) , OneClassActiveLearning.FullSplitStrat()),
+            :oracle => :PoolOracle,
             :param => Dict(:num_al_iterations => 5,
                            :solver => TEST_SOLVER,
                            :initial_pools => fill(:U, number_observations),
@@ -42,9 +43,9 @@
     @testset "update pools" begin
         pools = [:U, :U, :Lin]
         labels = [:inlier, :outlier, :inlier]
-        OneClassActiveLearning.update_pools!(pools, 1, labels)
+        OneClassActiveLearning.update_pools!(pools, 1, :inlier)
         @test pools == [:Lin, :U, :Lin]
-        OneClassActiveLearning.update_pools!(pools, 2, labels)
+        OneClassActiveLearning.update_pools!(pools, 2, :outlier)
         @test pools == [:Lin, :Lout, :Lin]
     end
 

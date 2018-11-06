@@ -27,6 +27,7 @@ include("data_util.jl")
 include("evaluate.jl")
 include("result.jl")
 include("serialize.jl")
+include("oracle.jl")
 include("run.jl")
 include("log_util.jl")
 
@@ -44,6 +45,7 @@ export
     DataSplits,
     get_train, get_test, get_query, calc_mask,
     get_splits_and_init_pools, get_initial_pools,
+    Oracle, PoolOracle,
 
     ConfusionMatrix,
     cohens_kappa,
