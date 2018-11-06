@@ -83,7 +83,7 @@
         qs_types = [NeighborhoodBasedQs, BoundaryNeighborCombinationQs]
         qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, params), qs_types)
         for qs in qs_objs
-            @testset "NeighborBasedQs $(typeof(qs))" begin
+            @testset "HybridQs $(typeof(qs))" begin
                 scores = qs_score(qs, dummy_data, labelmap(fill(:U, 10)))
                 @test length(scores) == size(dummy_data, 2)
             end

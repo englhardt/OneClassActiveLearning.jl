@@ -60,7 +60,7 @@ function knn_mean_dist(x::Array{T, 2}; k=1)::Array{Float64,1} where T <: Real
 end
 
 function initialize_qs(qs::DataType, model::OCClassifier, data::Array{T, 2}, params::Dict{Symbol, <:Any})::QueryStrategy where T <: Real
-    if qs <: NeighborBasedQs
+    if qs <: HybridQs
         return qs(model, data; params...)
     elseif qs <: ModelBasedQs
         return qs(model; params...)
