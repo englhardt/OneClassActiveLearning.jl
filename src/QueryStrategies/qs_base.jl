@@ -18,6 +18,7 @@ using NearestNeighbors
 using Statistics
 using LinearAlgebra
 using InteractiveUtils
+using LIBSVM
 using SVDD
 
 function initialize_qs(qs::DataType, model::OCClassifier, data::Array{T, 2}, params::Dict{Symbol, <:Any})::QueryStrategy where T <: Real
