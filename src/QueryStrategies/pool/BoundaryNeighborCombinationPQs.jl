@@ -18,7 +18,7 @@ function qs_score(qs::BoundaryNeighborCombinationPQs, x::Array{T, 2}, labels::Di
     if rand() < qs.p
         return rand(size(x,2))
     end
-    prediction = abs.(predict(qs.occ, x))
+    prediction = abs.(SVDD.predict(qs.occ, x))
     d_hyp = (prediction .- minimum(prediction[labels[:U]])) ./ maximum(prediction[labels[:U]])
     d_nn = (qs.nn_dist .- minimum(qs.nn_dist[labels[:U]])) ./ maximum(qs.nn_dist[labels[:U]])
     return qs.η * (-d_hyp) + (1 - qs.η) * (-d_nn)
