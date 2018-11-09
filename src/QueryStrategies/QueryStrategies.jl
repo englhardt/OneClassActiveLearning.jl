@@ -28,6 +28,8 @@ include("query_synthesis/query_synthesis_utils.jl")
 include("query_synthesis/TestQss.jl")
 include("query_synthesis/RandomQss.jl")
 include("query_synthesis/RandomOutlierQss.jl")
+include("query_synthesis/DecisionBoundaryQss.jl")
+include("query_synthesis/ExplorativeMarginQss.jl")
 
 export
     QueryStrategy,
@@ -47,6 +49,7 @@ export
 
     # query synthesis query query strategies
     TestQss, RandomQss, RandomOutlierQss,
+    DecisionBoundaryQss, ExplorativeMarginQss,
 
 
     # query synthesis optimizers
