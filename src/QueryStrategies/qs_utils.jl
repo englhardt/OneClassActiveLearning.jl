@@ -58,21 +58,3 @@ function knn_mean_dist(x::Array{T, 2}; k=1)::Array{Float64,1} where T <: Real
     kdtree = KDTree(x)
     return map(d -> mean(d[2:end]), knn(kdtree, x, k + 1, true)[2])
 end
-
-function initialize_qs(qs::DataType, model::OCClassifier, data::Array{T, 2}, params::Dict{Symbol, <:Any})::QueryStrategy where T <: Real
-    if qs <: HybridQs
-        return qs(model, data; params...)
-    elseif qs <: ModelBasedQs
-        return qs(model; params...)
-    elseif qs <: DataBasedQs
-        kernel = get_kernel(model)
-        if typeof(kernel) == GaussianKernel
-            return qs(data, bw_method=MLKernels.getvalue(strategy.kernel.alpha); params...)
-        else
-            return qs(data; params...)
-        end
-    elseif qs <: QueryStrategy
-        return qs(; params...)
-    end
-    throw(ErrorException("Unknown query strategy of type $(qs)."))
-end

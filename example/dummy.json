@@ -515,7 +515,7 @@
     "initial_pool_strategy_name": "Pu",
     "query_strategy": {
       "param": {},
-      "type": "RandomOutlierQs"
+      "type": "RandomOutlierPQs"
     },
     "split_strategy_name": "Sf"
   },

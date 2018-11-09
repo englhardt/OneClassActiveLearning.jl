@@ -12,7 +12,7 @@
             :model => Dict(:type => :(SVDD.RandomOCClassifier),
                            :param => Dict{Symbol, Any}(),
                            :init_strategy => SVDD.FixedParameterInitialization(GaussianKernel(2), 0.5)),
-            :query_strategy => Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomQs), :param => Dict{Symbol, Any}()),
+            :query_strategy => Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomPQs), :param => Dict{Symbol, Any}()),
             :split_strategy => OneClassActiveLearning.DataSplits(trues(number_observations) , OneClassActiveLearning.FullSplitStrat()),
             :oracle => :PoolOracle,
             :param => Dict(:num_al_iterations => 5,
@@ -47,32 +47,5 @@
         @test pools == [:Lin, :U, :Lin]
         OneClassActiveLearning.update_pools!(pools, 2, :outlier)
         @test pools == [:Lin, :Lout, :Lin]
-    end
-
-    @testset "get_query_object" begin
-        qs = OneClassActiveLearning.TestQs()
-        @testset "a" begin
-            data = rand(2, 6)
-            pools = fill(:U, 6)
-            pools[5] = :Lin
-            indices = [1, 3, 5, 7, 9, 11]
-            history = [7]
-            pool_map = MLLabelUtils.labelmap(pools)
-            @test scores = OneClassActiveLearning.qs_score(qs, data, MLLabelUtils.labelmap(pools)) == collect(1:6)
-            @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
-            @test OneClassActiveLearning.get_query_object(qs, data, pools, indices, history) == 11
-        end
-
-        @testset "b" begin
-            data = rand(2, 5)
-            pools = fill(:U, 5)
-            pools[5] = :Lin
-            indices = [1, 2, 4, 7, 9]
-            history = [7]
-            pool_map = MLLabelUtils.labelmap(pools)
-            @test scores = OneClassActiveLearning.qs_score(qs, data, MLLabelUtils.labelmap(pools)) == collect(1:5)
-            @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
-            @test OneClassActiveLearning.get_query_object(qs, data, pools, indices, history) == 4
-        end
     end
 end

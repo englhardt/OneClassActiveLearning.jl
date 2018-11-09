@@ -38,7 +38,7 @@
                 :output_file => "OneClassActiveLearning.jl/data/output/scenarioA/data_qs_model_id.tmp",
                 :model => Dict( :type => :(SVDD.RandomOCClassifier),
                                 :init_strategy => :(SVDD.FixedParameterInitialization(GaussianKernel(2), 0.5))),
-                :query_strategy => Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomQs), :param => Dict()),
+                :query_strategy => Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomPQs), :param => Dict()),
                 :split_strategy => OneClassActiveLearning.DataSplits(trues(123), OneClassActiveLearning.FullSplitStrat()),
                 :param => Dict(:num_al_iterations => 5,
                                :solver => :(IpoptSolver),

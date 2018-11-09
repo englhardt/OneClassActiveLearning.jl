@@ -15,7 +15,7 @@
     params = Dict{Symbol, Any}()
     @testset "initialize_qs" begin
         @testset "Standard" begin
-            qs_types = [RandomQs]
+            qs_types = [RandomPQs]
             qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data), qs_types, params)
             for qs in qs_objs
                 for labels in [labelmap(fill(:U, 10)), labelmap(fill(:Lin, 10)), labelmap(fill(:Lout, 10))]
@@ -25,7 +25,7 @@
             end
         end
 
-        qs_types = [MinimumMarginQs, MinimumLossQs]
+        qs_types = [MinimumMarginPQs, MinimumLossPQs]
         for x in qs_types
             @test_throws ArgumentError initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, Dict{Symbol, Any}())
             @test_throws ArgumentError initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, Dict(:p_inlier => nothing))
@@ -34,7 +34,7 @@
         end
         qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, Dict(:p_inlier => 0.05)), qs_types)
         for qs in qs_objs
-            @testset "DataBasedQs $(typeof(qs))" begin
+            @testset "DataBasedPQs $(typeof(qs))" begin
                 @testset "only :U" begin
                         @test isdefined(qs, :bw_method)
                         @test_throws OneClassActiveLearning.MissingLabelTypeException qs_score(qs, dummy_data, labelmap(fill(:U, 10)))
@@ -51,10 +51,10 @@
             end
         end
 
-        qs_types = [ExpectedMinimumMarginQs, ExpectedMaximumEntropyQs]
+        qs_types = [ExpectedMinimumMarginPQs, ExpectedMaximumEntropyPQs]
         qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, params), qs_types)
         for qs in qs_objs
-            @testset "DataBasedQs $(typeof(qs))" begin
+            @testset "DataBasedPQs $(typeof(qs))" begin
                 @testset "only :U" begin
                         @test isdefined(qs, :bw_method)
                         @test_throws OneClassActiveLearning.MissingLabelTypeException qs_score(qs, dummy_data, labelmap(fill(:U, 10)))
@@ -71,19 +71,19 @@
             end
         end
 
-        qs_types = [RandomOutlierQs, HighConfidenceQs, DecisionBoundaryQs]
+        qs_types = [RandomOutlierPQs, HighConfidencePQs, DecisionBoundaryPQs]
         qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, params), qs_types)
         for qs in qs_objs
-            @testset "ModelBasedQs $(typeof(qs))" begin
+            @testset "ModelBasedPQs $(typeof(qs))" begin
                 scores = qs_score(qs, dummy_data, labelmap(fill(:Lin, 10)))
                 @test length(scores) == size(dummy_data, 2)
             end
         end
 
-        qs_types = [NeighborhoodBasedQs, BoundaryNeighborCombinationQs]
+        qs_types = [NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs]
         qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, params), qs_types)
         for qs in qs_objs
-            @testset "HybridQs $(typeof(qs))" begin
+            @testset "HybridPQs $(typeof(qs))" begin
                 scores = qs_score(qs, dummy_data, labelmap(fill(:U, 10)))
                 @test length(scores) == size(dummy_data, 2)
             end
@@ -115,7 +115,7 @@
             SVDD.fit!(model, TEST_SOLVER)
             push!(models, model)
 
-            qs_types = [MinimumMarginQs, MinimumLossQs]
+            qs_types = [MinimumMarginPQs, MinimumLossPQs]
             for qst in qs_types
                 for m in models
                     @testset "initialize_qs $qst, $m" begin
@@ -125,7 +125,7 @@
                 end
             end
 
-            qs_types = [ExpectedMinimumMarginQs, ExpectedMaximumEntropyQs] ∪ subtypes(ModelBasedQs) ∪ [NeighborhoodBasedQs, BoundaryNeighborCombinationQs]
+            qs_types = [ExpectedMinimumMarginPQs, ExpectedMaximumEntropyPQs] ∪ subtypes(ModelBasedPQs) ∪ [NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs]
             for qst in qs_types
                 for m in models
                     @testset "initialize_qs $qst, $m" begin
@@ -134,6 +134,33 @@
                 end
                 end
             end
+        end
+    end
+
+    @testset "get_query_object" begin
+        qs = OneClassActiveLearning.TestPQs()
+        @testset "a" begin
+            data = rand(2, 6)
+            pools = fill(:U, 6)
+            pools[5] = :Lin
+            indices = [1, 3, 5, 7, 9, 11]
+            history = [7]
+            pool_map = MLLabelUtils.labelmap(pools)
+            @test scores = OneClassActiveLearning.qs_score(qs, data, MLLabelUtils.labelmap(pools)) == collect(1:6)
+            @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
+            @test OneClassActiveLearning.get_query_object(qs, data, pools, indices, history) == 11
+        end
+
+        @testset "b" begin
+            data = rand(2, 5)
+            pools = fill(:U, 5)
+            pools[5] = :Lin
+            indices = [1, 2, 4, 7, 9]
+            history = [7]
+            pool_map = MLLabelUtils.labelmap(pools)
+            @test scores = OneClassActiveLearning.qs_score(qs, data, MLLabelUtils.labelmap(pools)) == collect(1:5)
+            @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
+            @test OneClassActiveLearning.get_query_object(qs, data, pools, indices, history) == 4
         end
     end
 end
