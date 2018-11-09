@@ -110,16 +110,18 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
             end
             debug(LOGGER, "[QS] Starting query strategy on $(format_observations(query_data)) observations.")
             if i == 0
-                query_id, time_qs, mem_qs = @timed get_query_object(qs, query_data, query_pools, query_indices, Int[])
+                query, time_qs, mem_qs = @timed get_query_object_helper(qs, query_data, query_pools, query_indices)
             else
-                query_id, time_qs, mem_qs = @timed get_query_object(qs, query_data, query_pools, query_indices, values(res.al_history, :query_history))
+                query, time_qs, mem_qs = @timed get_query_object_helper(qs, query_data, query_pools, query_indices, values(res.al_history, :query_history))
             end
-            debug(LOGGER, "[QS] Query strategy scoring done ($(time_qs) s, $(format_bytes(mem_qs))).")
-            query_label = ask_oracle(oracle, query_id)
-            update_pools!(pools, query_id, query_label)
-            push_query!(res.al_history, i, query_id, query_label, time_qs, mem_qs)
-            debug(LOGGER, "[QS] Query(id = $(query_id), label = $(labels[query_id]))")
+            debug(LOGGER, "[QS] Query strategy finished ($(time_qs) s, $(format_bytes(mem_qs))).")
+            query_label = ask_oracle(oracle, query)
+            data = update_data_and_pools!(qs, data, labels, pools, split_strategy, query, query_label)
+            push_query!(res.al_history, i, query, query_label, time_qs, mem_qs)
+            isa(query, Int) ? debug(LOGGER, "[QS] Query(id = $(query), label = $(query_label))") :
+                             debug(LOGGER, "[QS] Query(label = $(query_label))")
             debug(LOGGER, "[QS] Query strategy done.")
+
 
         end
         debug(LOGGER, "Finished iteration $(i).")
@@ -133,13 +135,30 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
     return res
 end
 
-function update_pools!(pools, query_id, query_label)
-    pools[query_id] = query_label == :inlier ? :Lin : :Lout
-    return nothing
+function get_query_object_helper(qs::PoolQs, query_data::Array{T, 2}, query_pools::Vector{Symbol}, query_indices::Vector{Int}, history::Vector{Int}=Int[])::Int where T <: Real
+    return get_query_object(qs, query_data, query_pools, query_indices, history)
 end
 
-function push_query!(al_history::MVHistory, i, query_id, query_label, time_qs, mem_qs)
-    push!(al_history, :query_history, i, query_id)
+function get_query_object_helper(qs::QuerySynthesisStrategy, query_data::Array{T, 2}, query_pools::Vector{Symbol}, query_indices::Vector{Int}, history::Vector{Array{T, 2}}=Vector{Array{T, 2}}())::Array{T, 2} where T <: Real
+    return get_query_object(qs, query_data, query_pools, history)
+end
+
+function update_data_and_pools!(qs::PoolQs, data, labels, pools, split_strategy, query, query_label)
+    pools[query] = query_label == :inlier ? :Lin : :Lout
+    return data
+end
+
+function update_data_and_pools!(qs::QuerySynthesisStrategy, data, labels, pools, split_strategy, query, query_label)
+    data = hcat(data, query)
+    push!(labels, query_label)
+    push!(pools, query_label == :inlier ? :Lin : :Lout)
+    push!(split_strategy.train, true)
+    push!(split_strategy.test, false)
+    return data
+end
+
+function push_query!(al_history::MVHistory, i, query, query_label, time_qs, mem_qs)
+    push!(al_history, :query_history, i, query)
     @trace al_history i query_label time_qs mem_qs
     return nothing
 end

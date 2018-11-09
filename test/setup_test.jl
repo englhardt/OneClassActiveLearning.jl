@@ -1,10 +1,8 @@
 
 @testset "setup" begin
-
     @testset "simple random example" begin
         data_file = "$(@__DIR__)/../example/dummy.csv"
         number_observations = countlines(open(data_file))
-
         experiment = Dict{Symbol, Any}(
             :hash => 0,
             :data_file => data_file,
@@ -12,40 +10,102 @@
             :model => Dict(:type => :(SVDD.RandomOCClassifier),
                            :param => Dict{Symbol, Any}(),
                            :init_strategy => SVDD.FixedParameterInitialization(GaussianKernel(2), 0.5)),
-            :query_strategy => Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomPQs), :param => Dict{Symbol, Any}()),
             :split_strategy => OneClassActiveLearning.DataSplits(trues(number_observations) , OneClassActiveLearning.FullSplitStrat()),
-            :oracle => :PoolOracle,
             :param => Dict(:num_al_iterations => 5,
                            :solver => TEST_SOLVER,
                            :initial_pools => fill(:U, number_observations),
                            :adjust_K => true))
-        expected_experiment = deepcopy(experiment)
 
-        res = OneClassActiveLearning.active_learn(experiment)
+        @testset "pool based" begin
+            exp =  deepcopy(experiment)
+            exp[:query_strategy] = Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomPQs),
+                                        :param => Dict{Symbol, Any}())
+            exp[:oracle] = :PoolOracle
 
-        @test res.status[:exit_code] == :success
-        @test length(res.al_history, :query_history) == 5
-        @test length(res.al_history, :time_qs) == 5
-        @test all(values(res.al_history, :time_qs) .> 0.0)
+            expected_experiment = deepcopy(exp)
 
-        @test length(res.al_history, :time_fit) == 6
-        @test all(values(res.al_history, :time_fit) .> 0.0)
+            res = OneClassActiveLearning.active_learn(exp)
 
-        @test length(res.al_history, :query_history) == 5
-        @test !isempty(res.worker_info)
+            @test res.status[:exit_code] == :success
+            @test length(res.al_history, :query_history) == 5
+            @test length(res.al_history, :time_qs) == 5
+            @test all(values(res.al_history, :time_qs) .> 0.0)
 
-        @test length(res.al_history, :cm) == 6
-        @test OneClassActiveLearning.cohens_kappa(last(res.al_history[:cm])[2]) ≈ last(res.al_history[:cohens_kappa])[2]
+            @test length(res.al_history, :time_fit) == 6
+            @test all(values(res.al_history, :time_fit) .> 0.0)
 
-        @test res.experiment[:param][:initial_pools] == expected_experiment[:param][:initial_pools]
+            @test length(res.al_history, :query_history) == 5
+            @test !isempty(res.worker_info)
+
+            @test length(res.al_history, :cm) == 6
+            @test OneClassActiveLearning.cohens_kappa(last(res.al_history[:cm])[2]) ≈ last(res.al_history[:cohens_kappa])[2]
+
+            @test res.experiment[:param][:initial_pools] == expected_experiment[:param][:initial_pools]
+        end
+
+        @testset "query synthesis" begin
+            exp =  deepcopy(experiment)
+            exp[:query_strategy] = Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomQss),
+                                        :param => Dict{Symbol, Any}(:optimizer => nothing, :limits => [zeros(13) ones(13)]))
+            exp[:oracle] = OneClassActiveLearning.QuerySynthesisFunctionOracle(_ -> :inlier)
+
+            expected_experiment = deepcopy(exp)
+
+            res = OneClassActiveLearning.active_learn(exp)
+
+            @test length(res.experiment[:split_strategy].train) == number_observations + 5
+            @test length(res.experiment[:split_strategy].test) == number_observations + 5
+
+            @test res.status[:exit_code] == :success
+            @test length(res.al_history, :query_history) == 5
+            @test length(res.al_history, :time_qs) == 5
+            @test all(values(res.al_history, :time_qs) .> 0.0)
+
+            @test length(res.al_history, :time_fit) == 6
+            @test all(values(res.al_history, :time_fit) .> 0.0)
+
+            @test length(values(res.al_history, :query_history)) == 5
+            @test size(values(res.al_history, :query_history)[1]) == (13, 1)
+            @test !isempty(res.worker_info)
+
+            @test length(res.al_history, :cm) == 6
+            @test OneClassActiveLearning.cohens_kappa(last(res.al_history[:cm])[2]) ≈ last(res.al_history[:cohens_kappa])[2]
+
+            @test res.experiment[:param][:initial_pools] == expected_experiment[:param][:initial_pools]
+        end
     end
 
-    @testset "update pools" begin
-        pools = [:U, :U, :Lin]
-        labels = [:inlier, :outlier, :inlier]
-        OneClassActiveLearning.update_pools!(pools, 1, :inlier)
-        @test pools == [:Lin, :U, :Lin]
-        OneClassActiveLearning.update_pools!(pools, 2, :outlier)
-        @test pools == [:Lin, :Lout, :Lin]
+    @testset "update data and pools" begin
+        @testset "pool based" begin
+            qs = OneClassActiveLearning.QueryStrategies.RandomPQs()
+            data = rand(2, 3)
+            split_strategy = OneClassActiveLearning.DataSplits(trues(3))
+            pools = [:U, :U, :Lin]
+            labels = [:inlier, :outlier, :inlier]
+            OneClassActiveLearning.update_data_and_pools!(qs, data, labels, pools, split_strategy, 1, :inlier)
+            @test pools == [:Lin, :U, :Lin]
+            OneClassActiveLearning.update_data_and_pools!(qs, data, labels, pools, split_strategy, 2, :outlier)
+            @test pools == [:Lin, :Lout, :Lin]
+        end
+
+        @testset "query synthesis" begin
+            qs = OneClassActiveLearning.QueryStrategies.RandomQss(limits=[zeros(2) ones(2)])
+            data = rand(2, 3)
+            split_strategy = OneClassActiveLearning.DataSplits(trues(3))
+            pools = [:U, :U, :Lin]
+            labels = [:inlier, :outlier, :inlier]
+            data = OneClassActiveLearning.update_data_and_pools!(qs, data, labels, pools, split_strategy, rand(2, 1), :inlier)
+            @test size(data) == (2, 4)
+            @test labels == [:inlier, :outlier, :inlier, :inlier]
+            @test pools == [:U, :U, :Lin, :Lin]
+            @test split_strategy.train == [true, true, true, true]
+            @test split_strategy.test == [true, true, true, false]
+            data = OneClassActiveLearning.update_data_and_pools!(qs, data, labels, pools, split_strategy, rand(2, 1), :outlier)
+            @test size(data) == (2, 5)
+            @test labels == [:inlier, :outlier, :inlier, :inlier, :outlier]
+            @test pools == [:U, :U, :Lin, :Lin, :Lout]
+            @test split_strategy.train == [true, true, true, true, true]
+            @test split_strategy.test == [true, true, true, false, false]
+        end
     end
 end

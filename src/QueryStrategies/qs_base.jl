@@ -2,10 +2,15 @@
 abstract type QueryStrategy end
 
 abstract type PoolQs <: QueryStrategy end
+abstract type QuerySynthesisStrategy <: QueryStrategy end
 
 abstract type DataBasedPQs <: PoolQs end
 abstract type ModelBasedPQs <: PoolQs end
 abstract type HybridPQs <: PoolQs end
+
+abstract type DataBasedQss <: QuerySynthesisStrategy end
+abstract type ModelBasedQss <: QuerySynthesisStrategy end
+abstract type HybridQss <: QuerySynthesisStrategy end
 
 using MLKernels
 using MLLabelUtils
@@ -16,11 +21,11 @@ using InteractiveUtils
 using SVDD
 
 function initialize_qs(qs::DataType, model::OCClassifier, data::Array{T, 2}, params::Dict{Symbol, <:Any})::QueryStrategy where T <: Real
-    if qs <: HybridPQs
+    if qs <: HybridPQs || qs <: HybridQss
         return qs(model, data; params...)
-    elseif qs <: ModelBasedPQs
+    elseif qs <: ModelBasedPQs || qs <: ModelBasedQss
         return qs(model; params...)
-    elseif qs <: DataBasedPQs
+    elseif qs <: DataBasedPQs || qs <: DataBasedQss
         kernel = get_kernel(model)
         if typeof(kernel) == GaussianKernel
             return qs(data, bw_method=MLKernels.getvalue(strategy.kernel.alpha); params...)

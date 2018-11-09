@@ -3,5 +3,5 @@ struct DecisionBoundaryPQs <: ModelBasedPQs
 end
 
 function qs_score(qs::DecisionBoundaryPQs, x::Array{T, 2}, labels::Dict{Symbol, Array{Int, 1}})::Array{Float64, 1} where T <: Real
-    return -abs.(predict(qs.occ, x))
+    return -abs.(SVDD.predict(qs.occ, x))
 end

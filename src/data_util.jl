@@ -34,9 +34,9 @@ struct DataSplits
     test_strat::SplitStrategy
     query_strat::SplitStrategy
     DataSplits(train::BitArray) = DataSplits(train, FullSplitStrat())
-    DataSplits(train::BitArray, strat::SplitStrategy) = DataSplits(train, train, strat)
-    DataSplits(train::BitArray, train_strat::SplitStrategy, test_strat::SplitStrategy) = new(train, train, train_strat, test_strat, train_strat)
-    DataSplits(train::BitArray, train_strat::SplitStrategy, test_strat::SplitStrategy, query_strat::SplitStrategy) = new(train, train, train_strat, test_strat, query_strat)
+    DataSplits(train::BitArray, strat::SplitStrategy) = DataSplits(train, copy(train), strat)
+    DataSplits(train::BitArray, train_strat::SplitStrategy, test_strat::SplitStrategy) = new(train, copy(train), train_strat, test_strat, train_strat)
+    DataSplits(train::BitArray, train_strat::SplitStrategy, test_strat::SplitStrategy, query_strat::SplitStrategy) = new(train, copy(train), train_strat, test_strat, query_strat)
     DataSplits(train::BitArray, test::BitArray, strat::SplitStrategy) = new(train, test, strat, strat, strat)
     DataSplits(train::BitArray, test::BitArray, train_strat::SplitStrategy, test_strat::SplitStrategy) = new(train, test, train_strat, test_strat, train_strat)
 end
