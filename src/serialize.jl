@@ -36,7 +36,6 @@ function JSON.json(x::MVHistory)
     return JSON.json(Dict(:mvhistory => x.storage, :mv_itypes => itypes, :mv_vtypes => vtypes))
 end
 
-
 function JSON.lower(x::T) where T <: OneClassActiveLearning.SplitStrategy
     return JSON.lower(typeof(x))
 end
@@ -47,6 +46,10 @@ end
 
 function JSON.lower(x::T) where T <: SVDD.InitializationStrategy
     return JSON.lower(sprint(print, x))
+end
+
+function JSON.lower(x::T) where T <: OneClassActiveLearning.Oracle
+    return JSON.lower(typeof(x))
 end
 
 function JSON.json(res::Result)

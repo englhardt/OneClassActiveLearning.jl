@@ -23,11 +23,11 @@ using Memento
 include("QueryStrategies/QueryStrategies.jl")
 @reexport using .QueryStrategies
 
+include("oracle.jl")
 include("data_util.jl")
 include("evaluate.jl")
 include("result.jl")
 include("serialize.jl")
-include("oracle.jl")
 include("run.jl")
 include("log_util.jl")
 
