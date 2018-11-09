@@ -138,25 +138,6 @@ function update_pools!(pools, query_id, query_label)
     return nothing
 end
 
-"""
-get_query_object(qs::QueryStrategy, data::Array{T, 2}, pools::Vector{Symbol}, global_indices::Vector{Int}, history::Vector{Int})
-
-# Arguments
-- `query_data`: Subset of the full data set
-- `pools`: Labels for `query_data`
-- `global_indices`: Indices of the observations in `query_data` relative to the full data set.
-"""
-function get_query_object(qs::QueryStrategy, query_data::Array{T, 2}, pools::Vector{Symbol}, global_indices::Vector{Int}, history::Vector{Int})::Int where T <: Real
-    pool_map = labelmap(pools)
-    haskey(pool_map, :U) || throw(ArgumentError("No more points that are unlabeled."))
-    scores = qs_score(qs, query_data, pool_map)
-    @assert length(scores) == size(query_data, 2)
-    candidates = [i for i in pool_map[:U] if global_indices[i] ∉ history]
-    debug(LOGGER, "[QS] Selecting from $(format_number(length(candidates))) candidates.")
-    local_query_index = candidates[argmax(scores[candidates])]
-    return global_indices[local_query_index]
-end
-
 function push_query!(al_history::MVHistory, i, query_id, query_label, time_qs, mem_qs)
     push!(al_history, :query_history, i, query_id)
     @trace al_history i query_label time_qs mem_qs

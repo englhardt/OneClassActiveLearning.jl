@@ -5,15 +5,15 @@ support vector data description method for robust
 novelty detection. Knowledge-Based Systems, pages
 40–52, Aug. 2018.
 """
-struct BoundaryNeighborCombinationQs <: HybridQs
+struct BoundaryNeighborCombinationPQs <: HybridPQs
     occ::OCClassifier
     nn_dist::Array{Float64,1}
     η::Float64
     p::Float64
-    BoundaryNeighborCombinationQs(occ::OCClassifier, x::Array{T, 2}; η=0.7, p=0.15) where T <: Real = new(occ, knn_mean_dist(x; k=1), η, p)
+    BoundaryNeighborCombinationPQs(occ::OCClassifier, x::Array{T, 2}; η=0.7, p=0.15) where T <: Real = new(occ, knn_mean_dist(x; k=1), η, p)
 end
 
-function qs_score(qs::BoundaryNeighborCombinationQs, x::Array{T, 2}, labels::Dict{Symbol, Array{Int, 1}})::Array{Float64, 1} where T <: Real
+function qs_score(qs::BoundaryNeighborCombinationPQs, x::Array{T, 2}, labels::Dict{Symbol, Array{Int, 1}})::Array{Float64, 1} where T <: Real
     @assert length(qs.nn_dist) == size(x, 2)
     if rand() < qs.p
         return rand(size(x,2))

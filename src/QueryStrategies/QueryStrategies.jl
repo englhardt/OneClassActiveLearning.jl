@@ -1,18 +1,6 @@
 module QueryStrategies
 
-abstract type QueryStrategy end
-
-abstract type DataBasedQs <: QueryStrategy end
-abstract type ModelBasedQs <: QueryStrategy end
-abstract type HybridQs <: QueryStrategy end
-
-using MLKernels
-using NearestNeighbors
-using Statistics
-using LinearAlgebra
-using InteractiveUtils
 using PyCall
-using SVDD
 
 const gaussian_kde = PyNULL()
 
@@ -20,33 +8,35 @@ function __init__()
     copy!(gaussian_kde, pyimport_conda("scipy.stats", "scipy")[:gaussian_kde])
 end
 
+include("qs_base.jl")
 include("qs_utils.jl")
 
-include("TestQs.jl")
-include("RandomQs.jl")
-include("RandomOutlierQs.jl")
-include("MinimumMarginQs.jl")
-include("ExpectedMinimumMarginQs.jl")
-include("ExpectedMaximumEntropyQs.jl")
-include("MinimumLossQs.jl")
-include("HighConfidenceQs.jl")
-include("DecisionBoundaryQs.jl")
-include("NeighborhoodBasedQs.jl")
-include("BoundaryNeighborCombinationQs.jl")
+include("pool/TestPQs.jl")
+include("pool/RandomPQs.jl")
+include("pool/RandomOutlierPQs.jl")
+include("pool/MinimumMarginPQs.jl")
+include("pool/ExpectedMinimumMarginPQs.jl")
+include("pool/ExpectedMaximumEntropyPQs.jl")
+include("pool/MinimumLossPQs.jl")
+include("pool/HighConfidencePQs.jl")
+include("pool/DecisionBoundaryPQs.jl")
+include("pool/NeighborhoodBasedPQs.jl")
+include("pool/BoundaryNeighborCombinationPQs.jl")
 
 export
     QueryStrategy,
-    DataBasedQs,
-    ModelBasedQs, HybridQs,
+    DataBasedPQs,
+    ModelBasedPQs, HybridPQs,
 
     # data-based query strategies
-    TestQs, RandomQs, MinimumMarginQs, ExpectedMinimumMarginQs, ExpectedMaximumEntropyQs,
-    MinimumLossQs,
+    TestPQs, RandomPQs, MinimumMarginPQs, ExpectedMinimumMarginPQs, ExpectedMaximumEntropyPQs,
+    MinimumLossPQs,
     # model-based query strategies
-    RandomOutlierQs, HighConfidenceQs, DecisionBoundaryQs,
+    RandomOutlierPQs, HighConfidencePQs, DecisionBoundaryPQs,
     # hybrid query strategies
-    NeighborhoodBasedQs, BoundaryNeighborCombinationQs,
+    NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs,
 
+    get_query_object,
     qs_score,
     initialize_qs,
     filter_array,

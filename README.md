@@ -46,18 +46,18 @@ The package includes multiple strategies to initialize the initial pool before s
 ### Active learning strategies
 This is a list of the available active learning strategies:
 - Data-based query strategies
-  - MinimumMarginQs and ExpectedMinimumMarginQs [1]
-  - ExpectedMaximumEntropyQs [1]
-  - MinimumLossQs [2]
+  - MinimumMarginPQs and ExpectedMinimumMarginPQs [1]
+  - ExpectedMaximumEntropyPQs [1]
+  - MinimumLossPQs [2]
 - Model-based query strategies
-    - HighConfidenceQs [3]
-    - DecisionBoundaryQs
+    - HighConfidencePQs [3]
+    - DecisionBoundaryPQs
 - Hybrid query strategies
-    - NeighborhoodBasedQs [4]
+    - NeighborhoodBasedPQs [4]
     - BoundaryNeighborCombination [5]
 - Baselines
-  - RandomQs
-  - RandomOutlierQs
+  - RandomPQs
+  - RandomOutlierPQs
 
 #### Extending with a new strategy
 
