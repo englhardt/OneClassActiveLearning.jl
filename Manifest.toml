@@ -278,10 +278,8 @@ version = "0.4.0"
 
 [[MLKernels]]
 deps = ["LinearAlgebra", "SpecialFunctions", "Statistics", "Test"]
-git-tree-sha1 = "456c6aa2928ae85064ef1d28b80d04fafed08986"
-repo-rev = "master"
-repo-url = "https://github.com/trthatcher/MLKernels.jl.git"
-uuid = "48eadcf2-8ff1-11e8-289d-f103432a0bb3"
+git-tree-sha1 = "d8ae6ac28480a25ddaae9ad9108371035ef9a346"
+uuid = "6899632a-1081-549c-8d71-752c8a25a7ba"
 version = "0.4.0"
 
 [[MLLabelUtils]]
@@ -448,11 +446,11 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[SVDD]]
 deps = ["Distributions", "Ipopt", "JuMP", "LinearAlgebra", "MLKernels", "MLLabelUtils", "Memento", "Random", "StatsBase", "Test"]
-git-tree-sha1 = "ce7ce3b805c11d9ea00a4a75e1b054a7b755f12c"
+git-tree-sha1 = "de4f3212265c18e45a7a1f3031d97b24e4c99045"
 repo-rev = "master"
-repo-url = "https://github.com/englhardt/SVDD.jl.git"
+repo-url = "https://github.com/englhardt/SVDD.jl"
 uuid = "83536b18-e0df-11e8-1e3f-f991e449cee4"
-version = "0.1.0"
+version = "0.2.0"
 
 [[Serialization]]
 uuid = "9e88b42a-f829-5b0c-bbe9-9e923198166b"
@@ -520,9 +518,9 @@ version = "0.4.0"
 
 [[Tables]]
 deps = ["Requires", "Test"]
-git-tree-sha1 = "be3a3a28a1e6c4fdd838bdf21e796f7a592c565c"
+git-tree-sha1 = "c7fb447deab835fa70ce6717e78c68b0f466a42c"
 uuid = "bd369af6-aec1-5ad0-b16a-f7cc5008161c"
-version = "0.1.10"
+version = "0.1.11"
 
 [[Test]]
 deps = ["Distributed", "InteractiveUtils", "Logging", "Random"]
