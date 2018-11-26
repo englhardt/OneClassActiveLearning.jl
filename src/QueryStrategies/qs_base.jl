@@ -3,6 +3,7 @@ abstract type QueryStrategy end
 
 abstract type PoolQs <: QueryStrategy end
 abstract type QuerySynthesisStrategy <: QueryStrategy end
+abstract type SubspaceQueryStrategy <: QueryStrategy end
 
 abstract type DataBasedPQs <: PoolQs end
 abstract type ModelBasedPQs <: PoolQs end
@@ -21,7 +22,7 @@ using InteractiveUtils
 using LIBSVM
 using SVDD
 
-function initialize_qs(qs, model::OCClassifier, data::Array{T, 2}, params::Dict{Symbol, <:Any})::QueryStrategy where T <: Real
+function initialize_qs(qs, model::OCClassifier, data::Array{T, 2}, params)::qs where T <: Real
     if qs <: HybridPQs || qs <: HybridQss
         return qs(model, data; params...)
     elseif qs <: ModelBasedPQs || qs <: ModelBasedQss
@@ -33,6 +34,8 @@ function initialize_qs(qs, model::OCClassifier, data::Array{T, 2}, params::Dict{
         else
             return qs(data; params...)
         end
+    elseif qs <: SubspaceQs
+        return qs(model, data; params...)
     elseif qs <: QueryStrategy
         return qs(; params...)
     end
@@ -48,7 +51,11 @@ get_query_object(qs::QueryStrategy, data::Array{T, 2}, pools::Vector{Symbol}, gl
 - `global_indices`: Indices of the observations in `query_data` relative to the full data set.
 - `history`: Indices of previous queries
 """
-function get_query_object(qs::PoolQs, query_data::Array{T, 2}, pools::Vector{Symbol}, global_indices::Vector{Int}, history::Vector{Int})::Int where T <: Real
+function get_query_object(qs::Q,
+                          query_data::Array{<:Real, 2},
+                          pools::Vector{Symbol},
+                          global_indices::Vector{Int},
+                          history::Vector{Int})::Int where Q <: Union{PoolQs, SubspaceQueryStrategy}
     pool_map = labelmap(pools)
     haskey(pool_map, :U) || throw(ArgumentError("No more points that are unlabeled."))
     scores = qs_score(qs, query_data, pool_map)
