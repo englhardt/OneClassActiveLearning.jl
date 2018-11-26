@@ -16,7 +16,7 @@
     @testset "initialize_qs" begin
         @testset "Standard" begin
             qs_types = [RandomPQs]
-            qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data), qs_types, params)
+            qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, params), qs_types)
             for qs in qs_objs
                 for labels in [labelmap(fill(:U, 10)), labelmap(fill(:Lin, 10)), labelmap(fill(:Lout, 10))]
                     scores = qs_score(qs, dummy_data, labels)

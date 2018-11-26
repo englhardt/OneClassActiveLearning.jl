@@ -21,7 +21,7 @@ using InteractiveUtils
 using LIBSVM
 using SVDD
 
-function initialize_qs(qs::DataType, model::OCClassifier, data::Array{T, 2}, params::Dict{Symbol, <:Any})::QueryStrategy where T <: Real
+function initialize_qs(qs, model::OCClassifier, data::Array{T, 2}, params::Dict{Symbol, <:Any})::QueryStrategy where T <: Real
     if qs <: HybridPQs || qs <: HybridQss
         return qs(model, data; params...)
     elseif qs <: ModelBasedPQs || qs <: ModelBasedQss
