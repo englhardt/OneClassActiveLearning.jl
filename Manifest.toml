@@ -48,9 +48,9 @@ uuid = "8bf52ea8-c179-5cab-976a-9e18b702a9bc"
 
 [[CSV]]
 deps = ["CategoricalArrays", "DataFrames", "DataStreams", "Dates", "Mmap", "Parsers", "Profile", "Random", "Tables", "Test", "Unicode", "WeakRefStrings"]
-git-tree-sha1 = "6dd974f0da3adb8b610cbbba5c95f5efbfa7a4df"
+git-tree-sha1 = "b92c6f626a044cc9619156d54994b94084d40abe"
 uuid = "336ed68f-0bac-5ca0-87d4-7b16caf5d00b"
-version = "0.4.2"
+version = "0.4.3"
 
 [[Calculus]]
 deps = ["Compat"]
@@ -168,9 +168,9 @@ version = "1.0.4"
 
 [[Formatting]]
 deps = ["Compat"]
-git-tree-sha1 = "6b5c29ec39a54fa823beb31f836431969e83fb74"
+git-tree-sha1 = "289003271ce9c8194c1ce56a3c433f1c51841125"
 uuid = "59287772-0a20-5a39-b81b-1366585eb4c0"
-version = "0.3.4"
+version = "0.3.5"
 
 [[ForwardDiff]]
 deps = ["CommonSubexpressions", "DiffResults", "DiffRules", "InteractiveUtils", "LinearAlgebra", "NaNMath", "Random", "SparseArrays", "SpecialFunctions", "StaticArrays", "Test"]
@@ -230,9 +230,9 @@ version = "0.9.1"
 
 [[JSON]]
 deps = ["Dates", "Distributed", "Mmap", "Sockets", "Test", "Unicode"]
-git-tree-sha1 = "fec8e4d433072731466d37ed0061b3ba7f70eeb9"
+git-tree-sha1 = "1f7a25b53ec67f5e9422f1f551ee216503f4a0fa"
 uuid = "682c06a0-de6a-54ab-a142-c8b1cf79cde6"
-version = "0.19.0"
+version = "0.20.0"
 
 [[JuMP]]
 deps = ["Calculus", "Compat", "DataStructures", "ForwardDiff", "MathOptInterface", "NaNMath"]
@@ -323,9 +323,9 @@ version = "0.4.0"
 
 [[MLLabelUtils]]
 deps = ["LearnBase", "MappedArrays", "StatsBase", "Test"]
-git-tree-sha1 = "2f5309e393467e8d40231957ba17582cba84e8c1"
+git-tree-sha1 = "e0ec57f450c345dbdaff191f4974b22407ed363f"
 uuid = "66a33bbf-0c2b-5fc8-a008-9da813334f0a"
-version = "0.4.1"
+version = "0.5.0"
 
 [[MacroTools]]
 deps = ["Compat"]
@@ -535,9 +535,9 @@ uuid = "10745b16-79ce-11e8-11f9-7d13ad32a3b2"
 
 [[StatsBase]]
 deps = ["DataStructures", "LinearAlgebra", "Missings", "Printf", "Random", "SortingAlgorithms", "SparseArrays", "Statistics", "Test"]
-git-tree-sha1 = "723193a13e8078cec6dcd0b8fe245c8bfd81690e"
+git-tree-sha1 = "2722397d88f8ffef551948f6c20e1d74a743298c"
 uuid = "2913bbd2-ae8a-5f71-8c99-4fb6c76f3a91"
-version = "0.25.0"
+version = "0.26.0"
 
 [[StatsFuns]]
 deps = ["Rmath", "SpecialFunctions", "Test"]
@@ -604,9 +604,9 @@ version = "0.2.1"
 
 [[ValueHistories]]
 deps = ["DataStructures", "Random", "RecipesBase", "Test"]
-git-tree-sha1 = "6d698a23adf7d802b222c18428ee8e58de649de0"
+git-tree-sha1 = "37f692be32132346b7e867ac7565a01b7a1592be"
 uuid = "98cad3c8-aec3-5f06-8e41-884608649ab7"
-version = "0.5.0"
+version = "0.5.1"
 
 [[VersionParsing]]
 deps = ["Compat"]

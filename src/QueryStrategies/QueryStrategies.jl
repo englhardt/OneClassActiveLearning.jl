@@ -10,6 +10,7 @@ end
 
 include("qs_base.jl")
 include("qs_utils.jl")
+include("qs_subspace.jl")
 
 include("pool/TestPQs.jl")
 include("pool/RandomPQs.jl")
@@ -34,6 +35,7 @@ include("query_synthesis/ExplorativeMarginQss.jl")
 export
     QueryStrategy,
     PoolQs,
+    SubspaceQs,
     DataBasedPQs, ModelBasedPQs, HybridPQs,
     QuerySynthesisStrategy,
     DataBasedQss, ModelBasedQss, HybridQss,

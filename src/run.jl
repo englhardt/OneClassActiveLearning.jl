@@ -135,12 +135,25 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
     return res
 end
 
-function get_query_object_helper(qs::PoolQs, query_data::Array{T, 2}, query_pools::Vector{Symbol}, query_indices::Vector{Int}, history::Vector{Int}=Int[])::Int where T <: Real
+function get_query_object_helper(qs::Q,
+                                 query_data::Array{<:Real, 2},
+                                 query_pools::Vector{Symbol},
+                                 query_indices::Vector{Int},
+                                 history::Vector{Int}=Int[])::Int where Q <: Union{PoolQs, SubspaceQs}
     return get_query_object(qs, query_data, query_pools, query_indices, history)
 end
 
-function get_query_object_helper(qs::QuerySynthesisStrategy, query_data::Array{T, 2}, query_pools::Vector{Symbol}, query_indices::Vector{Int}, history::Vector{Array{T, 2}}=Vector{Array{T, 2}}())::Array{T, 2} where T <: Real
+function get_query_object_helper(qs::QuerySynthesisStrategy,
+                                 query_data::Array{T, 2},
+                                 query_pools::Vector{Symbol},
+                                 query_indices::Vector{Int},
+                                 history::Vector{Array{T, 2}}=Vector{Array{T, 2}}())::Array{T, 2} where T <: Real
     return get_query_object(qs, query_data, query_pools, history)
+end
+
+function update_data_and_pools!(qs::SubspaceQs, data, labels, pools, split_strategy, query, query_label)
+    pools[query] = query_label == :inlier ? :Lin : :Lout
+    return data
 end
 
 function update_data_and_pools!(qs::PoolQs, data, labels, pools, split_strategy, query, query_label)
@@ -163,12 +176,22 @@ function push_query!(al_history::MVHistory, i, query, query_label, time_qs, mem_
     return nothing
 end
 
-function push_evaluation!(al_history::MVHistory, i, predictions, labels)
-    cm = ConfusionMatrix(SVDD.classify.(predictions), labels)
+function push_evaluation_cm!(al_history, i, cm)
     push!(al_history, :cm, i, cm)
     for e in [:cohens_kappa, :matthews_corr, :f1_score, :tpr, :fpr]
         push!(al_history, e, i, eval(e)(cm))
     end
+end
+
+function push_evaluation!(al_history::MVHistory, i, predictions::Vector{Vector{Float64}}, labels)
+    cm = ConfusionMatrix(SVDD.classify(predictions, Val(:Global)), labels)
+    push_evaluation_cm!(al_history, i, cm)
+    return nothing
+end
+
+function push_evaluation!(al_history::MVHistory, i, predictions, labels)
+    cm = ConfusionMatrix(SVDD.classify.(predictions), labels)
+    push_evaluation_cm!(al_history, i, cm)
     push!(al_history, :auc, i, roc_auc(predictions, labels))
     for k in [0.01, 0.02, 0.05, 0.1, 0.2]
         auc_fpr = OneClassActiveLearning.roc_auc(predictions, labels, fpr = k)
