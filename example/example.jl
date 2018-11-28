@@ -8,7 +8,7 @@ if !isempty(ARGS)
 end
 @info "Running with '$example_scenario'"
 
-using SVDD, OneClassActiveLearning, JSON, JuMP, Ipopt, Random, JLD
+using SVDD, OneClassActiveLearning, JSON, JuMP, Ipopt, Random, JLD, Gurobi
 Random.seed!(0)
 
 function run_experiment(experiment::Dict)

@@ -41,7 +41,8 @@
                 :query_strategy => Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomPQs), :param => Dict()),
                 :split_strategy => OneClassActiveLearning.DataSplits(trues(123), OneClassActiveLearning.FullSplitStrat()),
                 :param => Dict(:num_al_iterations => 5,
-                               :solver => :(IpoptSolver),
+                               :solver => Dict(:type => TEST_SOLVER.constructor,
+                                               :flags => Dict(TEST_SOLVER.kwargs)),
                                :initial_pools => fill(:U, 123)))
 
        al_history = MVHistory()
