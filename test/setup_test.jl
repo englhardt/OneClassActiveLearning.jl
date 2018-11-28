@@ -1,19 +1,17 @@
 
 @testset "setup" begin
     @testset "simple random example" begin
-        data_file = "$(@__DIR__)/../example/dummy.csv"
-        number_observations = countlines(open(data_file))
         experiment = Dict{Symbol, Any}(
             :hash => 0,
-            :data_file => data_file,
+            :data_file => TEST_DATA_FILE,
             :output_file => "OneClassActiveLearning.jl/data/output/scenarioA/data_qs_model_id.tmp",
             :model => Dict(:type => :(SVDD.RandomOCClassifier),
                            :param => Dict{Symbol, Any}(),
                            :init_strategy => SVDD.FixedParameterInitialization(GaussianKernel(2), 0.5)),
-            :split_strategy => OneClassActiveLearning.DataSplits(trues(number_observations) , OneClassActiveLearning.FullSplitStrat()),
+            :split_strategy => OneClassActiveLearning.DataSplits(trues(TEST_DATA_NUM_OBSERVATIONS) , OneClassActiveLearning.FullSplitStrat()),
             :param => Dict(:num_al_iterations => 5,
                            :solver => TEST_SOLVER,
-                           :initial_pools => fill(:U, number_observations),
+                           :initial_pools => fill(:U, TEST_DATA_NUM_OBSERVATIONS),
                            :adjust_K => true))
 
         @testset "pool based" begin
@@ -53,8 +51,8 @@
 
             res = OneClassActiveLearning.active_learn(exp)
 
-            @test length(res.experiment[:split_strategy].train) == number_observations + 5
-            @test length(res.experiment[:split_strategy].test) == number_observations + 5
+            @test length(res.experiment[:split_strategy].train) == TEST_DATA_NUM_OBSERVATIONS + 5
+            @test length(res.experiment[:split_strategy].test) == TEST_DATA_NUM_OBSERVATIONS + 5
 
             @test res.status[:exit_code] == :success
             @test length(res.al_history, :query_history) == 5
