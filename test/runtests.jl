@@ -13,6 +13,8 @@ using JSON, Unmarshal
 using InteractiveUtils
 
 TEST_SOLVER =  with_optimizer(Ipopt.Optimizer, print_level=0)
+TEST_DATA_FILE = "$(@__DIR__)/test.csv"
+TEST_DATA_NUM_DIMENSIONS, TEST_DATA_NUM_OBSERVATIONS = size(load_data(TEST_DATA_FILE)[1])
 
 Random.seed!(0)
 
