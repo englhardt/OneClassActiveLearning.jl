@@ -10,7 +10,7 @@ The package has been developed as part of a benchmark suite for [active learning
 > Holger Trittenbach, Adrian Englhardt, Klemens Böhm, "An Overview and a Benchmark of Active Learning for One-Class Classification" [arXiv:1808.04759](https://arxiv.org/abs/1808.04759), 14 Aug 2018
 
 ## Installation
-This package works with Julia 0.7 and Julia 1.0.
+This package requires at least Julia 1.0.
 This package is not registered yet. Please use the following command to add the package with Pkg3.
 ```Julia
 using Pkg
