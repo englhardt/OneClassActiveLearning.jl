@@ -70,8 +70,8 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
         debug(LOGGER, "[FIT] Start fitting model on $(format_observations(train_data)) observations.")
         # Workaround: redirect solver output
         stdout_orig, stderr_orig = stdout, stderr
-        redirect_stdout(open("/dev/null", "w")); redirect_stderr(open("/dev/null", "w"))
-        status, time_fit, mem_fit = @timed SVDD.fit!(model, solver)
+        redirect_stdout(); redirect_stderr()
+        status, time_fit, mem_fit = @timed fit!(model, solver)
         redirect_stdout(stdout_orig); redirect_stderr(stderr_orig)
         debug(LOGGER, "[FIT] Fitting done ($(time_fit) s, $(format_bytes(mem_fit))).")
 
