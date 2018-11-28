@@ -28,7 +28,20 @@ This includes the setup with data loading, splitting and setting up the initial 
 Then it includes several active learning strategies for one-class learning.
 All the results are stored in `.json` files.
 
-The script in `example` gives a jump start on how to use this package.
+The scripts in `example` gives a jump start on how to use this package.
+To run a minimal example, execute:
+```Julia
+> julia example/example.jl
+```
+The result is then stored in `example/example_pool_qs.json`.
+
+The following examples are available:
+* `pool_qs`: The default example with a pool based query strategy
+* `query_synthesis`: Use a query synthesis strategy optimized via particle swarm optimization
+Run any of the above examples by supplying the name, e.g., `pool_qs` as command line argument:
+```Julia
+> julia example/example.jl pool_qs
+```
 
 ### Data and initial pool init_strategies
 

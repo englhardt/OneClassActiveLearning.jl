@@ -1,4 +1,15 @@
-using SVDD, OneClassActiveLearning, JSON, Logging, JuMP, Ipopt, Random
+using Logging
+
+example_scenario = joinpath(@__DIR__, "example_pool_qs.jl")
+if !isempty(ARGS)
+    length(ARGS) > 1 && error("Please only supply one scenario.")
+    example_scenario = joinpath(@__DIR__, "example_$(ARGS[1]).jl")
+    isfile(example_scenario) || error("Cannot find scenario file '$(example_scenario)'.")
+end
+@info "Running with '$example_scenario'"
+
+using SVDD, OneClassActiveLearning, JSON, JuMP, Ipopt, Random, JLD
+Random.seed!(0)
 
 function run_experiment(experiment::Dict)
     Random.seed!(0)
@@ -9,7 +20,7 @@ function run_experiment(experiment::Dict)
     end
 
     res = Result(experiment)
-    errorfile = "$(experiment[:log_dir])worker/$(gethostname())_$(getpid())"
+    errorfile = joinpath(experiment[:log_dir],"$(gethostname())_$(getpid()).error")
     try
         time_exp = @elapsed res = OneClassActiveLearning.active_learn(experiment)
         res.al_summary[:runtime] = Dict(:time_exp => time_exp)
@@ -19,8 +30,8 @@ function run_experiment(experiment::Dict)
         @warn e
     finally
         if res.status[:exit_code] != :success
-            @info "Writing error hash to $errorfile.error."
-            open("$errorfile.error", "a") do f
+            @info "Writing error hash to $errorfile."
+            open(errorfile, "a") do f
                 print(f, "$(experiment[:hash])\n")
             end
         end
@@ -29,27 +40,7 @@ function run_experiment(experiment::Dict)
     end
 end
 
-const NUM_OBSERVATIONS = 157
-
-experiment = Dict{Symbol, Any}(
-    :hash => 1,
-    :data_file => "$(@__DIR__)/dummy.csv",
-    :data_set_name => "Dummy",
-    :output_file => "$(@__DIR__)/dummy.json",
-    :log_dir => "$(@__DIR__)/dummy.log",
-    :split_strategy_name => "Sf",
-    :initial_pool_strategy_name => "Pu",
-    :model => Dict(:type => :SVDDneg,
-                   :param => Dict{Symbol, Any}(),
-                   :init_strategy => SimpleCombinedStrategy(RuleOfThumbScott(), BoundedTaxErrorEstimate(0.05, 0.02, 0.98))),
-    :query_strategy => Dict(:type => :RandomOutlierPQs,
-                            :param => Dict{Symbol, Any}()),
-    :split_strategy => OneClassActiveLearning.DataSplits(trues(NUM_OBSERVATIONS)),
-    :oracle => :PoolOracle,
-    :param => Dict(:num_al_iterations => 10,
-                   :solver => with_optimizer(Ipopt.Optimizer; print_level=0),
-                   :initial_pools => fill(:U, NUM_OBSERVATIONS),
-                   :adjust_K => true,
-                   :initial_pool_resample_version => 1))
-
+@info "Generating experiment settings."
+include(example_scenario)
+@info "Running experiment."
 run_experiment(experiment)
