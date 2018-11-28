@@ -24,13 +24,12 @@
     @testset "get query" begin
         data = rand(2, 10)
         labels = fill(:U, 10)
-        indices = collect(1:10)
         history = Vector{Array{Float64, 2}}()
         optimizer = ParticleSwarmOptimization(zeros(2))
 
         @testset "TestQss" begin
             qs = TestQss(optimizer=optimizer)
-            query = get_query_object(qs, data, labels, indices, history)
+            query = get_query_object(qs, data, labels, history)
             @test size(query) == (2, 1)
         end
 
@@ -41,10 +40,10 @@
         for qs_type in [DecisionBoundaryQss, ExplorativeMarginQss]
             @testset "$qs_type" begin
                 qs = qs_type(occ, optimizer=optimizer)
-                query = get_query_object(qs, data, labels, indices, history)
+                query = get_query_object(qs, data, labels, history)
                 @test size(query) == (2, 1)
                 labels[end] = :Lout
-                query = get_query_object(qs, data, labels, indices, history)
+                query = get_query_object(qs, data, labels, history)
                 @test size(query) == (2, 1)
             end
         end
