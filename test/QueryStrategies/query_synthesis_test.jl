@@ -36,7 +36,7 @@
         occ = SVDD.VanillaSVDD(data)
         init_strategy = SVDD.SimpleCombinedStrategy(SVDD.FixedGammaStrategy(GaussianKernel(2.0)), SVDD.FixedCStrategy(1))
         SVDD.initialize!(occ, init_strategy)
-        fit!(occ, TEST_SOLVER)
+        SVDD.fit!(occ, TEST_SOLVER)
         for qs_type in [DecisionBoundaryQss, ExplorativeMarginQss]
             @testset "$qs_type" begin
                 qs = qs_type(occ, optimizer=optimizer)
