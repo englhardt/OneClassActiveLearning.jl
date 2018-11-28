@@ -5,11 +5,10 @@
       "num_al_iterations": 10,
       "adjust_K": true,
       "solver": {
-        "kwargs": {
+        "flags": {
           "print_level": 0
         },
-        "args": [],
-        "constructor": "Ipopt.Optimizer"
+        "type": "Ipopt.Optimizer"
       },
       "initial_pool_resample_version": 1,
       "initial_pools": [
@@ -185,8 +184,8 @@
       "type": "SVDDneg"
     },
     "data_set_name": "Dummy",
-    "data_file": "OneClassActiveLearning/example/dummy.csv",
-    "output_file": "OneClassActiveLearning/example/example_pool_qs.json",
+    "data_file": "example/dummy.csv",
+    "output_file": "example/example_pool_qs.json",
     "hash": 1,
     "split_strategy": {
       "query_strat": "FullSplitStrat",
@@ -511,7 +510,7 @@
       ],
       "train_strat": "FullSplitStrat"
     },
-    "log_dir": "OneClassActiveLearning/example/example_pool_qs.log",
+    "log_dir": "example/example_pool_qs.log",
     "initial_pool_strategy_name": "Pu",
     "query_strategy": {
       "param": {},
@@ -524,7 +523,7 @@
     "git_commit": "xxx",
     "julia_version": "1.0.2",
     "hostname": "machine",
-    "utc_time": "2018-11-28T12:00:00.000"
+    "utc_time": "2018-01-01T12:00:00.000"
   },
   "data_stats": {
     "num_observations": 157,
@@ -1009,17 +1008,17 @@
           10
         ],
         "values": [
-          1249280487,
-          58708192,
-          58708768,
-          58708192,
-          58708192,
-          58708192,
-          58708768,
-          58724496,
-          58708192,
-          58713968,
-          58708192
+          1853175574,
+          58711712,
+          58711712,
+          58711712,
+          58711712,
+          58712288,
+          58727440,
+          58711712,
+          58711712,
+          58708272,
+          58712288
         ],
         "lastiter": 10
       },
@@ -1095,11 +1094,11 @@
           9
         ],
         "values": [
-          28635604,
-          10140486,
-          6791456,
+          29987810,
+          10142534,
+          6792032,
           6791600,
-          6792288,
+          6791712,
           6791936,
           6792048,
           6792192,
@@ -1324,17 +1323,17 @@
           10
         ],
         "values": [
-          10.617420465,
-          0.100480817,
-          0.094404118,
-          0.091598434,
-          0.089365436,
-          0.090828451,
-          0.178684657,
-          0.092754335,
-          0.091241021,
-          0.084587426,
-          0.088653109
+          14.093497455,
+          0.101643418,
+          0.079990321,
+          0.082752863,
+          0.075218249,
+          0.087582978,
+          0.084634425,
+          0.078094266,
+          0.083344761,
+          0.086192766,
+          0.09065608
         ],
         "lastiter": 10
       },
@@ -1437,16 +1436,16 @@
           9
         ],
         "values": [
-          0.265938801,
-          0.057528925,
-          0.004868214,
-          0.008031622,
-          0.008331429,
-          0.005418754,
-          0.003710701,
-          0.003863946,
-          0.003858566,
-          0.008448705
+          0.283932997,
+          0.067781901,
+          0.007435743,
+          0.003659697,
+          0.003996549,
+          0.004596543,
+          0.004097668,
+          0.007704302,
+          0.003623565,
+          0.003645509
         ],
         "lastiter": 9
       },
@@ -1523,17 +1522,17 @@
           10
         ],
         "values": [
-          0.006195083,
-          3.898e-6,
-          2.35e-6,
-          2.67e-6,
-          2.449e-6,
-          2.601e-6,
-          8.456e-6,
-          2.559e-6,
-          2.119e-6,
+          0.006226802,
+          3.019e-6,
+          1.6626e-5,
+          3.194e-6,
           2.875e-6,
-          2.721e-6
+          3.566e-6,
+          4.018e-6,
+          3.561e-6,
+          3.531e-6,
+          3.263e-6,
+          2.994e-6
         ],
         "lastiter": 10
       },
@@ -2345,7 +2344,7 @@
       "maximum": 0.0014285714285714249
     },
     "runtime": {
-      "time_exp": 24.501838263
+      "time_exp": 26.9766457
     },
     "auc_fpr_normalized_0.2": {
       "learning_stability": [

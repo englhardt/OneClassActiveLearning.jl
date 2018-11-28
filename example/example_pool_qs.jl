@@ -1,5 +1,6 @@
 const DATA_FILE = joinpath(@__DIR__, "dummy.csv")
 const NUM_DIMENSIONS, NUM_OBSERVATIONS = size(load_data(DATA_FILE)[1])
+const SOLVER = with_optimizer(Ipopt.Optimizer; print_level=0)
 
 experiment = Dict{Symbol, Any}(
     :hash => 1,
@@ -17,7 +18,8 @@ experiment = Dict{Symbol, Any}(
     :split_strategy => OneClassActiveLearning.DataSplits(trues(NUM_OBSERVATIONS)),
     :oracle => :PoolOracle,
     :param => Dict(:num_al_iterations => 10,
-                   :solver => with_optimizer(Ipopt.Optimizer; print_level=0),
+                   :solver => Dict(:type => SOLVER.constructor,
+                                   :flags => Dict(SOLVER.kwargs)),
                    :initial_pools => fill(:U, NUM_OBSERVATIONS),
                    :adjust_K => true,
                    :initial_pool_resample_version => 1))
