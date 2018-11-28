@@ -10,7 +10,8 @@
                            :init_strategy => SVDD.FixedParameterInitialization(GaussianKernel(2), 0.5)),
             :split_strategy => OneClassActiveLearning.DataSplits(trues(TEST_DATA_NUM_OBSERVATIONS) , OneClassActiveLearning.FullSplitStrat()),
             :param => Dict(:num_al_iterations => 5,
-                           :solver => TEST_SOLVER,
+                           :solver => Dict(:type => TEST_SOLVER.constructor,
+                                           :flags => Dict(TEST_SOLVER.kwargs)),
                            :initial_pools => fill(:U, TEST_DATA_NUM_OBSERVATIONS),
                            :adjust_K => true))
 
