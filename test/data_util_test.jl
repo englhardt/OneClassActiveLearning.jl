@@ -64,6 +64,11 @@ end
             @test ds.train == ds.test == trues(size(data, 2))
             @test length(findall(x -> (x == :Lin) || (x == :Lout), ip)) == n
         end
+        for n in [11, 22, 33]
+            ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sf", "Pnin"; n=n)
+            @test ds.train == ds.test == trues(size(data, 2))
+            @test length(findall(x -> x == :Lin, ip)) == n
+        end
         for x in [5, 10, 20]
             ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sf", "Pa"; x=x)
             @test ds.train == ds.test == trues(size(data, 2))
@@ -83,6 +88,10 @@ end
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sh", "Pn")
         @test (sum(ds.train) == 80) && (sum(ds.test) == 20) && all(ds.train .⊻ ds.test)
         @test length(findall(x -> (x == :Lin) || (x == :Lout), ip[ds.train])) == 20
+        ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sh", "Pnin")
+        @test (sum(ds.train) == 80) && (sum(ds.test) == 20) && all(ds.train .⊻ ds.test)
+        @test length(findall(x -> x == :Lin, ip)) == 20
+        @test length(findall(x -> x == :Lin, ip[ds.train])) == 20
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sh", "Pa")
         @test (sum(ds.train) == 80) && (sum(ds.test) == 20) && all(ds.train .⊻ ds.test)
         @test length(findall(x -> x == :Lin, ip[ds.train])) == size(data, 1) + 10
@@ -97,7 +106,27 @@ end
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Si", "Pn")
         @test ds.train == ds.test == trues(size(data, 2))
         @test length(findall(x -> (x == :Lin) || (x == :Lout), ip)) == 20
+        ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Si", "Pnin")
+        @test ds.train == ds.test == trues(size(data, 2))
+        @test length(findall(x -> x == :Lin, ip)) == 20
         ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Si", "Pa")
+        @test ds.train == ds.test == trues(size(data, 2))
+        @test length(findall(x -> x == :Lin, ip)) == size(data, 1) + 10
+    end
+    @testset "lff" begin
+        ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sl", "Pu")
+        @test ds.train == ds.test == trues(size(data, 2))
+        @test ip == fill(:U, size(data, 2))
+        ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sl", "Pp")
+        @test ds.train == ds.test == trues(size(data, 2))
+        @test length(findall(x -> (x == :Lin) || (x == :Lout), ip)) == sum(ds.train) * 0.1
+        ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sl", "Pn")
+        @test ds.train == ds.test == trues(size(data, 2))
+        @test length(findall(x -> (x == :Lin) || (x == :Lout), ip)) == 20
+        ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sl", "Pnin")
+        @test ds.train == ds.test == trues(size(data, 2))
+        @test length(findall(x -> x == :Lin, ip)) == 20
+        ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sl", "Pa")
         @test ds.train == ds.test == trues(size(data, 2))
         @test length(findall(x -> x == :Lin, ip)) == size(data, 1) + 10
     end

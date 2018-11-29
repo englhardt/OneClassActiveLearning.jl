@@ -58,7 +58,7 @@ calc_mask(strat::LabeledInlierSplitStrat, init_mask::BitArray, pools::Vector{Sym
 calc_mask(strat::LabeledOutlierSplitStrat, init_mask::BitArray, pools::Vector{Symbol}) = init_mask .& (pools .== :Lout)
 
 function get_initial_pools(data, labels, data_splits, initial_pool_strategy; n=20, p=0.1, x=10)
-    if initial_pool_strategy ∉ ["Pu", "Pp", "Pn", "Pa"]
+    if initial_pool_strategy ∉ ["Pu", "Pp", "Pn", "Pnin", "Pa"]
         throw(ArgumentError("Unknown initial pools strategy '$(initial_pool_strategy)'."))
     end
     l = fill(:U, size(data, 2))
@@ -71,6 +71,10 @@ function get_initial_pools(data, labels, data_splits, initial_pool_strategy; n=2
         p = initial_pool_strategy == "Pp" ? p : min(1.0, n / sum(data_splits.train))
         label_candidates = findall(data_splits.train)
         (label_indices, _), _ = stratifiedobs((label_candidates, labels[data_splits.train]), p=p)
+        l[label_indices] .= convert_labels_to_learning(labels[label_indices])
+    elseif initial_pool_strategy == "Pnin"
+        label_candidates = findall(data_splits.train .& (labels .== :inlier))
+        label_indices = shuffle(label_candidates)[1:min(length(label_candidates), n)]
         l[label_indices] .= convert_labels_to_learning(labels[label_indices])
     end
     return l
@@ -86,6 +90,8 @@ function get_splits_and_init_pools(data, labels, split_strategy, initial_pool_st
         data_splits = DataSplits(train, .~train, FullSplitStrat())
     elseif split_strategy == "Si"
         data_splits = DataSplits(train, LabeledInlierSplitStrat(), FullSplitStrat(), FullSplitStrat())
+    elseif split_strategy == "Sl"
+        data_splits = DataSplits(train, LabeledSplitStrat(), LabeledSplitStrat(), FullSplitStrat())
     else
         throw(ArgumentError("Unknown split strategy '$(split_strategy)'."))
     end
