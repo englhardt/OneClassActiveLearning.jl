@@ -76,12 +76,12 @@ function get_initial_pools(data, labels, data_splits, initial_pool_strategy; n=2
     return l
 end
 
-function get_splits_and_init_pools(data, labels, split_strategy, initial_pool_strategy; n=20, p=0.1, x=10)
+function get_splits_and_init_pools(data, labels, split_strategy, initial_pool_strategy; holdout_p=0.2, kwargs...)
     train = trues(size(data, 2))
     if split_strategy == "Sf"
         data_splits = DataSplits(train, FullSplitStrat())
     elseif split_strategy == "Sh"
-        (train_indices, train_labels), (test_indices, test_labels) = stratifiedobs((collect(1:length(labels)), labels), p=0.8)
+        (train_indices, train_labels), (test_indices, test_labels) = stratifiedobs((collect(1:length(labels)), labels), p=1-holdout_p)
         train[test_indices] .= false
         data_splits = DataSplits(train, .~train, FullSplitStrat())
     elseif split_strategy == "Si"
@@ -89,6 +89,6 @@ function get_splits_and_init_pools(data, labels, split_strategy, initial_pool_st
     else
         throw(ArgumentError("Unknown split strategy '$(split_strategy)'."))
     end
-    initial_pools = get_initial_pools(data, labels, data_splits, initial_pool_strategy, x=x)
+    initial_pools = get_initial_pools(data, labels, data_splits, initial_pool_strategy; kwargs...)
     return data_splits, initial_pools
 end
