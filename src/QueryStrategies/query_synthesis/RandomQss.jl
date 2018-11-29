@@ -1,13 +1,11 @@
 struct RandomQss <: QuerySynthesisStrategy
-    # [[min_dim1, min_dim2, min_dim3] [max_dim1, max_dim2, max_dim3]]
-    # == [min_dim1 min_dim2 min_dim3; max_dim1 max_dim2 max_dim3]
-    limits::Array{Float64, 2}
-    function RandomQss(; optimizer=nothing, limits=[[0., 0.] [1., 1.]])
-        check_limits(limits)
-        new(limits)
+    epsilon::Union{Float64, Vector{Float64}}
+    function RandomQss(; optimizer=nothing, epsilon=0.1)
+        check_epsilon(epsilon)
+        new(epsilon)
     end
 end
 
 function get_query_object(qs::RandomQss, data::Array{T, 2}, labels::Vector{Symbol}, history::Vector{Array{T, 2}})::Array{T, 2} where T <: Real
-    return rand(size(qs.limits, 1), 1) .* (qs.limits[:, 2] .- qs.limits[:, 1]) .+ qs.limits[:, 1]
+    return rand_in_hypercube(extrema_arrays(data)..., qs.epsilon)
 end
