@@ -45,7 +45,7 @@
         @testset "query synthesis" begin
             exp =  deepcopy(experiment)
             exp[:query_strategy] = Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomQss),
-                                        :param => Dict{Symbol, Any}(:optimizer => nothing, :limits => [zeros(13) ones(13)]))
+                                        :param => Dict{Symbol, Any}())
             exp[:oracle] = OneClassActiveLearning.QuerySynthesisFunctionOracle(_ -> :inlier)
 
             expected_experiment = deepcopy(exp)
@@ -64,7 +64,7 @@
             @test all(values(res.al_history, :time_fit) .> 0.0)
 
             @test length(values(res.al_history, :query_history)) == 5
-            @test size(values(res.al_history, :query_history)[1]) == (13, 1)
+            @test size(values(res.al_history, :query_history)[1]) == (TEST_DATA_NUM_DIMENSIONS, 1)
             @test !isempty(res.worker_info)
 
             @test length(res.al_history, :cm) == 6
@@ -88,7 +88,7 @@
         end
 
         @testset "query synthesis" begin
-            qs = OneClassActiveLearning.QueryStrategies.RandomQss(limits=[zeros(2) ones(2)])
+            qs = OneClassActiveLearning.QueryStrategies.RandomQss()
             data = rand(2, 3)
             split_strategy = OneClassActiveLearning.DataSplits(trues(3))
             pools = [:U, :U, :Lin]

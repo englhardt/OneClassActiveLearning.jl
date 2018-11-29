@@ -1,13 +1,14 @@
 
 @testset "query synthesis" begin
     @testset "random baselines" begin
-        limits = ones(2, 2)
+        epsilon = fill(0.1, 2)
         data = ones(2, 10)
         labels = fill(:U, 10)
         history = Array{Float64, 2}[]
 
         @testset "RandomQss" begin
-            @test_throws ArgumentError RandomQss(limits=limits)
+            @test_throws ArgumentError RandomQss(epsilon=-0.1)
+            @test_throws ArgumentError RandomQss(epsilon=-ones(2))
             query = get_query_object(RandomQss(), data, labels, history)
             @test size(query) == (2, 1)
         end
@@ -15,7 +16,8 @@
         @testset "RandomOutlierQss" begin
             occ = SVDD.RandomOCClassifier(data)
             @test_throws ArgumentError RandomOutlierQss(occ, max_tries=0)
-            @test_throws ArgumentError RandomOutlierQss(occ, limits=limits)
+            @test_throws ArgumentError RandomOutlierQss(occ, epsilon=-0.1)
+            @test_throws ArgumentError RandomOutlierQss(occ, epsilon=-ones(2))
             query = get_query_object(RandomOutlierQss(occ), data, labels, history)
             @test size(query) == (2, 1)
         end
