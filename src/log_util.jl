@@ -39,3 +39,5 @@ end
 function Base.push!(logger::Logger, handler::Handler, name::String)
     logger.handlers[name] = handler
 end
+
+get_val_type(x::Val{T}) where T = T

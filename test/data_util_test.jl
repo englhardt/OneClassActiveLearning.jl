@@ -14,6 +14,36 @@
         @test calc_mask(LabeledOutlierSplitStrat(), init_mask, pools) == [false, true, false, false, false]
     end
 
+    @testset "get_local_idx" begin
+        pools = fill(:U, 6)
+        train = BitArray([true, true, false, false, true, true])
+        ds = DataSplits(train, .~train, FullSplitStrat())
+
+        @test OneClassActiveLearning.get_local_idx(1, ds, pools, Val(:train)) == 1
+        @test OneClassActiveLearning.get_local_idx(5, ds, pools, Val(:train)) == 3
+        @test OneClassActiveLearning.get_local_idx(6, ds, pools, Val(:train)) == 4
+        @test_throws ErrorException OneClassActiveLearning.get_local_idx(3, ds, pools, Val(:train))
+
+        @test OneClassActiveLearning.get_local_idx(3, ds, pools, Val(:test)) == 1
+        @test_throws ErrorException OneClassActiveLearning.get_local_idx(5, ds, pools, Val(:test))
+
+        pools[3:6] .= :Lin
+        ds = DataSplits(train, .~train, LabeledInlierSplitStrat())
+
+        @test_throws ErrorException OneClassActiveLearning.get_local_idx(1, ds, pools, Val(:train))
+        @test OneClassActiveLearning.get_local_idx(5, ds, pools, Val(:train)) == 1
+    end
+
+    @testset "filter_query_id" begin
+        train = vcat(trues(5), falses(5))
+        query_ids = [1,3,5]
+        query_labels = [:Lin, :Lout, :U]
+        @test OneClassActiveLearning.filter_query_id(query_ids, DataSplits(train, .~train, FullSplitStrat()), query_labels, Val(:train)) == [1,3,5]
+        @test OneClassActiveLearning.filter_query_id(query_ids, DataSplits(train, .~train, LabeledInlierSplitStrat()), query_labels, Val(:train)) == [1]
+        @test OneClassActiveLearning.filter_query_id(query_ids, DataSplits(train, .~train, LabeledOutlierSplitStrat()), query_labels, Val(:train)) == [3]
+        @test OneClassActiveLearning.filter_query_id(query_ids, DataSplits(train, .~train, UnlabeledAndLabeledInlierSplitStrat()), query_labels, Val(:train)) == [1,5]
+    end
+
     @testset "no holdout" begin
         data = reshape(collect(1:10), (2, 5))
         pools = fill(:U, 5)

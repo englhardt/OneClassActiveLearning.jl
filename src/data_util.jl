@@ -2,6 +2,7 @@
 const NATIVE_LABEL_ENCODING = LabelEnc.NativeLabels(["inlier", "outlier"])
 const LABEL_ENCODING = LabelEnc.NativeLabels([:inlier,:outlier])
 const LEARNING_LABEL_ENCODING = LabelEnc.NativeLabels([:Lin,:Lout])
+const SplitType = Union{Val{:train}, Val{:test}, Val{:query}}
 
 function load_data(file_path; header=false, native_label_encoding=NATIVE_LABEL_ENCODING)
     raw_data, _ = header ? readdlm(file_path, ',', header=header) : (readdlm(file_path, ','), nothing)
@@ -41,6 +42,27 @@ struct DataSplits
     DataSplits(train::BitArray, test::BitArray, train_strat::SplitStrategy, test_strat::SplitStrategy) = new(train, test, train_strat, test_strat, train_strat)
 end
 
+get_mask(ds, pools, ::Val{:train}) = calc_mask(ds.train_strat, ds.train, pools)
+get_mask(ds, pools, ::Val{:test}) = calc_mask(ds.test_strat, ds.test, pools)
+get_mask(ds, pools, ::Val{:query}) = calc_mask(ds.query_strat, ds.train, pools)
+
+function get_local_idx(global_idx::Int, ds, pools, split::T) where T <: SplitType
+    mask = get_mask(ds, pools, split)
+    mask[global_idx] || error("$(get_val_type(split)) split does not contain observation with global idx $(global_idx).")
+    local_idx = count(mask[1:global_idx])
+    return local_idx
+end
+
+"""
+    filter_query_id(query_ids::Vector{Int}, split_strategy, query_pool_labels, ::Val{:train})
+
+    Returns the query ids that also are in the train split.
+"""
+function filter_query_id(query_ids::Vector{Int}, split_strategy, query_pool_labels, ::Val{:train})
+    query_id_mask = calc_mask(split_strategy.train_strat, split_strategy.train[query_ids], query_pool_labels)
+    return query_ids[query_id_mask]
+end
+
 get_train(ds::DataSplits, data::Array{T, 2}, pools::Vector{Symbol}) where T <: Real = select_subset(ds.train_strat, ds.train, data, pools)
 get_test(ds::DataSplits, data::Array{T, 2}, pools::Vector{Symbol}) where T <: Real = select_subset(ds.test_strat, ds.test, data, pools)
 get_query(ds::DataSplits, data::Array{T, 2}, pools::Vector{Symbol}) where T <: Real = select_subset(ds.query_strat, ds.train, data, pools)
@@ -50,12 +72,12 @@ function select_subset(strat::SplitStrategy, init_mask::BitArray, data::Array{T,
     return (data[:, mask], pools[mask], findall(mask))
 end
 
-calc_mask(strat::FullSplitStrat, init_mask::BitArray, pools::Vector{Symbol}) = init_mask
-calc_mask(strat::UnlabeledSplitStrat, init_mask::BitArray, pools::Vector{Symbol}) = init_mask .& (pools .== :U)
-calc_mask(strat::UnlabeledAndLabeledInlierSplitStrat, init_mask::BitArray, pools::Vector{Symbol}) = init_mask .& ((pools .== :U) .| (pools .== :Lin))
-calc_mask(strat::LabeledSplitStrat, init_mask::BitArray, pools::Vector{Symbol}) = init_mask .& ((pools .== :Lin) .| (pools .== :Lout))
-calc_mask(strat::LabeledInlierSplitStrat, init_mask::BitArray, pools::Vector{Symbol}) = init_mask .& (pools .== :Lin)
-calc_mask(strat::LabeledOutlierSplitStrat, init_mask::BitArray, pools::Vector{Symbol}) = init_mask .& (pools .== :Lout)
+calc_mask(strat::FullSplitStrat, init_mask, pools) = init_mask
+calc_mask(strat::UnlabeledSplitStrat, init_mask, pools) = init_mask .& (pools .== :U)
+calc_mask(strat::UnlabeledAndLabeledInlierSplitStrat, init_mask, pools) = init_mask .& ((pools .== :U) .| (pools .== :Lin))
+calc_mask(strat::LabeledSplitStrat, init_mask, pools) = init_mask .& ((pools .== :Lin) .| (pools .== :Lout))
+calc_mask(strat::LabeledInlierSplitStrat, init_mask, pools) = init_mask .& (pools .== :Lin)
+calc_mask(strat::LabeledOutlierSplitStrat, init_mask, pools) = init_mask .& (pools .== :Lout)
 
 function get_initial_pools(data, labels, data_splits, initial_pool_strategy; n=20, p=0.1, x=10)
     if initial_pool_strategy ∉ ["Pu", "Pp", "Pn", "Pnin", "Pa"]

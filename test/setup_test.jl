@@ -74,17 +74,18 @@
         end
     end
 
-    @testset "update data and pools" begin
+    @testset "process query" begin
         @testset "pool based" begin
             qs = OneClassActiveLearning.QueryStrategies.RandomPQs()
-            data = rand(2, 3)
-            split_strategy = OneClassActiveLearning.DataSplits(trues(3))
-            pools = [:U, :U, :Lin]
-            labels = [:inlier, :outlier, :inlier]
-            OneClassActiveLearning.update_data_and_pools!(qs, data, labels, pools, split_strategy, 1, :inlier)
-            @test pools == [:Lin, :U, :Lin]
-            OneClassActiveLearning.update_data_and_pools!(qs, data, labels, pools, split_strategy, 2, :outlier)
-            @test pools == [:Lin, :Lout, :Lin]
+            data = rand(2, 4)
+            split_strategy = OneClassActiveLearning.DataSplits(trues(4))
+            pools = [:U, :U, :Lin, :U]
+            labels = [:inlier, :outlier, :inlier, :inlier]
+            data, pools, labels = OneClassActiveLearning.process_query!([1], labels[[1]], SVDD.RandomOCClassifier(data), split_strategy, data, pools, labels)
+            @test pools == [:Lin, :U, :Lin, :U]
+            data, pools, labels = OneClassActiveLearning.process_query!([2,4], labels[[2,4]], SVDD.RandomOCClassifier(data), split_strategy, data, pools, labels)
+            @test pools == [:Lin, :Lout, :Lin, :Lin]
+            @test labels == [:inlier, :outlier, :inlier, :inlier]
         end
 
         @testset "query synthesis" begin
@@ -93,18 +94,18 @@
             split_strategy = OneClassActiveLearning.DataSplits(trues(3))
             pools = [:U, :U, :Lin]
             labels = [:inlier, :outlier, :inlier]
-            data = OneClassActiveLearning.update_data_and_pools!(qs, data, labels, pools, split_strategy, rand(2, 1), :inlier)
+            data, pools, labels = OneClassActiveLearning.process_query!(rand(2,1), [:inlier], SVDD.RandomOCClassifier(data), split_strategy, data, pools, labels)
             @test size(data) == (2, 4)
             @test labels == [:inlier, :outlier, :inlier, :inlier]
             @test pools == [:U, :U, :Lin, :Lin]
             @test split_strategy.train == [true, true, true, true]
             @test split_strategy.test == [true, true, true, false]
-            data = OneClassActiveLearning.update_data_and_pools!(qs, data, labels, pools, split_strategy, rand(2, 1), :outlier)
-            @test size(data) == (2, 5)
-            @test labels == [:inlier, :outlier, :inlier, :inlier, :outlier]
-            @test pools == [:U, :U, :Lin, :Lin, :Lout]
-            @test split_strategy.train == [true, true, true, true, true]
-            @test split_strategy.test == [true, true, true, false, false]
+            data, pools, labels = OneClassActiveLearning.process_query!(rand(2,3), fill(:outlier, 3), SVDD.RandomOCClassifier(data), split_strategy, data, pools, labels)
+            @test size(data) == (2, 7)
+            @test labels == [:inlier, :outlier, :inlier, :inlier, :outlier, :outlier, :outlier]
+            @test pools == [:U, :U, :Lin, :Lin, :Lout, :Lout, :Lout]
+            @test split_strategy.train == [true, true, true, true, true, true, true]
+            @test split_strategy.test == [true, true, true, false, false, false, false]
         end
     end
 end
