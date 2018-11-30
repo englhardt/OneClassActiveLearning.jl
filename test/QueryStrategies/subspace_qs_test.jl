@@ -97,5 +97,43 @@
                 @test_throws ErrorException qs_score(sub_qs, rand(4, 10), labelmap(fill(:U, 10)))
             end
         end
+
+        @testset "process_query!" begin
+            data = rand(4,10)
+            subspaces = [[1,2], [3,4]]
+            pools = fill(:U, size(data,2))
+
+            train = BitArray(vcat(false, trues(8), false))
+            gamma_strategy = FixedGammaStrategy(MLKernels.GaussianKernel(2))
+            C_strategy = FixedCStrategy(0.1)
+            init_strategy = SVDD.SimpleSubspaceStrategy(gamma_strategy, C_strategy, gamma_scope=Val(:Global))
+            update_strategy = SVDD.FixedWeightStrategy(42.0, 5.0)
+
+            global_query_ids = [2,4]
+            query_labels = [:outlier, :inlier]
+
+            @testset "FullSplit" begin
+                split_strategy = DataSplits(train, .~train, FullSplitStrat())
+                train_data, train_pools, _ = get_train(split_strategy, data, pools)
+                model = SVDD.SubSVDD(train_data, subspaces, train_pools)
+                set_param!(model, Dict(:weight_update_strategy => update_strategy))
+                initialize!(model, init_strategy)
+                data_updated, pools_updated, labels_updated = OneClassActiveLearning.process_query!(global_query_ids, query_labels, model, split_strategy, data, pools, labels)
+                # FullSplit -> first train index and third train index are updated
+                @test all(model.v .== [5.0, 1.0, 42.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+            end
+
+            @testset "UnlabeledAndLabeledInlierSplit" begin
+                split_strategy = DataSplits(train, .~train, UnlabeledAndLabeledInlierSplitStrat())
+                train_data, train_pools, _ = get_train(split_strategy, data, pools)
+                model = SVDD.SubSVDD(train_data, subspaces, train_pools)
+                set_param!(model, Dict(:weight_update_strategy => update_strategy))
+                initialize!(model, init_strategy)
+
+                data_updated, pools_updated, labels_updated = OneClassActiveLearning.process_query!(global_query_ids, query_labels, model, split_strategy, data, pools, labels)
+                # FullSplit -> first train observation is removed because it is labled :Lout, second train observation in updated data set is updated
+                @test all(model.v .== [1.0, 42.0, 1.0, 1.0, 1.0, 1.0, 1.0])
+            end
+        end
     end
 end

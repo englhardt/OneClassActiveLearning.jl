@@ -62,14 +62,14 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
         return res
     end
 
+    train_data, train_pools, _ = get_train(split_strategy, data, pools)
+    set_data!(model, train_data)
+    set_pools!(model, labelmap(train_pools))
+
     debug(LOGGER, "Start active learning cycle with $(experiment[:param][:num_al_iterations]) queries.")
     for i in 0:experiment[:param][:num_al_iterations]
         info(LOGGER, "Iteration $(i)")
         debug(LOGGER, "Memory consumption $(round(Int, Sys.free_memory() / 2^20)) MB / $(round(Int, Sys.total_memory() / 2^20)) MB")
-
-        train_data, train_pools, _ = get_train(split_strategy, data, pools)
-        time_set_data = @elapsed set_data!(model, train_data)
-        set_pools!(model, labelmap(train_pools))
 
         debug(LOGGER, "[FIT] Start fitting model on $(format_observations(train_data)) observations.")
         # Workaround: redirect solver output
@@ -79,7 +79,7 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
         redirect_stdout(stdout_orig); redirect_stderr(stderr_orig)
         debug(LOGGER, "[FIT] Fitting done ($(time_fit) s, $(format_bytes(mem_fit))).")
 
-        @trace res.al_history i time_fit mem_fit time_set_data
+        @trace res.al_history i time_fit mem_fit
         if status !== JuMP.MathOptInterface.OPTIMAL
             warn(LOGGER, "Not solved to optimality. Solver status: $status.")
             res.status[:exit_code] = :solver_error
@@ -120,13 +120,20 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
             end
             debug(LOGGER, "[QS] Query strategy finished ($(time_qs) s, $(format_bytes(mem_qs))).")
             query_label = ask_oracle(oracle, query)
-            data = update_data_and_pools!(qs, data, labels, pools, split_strategy, query, query_label)
+
+            # tmp workaround
+            data, pools, labels = process_query!(isa(query, Array) ? query : [query],
+                                         isa(query_label, Array) ? query_label : [query_label],
+                                         model,
+                                         split_strategy,
+                                         data,
+                                         pools,
+                                         labels)
+
             push_query!(res.al_history, i, query, query_label, time_qs, mem_qs)
             isa(query, Int) ? debug(LOGGER, "[QS] Query(id = $(query), label = $(query_label))") :
                              debug(LOGGER, "[QS] Query(label = $(query_label))")
             debug(LOGGER, "[QS] Query strategy done.")
-
-
         end
         debug(LOGGER, "Finished iteration $(i).")
     end
@@ -139,11 +146,56 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
     return res
 end
 
+function process_query!(query_data::Array{T, 2},
+                        query_labels::Vector{Symbol},
+                        model, split_strategy, data, pools, labels) where T <: Real
+    size(query_data, 2) == length(query_labels) || throw(DimensionMismatch("Number of queries does not match number of labels."))
+    size(data, 1) == size(query_data, 1) ||throw(DimensionMismatch("Data dimensionality does not match query dimensionality."))
+
+    n_old = size(data,2)
+    append!(split_strategy.train, trues(length(query_labels)))
+    append!(split_strategy.test, falses(length(query_labels)))
+    data = hcat(data, query_data)
+    pools = vcat(pools, fill(:U, length(query_labels)))
+    labels = vcat(labels, query_labels)
+    n_new = size(data, 2)
+    global_query_ids = collect((n_old + 1):n_new)
+
+    process_query!(global_query_ids, query_labels, model, split_strategy, data, pools, labels)
+end
+
+function process_query!(global_query_ids::Vector{Int},
+                        query_labels::Vector{Symbol},
+                        model, split_strategy, data, pools, labels)
+    length(global_query_ids) == length(query_labels) || throw(DimensionMismatch("Number of queries does not match number of labels."))
+
+    pools_before = copy(pools)
+    train_mask_before = OneClassActiveLearning.calc_mask(split_strategy.train_strat, split_strategy.train, pools)
+
+    query_pool_labels = convert_labels_to_learning(query_labels)
+    pools[global_query_ids] .= query_pool_labels
+    train_data, train_pools, _ = get_train(split_strategy, data, pools)
+
+    train_mask_after = OneClassActiveLearning.calc_mask(split_strategy.train_strat, split_strategy.train, pools)
+
+    # indices that are in train before and after, relative to the updated train
+    global_remaining_indices = findall(train_mask_before .& train_mask_after)
+    old_idx_remaining_train = map(id -> get_local_idx(id, split_strategy, pools_before, Val(:train)), global_remaining_indices)
+    new_idx_remaining_train = map(id -> get_local_idx(id, split_strategy, pools, Val(:train)), global_remaining_indices)
+
+    filtered_query_ids = filter_query_id(global_query_ids, split_strategy, query_pool_labels, Val(:train))
+    train_query_ids = map(id -> get_local_idx(id, split_strategy, pools, Val(:train)), filtered_query_ids)
+
+    update_with_feedback!(model, train_data, train_pools, train_query_ids, old_idx_remaining_train, new_idx_remaining_train)
+
+    return data, pools, labels
+end
+
 function get_query_object_helper(qs::Q,
-                                 query_data::Array{<:Real, 2},
+                                 query_data::Array{T, 2},
                                  query_pools::Vector{Symbol},
                                  query_indices::Vector{Int},
-                                 history::Vector{Int}=Int[])::Int where Q <: Union{PoolQs, SubspaceQs}
+                                 history::Vector{Int}=Int[])::Int where T <: Real where Q <: Union{PoolQs, SubspaceQs}
     return get_query_object(qs, query_data, query_pools, query_indices, history)
 end
 
@@ -153,25 +205,6 @@ function get_query_object_helper(qs::QuerySynthesisStrategy,
                                  query_indices::Vector{Int},
                                  history::Vector{Array{T, 2}}=Vector{Array{T, 2}}())::Array{T, 2} where T <: Real
     return get_query_object(qs, query_data, query_pools, history)
-end
-
-function update_data_and_pools!(qs::SubspaceQs, data, labels, pools, split_strategy, query, query_label)
-    pools[query] = query_label == :inlier ? :Lin : :Lout
-    return data
-end
-
-function update_data_and_pools!(qs::PoolQs, data, labels, pools, split_strategy, query, query_label)
-    pools[query] = query_label == :inlier ? :Lin : :Lout
-    return data
-end
-
-function update_data_and_pools!(qs::QuerySynthesisStrategy, data, labels, pools, split_strategy, query, query_label)
-    data = hcat(data, query)
-    push!(labels, query_label)
-    push!(pools, query_label == :inlier ? :Lin : :Lout)
-    push!(split_strategy.train, true)
-    push!(split_strategy.test, false)
-    return data
 end
 
 function push_query!(al_history::MVHistory, i, query, query_label, time_qs, mem_qs)
