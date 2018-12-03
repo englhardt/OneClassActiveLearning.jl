@@ -1,17 +1,18 @@
 struct ParticleSwarmOptimization <: QuerySynthesisOptimizer
-    eps::Vector{Float64}
+    eps::Float64
     swarmsize::Int
     maxiter::Int
     minstep::Float64
     minfunc::Float64
-    function ParticleSwarmOptimization(eps::Vector{Float64}; swarmsize=100, maxiter=100)
+    function ParticleSwarmOptimization(; eps=0.1, swarmsize=100, maxiter=100)
         check_epsilon(eps)
         new(eps, swarmsize, maxiter, 1e-8, 1e-8)
     end
 end
 
 function query_synthesis_optimize(f::Function, optimizer::ParticleSwarmOptimization, data::Array{T, 2})::Array{T, 2} where T <: Real
-    lb, ub = vec(minimum(data, dims=2)) - optimizer.eps, vec(maximum(data, dims=2)) + optimizer.eps
+    eps_padding = estimate_limit_epsilon(data, optimizer.eps)
+    lb, ub = vec(minimum(data, dims=2)) - eps_padding, vec(maximum(data, dims=2)) + eps_padding
     x_opt, _ = pso(x -> vec(-f(x)), lb, ub;
                     swarmsize=optimizer.swarmsize,
                     maxiter=optimizer.maxiter,
