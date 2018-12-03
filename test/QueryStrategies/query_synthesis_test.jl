@@ -27,7 +27,7 @@
         data = rand(2, 10)
         labels = fill(:U, 10)
         history = Vector{Array{Float64, 2}}()
-        optimizer = ParticleSwarmOptimization(zeros(2))
+        optimizer = ParticleSwarmOptimization()
 
         @testset "TestQss" begin
             qs = TestQss(optimizer=optimizer)
@@ -41,7 +41,7 @@
         SVDD.fit!(occ, TEST_SOLVER)
         for qs_type in [DecisionBoundaryQss, ExplorativeMarginQss]
             @testset "$qs_type" begin
-                qs = qs_type(occ, optimizer=optimizer)
+                qs = initialize_qs(qs_type, occ, data, Dict(:optimizer => optimizer))
                 query = get_query_object(qs, data, labels, history)
                 @test size(query) == (2, 1)
                 labels[end] = :Lout

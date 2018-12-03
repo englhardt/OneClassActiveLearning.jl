@@ -1,14 +1,20 @@
-struct ExplorativeMarginQss <: ModelBasedQss
+mutable struct ExplorativeMarginQss <: HybridQss
     occ::SVDD.SVDDClassifier
     optimizer::QuerySynthesisOptimizer
-    eps::Float64
-    function ExplorativeMarginQss(occ; optimizer=nothing, eps=0.15)
+    lambda::Float64
+    eps
+    function ExplorativeMarginQss(occ, data; optimizer=nothing, lambda=1.0)
         !isa(occ.kernel_fct, SquaredExponentialKernel) && throw(ArgumentError("Invalid kernel type $(typeof(occ.kernel_fct))."))
-        new(occ, optimizer, eps)
+        new(occ, optimizer, lambda, nothing)
     end
 end
 
 function qs_score_function(qs::ExplorativeMarginQss, data::Array{T, 2}, labels::Dict{Symbol, Array{Int, 1}})::Function where T <: Real
+    # Init epsilon if not yet set
+    if qs.eps === nothing
+        data_target, data_outliers = SVDD.generate_binary_data_for_tuning(data)
+        qs.eps = qs.lambda * maximum(SVDD.predict(qs.occ, data_outliers))
+    end
     occ_modified = deepcopy(qs.occ)
     occ_modified.R += qs.eps
     oc_scoring(x) = -abs.(SVDD.predict(occ_modified, x))
