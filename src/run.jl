@@ -20,7 +20,11 @@ function init_from_experiment(experiment, data, labels, res)
     qs = QueryStrategies.initialize_qs(eval(experiment[:query_strategy][:type]), model, query_data, experiment[:query_strategy][:param])
 
     debug(LOGGER, "[INIT] Initializing oracle.")
-    oracle = initialize_oracle(eval(experiment[:oracle]), labels)
+    if isa(experiment[:oracle], Oracle)
+        oracle = experiment[:oracle]
+    else
+        oracle = initialize_oracle(eval(experiment[:oracle][:type]), data, labels, experiment[:oracle][:param])
+    end
 
     info(LOGGER, "[INIT] Initialization done.")
     return (model, pools, solver, qs, split_strategy, oracle)

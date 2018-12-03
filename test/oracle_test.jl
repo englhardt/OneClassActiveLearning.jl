@@ -1,14 +1,15 @@
 
 @testset "oracle" begin
-    data_file = "$(@__DIR__)/../example/dummy.csv"
-    data, labels = OneClassActiveLearning.load_data(data_file)
+    data, labels = OneClassActiveLearning.load_data(TEST_DATA_FILE)
+    init_strategy = SimpleCombinedStrategy(FixedGammaStrategy(GaussianKernel(2.0)), FixedCStrategy(0.5))
 
     @testset "initialize" begin
-        @test_throws ErrorException OneClassActiveLearning.initialize_oracle(OneClassActiveLearning, labels)
+        @test_throws ErrorException OneClassActiveLearning.initialize_oracle(OneClassActiveLearning, data, labels)
+        @test_throws ArgumentError OneClassActiveLearning.initialize_oracle(QuerySynthesisOCCOracle, data, labels)
     end
 
     @testset "PoolOracle" begin
-        oracle = OneClassActiveLearning.initialize_oracle(PoolOracle, labels)
+        oracle = OneClassActiveLearning.initialize_oracle(PoolOracle, data, labels)
         @test isa(oracle, PoolOracle)
         for i in 1:3
             @test ask_oracle(oracle, i) == labels[i]
@@ -20,14 +21,23 @@
         @test ask_oracle(oracle, 1) == :inlier
     end
 
-    init_strategy = SimpleCombinedStrategy(FixedGammaStrategy(GaussianKernel(2.0)), FixedCStrategy(0.5))
-    @testset "QuerySynthesisFunctionOracle" begin
-        oracle = QuerySynthesisOCCOracle(SVDD.RandomOCClassifier, init_strategy, data_file, TEST_SOLVER)
+    @testset "QuerySynthesisOCCOracle" begin
+        oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisOCCOracle, data, labels, Dict{Symbol, Any}(
+            :classifier_type => SVDD.RandomOCClassifier,
+            :init_strategy => init_strategy,
+            :solver => TEST_SOLVER
+        ))
         @test ask_oracle(oracle, rand(TEST_DATA_NUM_DIMENSIONS, 1)) ∈ [:inlier, :outlier]
     end
 
     @testset "QuerySynthesisSVMOracle" begin
-        oracle = QuerySynthesisSVMOracle(init_strategy, data_file)
+        oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisSVMOracle, data, labels, Dict{Symbol, Any}(
+            :init_strategy => init_strategy,
+        ))
+        @test ask_oracle(oracle, rand(TEST_DATA_NUM_DIMENSIONS, 1)) ∈ [:inlier, :outlier]
+        oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisSVMOracle, data, labels, Dict{Symbol, Any}(
+            :gamma_search_range_oracle => [0.5, 1.0],
+        ))
         @test ask_oracle(oracle, rand(TEST_DATA_NUM_DIMENSIONS, 1)) ∈ [:inlier, :outlier]
     end
 end
