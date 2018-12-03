@@ -19,7 +19,8 @@
             exp =  deepcopy(experiment)
             exp[:query_strategy] = Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomPQs),
                                         :param => Dict{Symbol, Any}())
-            exp[:oracle] = :PoolOracle
+            exp[:oracle] = Dict(:type => :PoolOracle,
+                                :param => Dict{Symbol, Any}())
 
             expected_experiment = deepcopy(exp)
 
