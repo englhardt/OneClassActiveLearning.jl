@@ -5,10 +5,11 @@
       "num_al_iterations": 10,
       "adjust_K": true,
       "solver": {
-        "flags": {
+        "kwargs": {
           "OutputFlag": 0
         },
-        "type": "Gurobi.Optimizer"
+        "args": [],
+        "constructor": "Gurobi.Optimizer"
       },
       "initial_pool_resample_version": 1,
       "initial_pools": [

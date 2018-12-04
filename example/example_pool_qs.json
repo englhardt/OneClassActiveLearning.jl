@@ -5,10 +5,11 @@
       "num_al_iterations": 10,
       "adjust_K": true,
       "solver": {
-        "flags": {
+        "kwargs": {
           "print_level": 0
         },
-        "type": "Ipopt.Optimizer"
+        "args": [],
+        "constructor": "Ipopt.Optimizer"
       },
       "initial_pool_resample_version": 1,
       "initial_pools": [

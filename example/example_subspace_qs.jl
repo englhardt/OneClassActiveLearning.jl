@@ -22,8 +22,7 @@ experiment = Dict{Symbol, Any}(
     :split_strategy => OneClassActiveLearning.DataSplits(trues(NUM_OBSERVATIONS)),
     :oracle => :PoolOracle,
     :param => Dict(:num_al_iterations => 10,
-                   :solver => Dict(:type => SOLVER.constructor,
-                                   :flags => Dict(SOLVER.kwargs)),
+                   :solver => SOLVER,
                    :initial_pools => fill(:U, NUM_OBSERVATIONS),
                    :adjust_K => true,
                    :initial_pool_resample_version => 1))

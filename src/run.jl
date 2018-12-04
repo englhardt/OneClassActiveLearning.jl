@@ -11,7 +11,7 @@ function init_from_experiment(experiment, data, labels, res)
     initialize!(model, eval(experiment[:model][:init_strategy]))
     set_model_fitted!(res, model)
     set_adjust_K!(model, experiment[:param][:adjust_K])
-    solver = with_optimizer(experiment[:param][:solver][:type]; experiment[:param][:solver][:flags]...)
+    solver = experiment[:param][:solver]
     debug(LOGGER, "[INIT] Model solver for this experiment is '$(typeof(solver))'.")
 
     # query strategy
