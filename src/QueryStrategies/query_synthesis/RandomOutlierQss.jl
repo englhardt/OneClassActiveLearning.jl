@@ -13,7 +13,7 @@ end
 
 function get_query_object(qs::RandomOutlierQss, data::Array{T, 2}, labels::Vector{Symbol}, history::Vector{Array{T, 2}})::Array{T, 2} where T <: Real
     data_minima, data_maxima = extrema_arrays(data)
-    for _ in 1:qs.max_tries
+    for i in 1:qs.max_tries
         query_candidate = rand_in_hypercube(data_minima, data_maxima, qs.epsilon)
         if first(SVDD.classify.(SVDD.predict(qs.occ, query_candidate))) == :outlier || i == qs.max_tries
             return query_candidate
