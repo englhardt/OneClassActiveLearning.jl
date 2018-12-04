@@ -106,7 +106,7 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
                 end
                 return res
             end
-            if :U ∉ query_pools
+            if :U ∉ query_pools && !isa(qs, QuerySynthesisStrategy)
                 info(LOGGER, "Aborting '$(experiment[:hash])' after $(i) iterations because no more unlabeled observations are left.")
                 al_summarize!(res)
                 res.status[:exit_code] = :early_abort

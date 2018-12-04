@@ -91,7 +91,7 @@ function get_splits_and_init_pools(data, labels, split_strategy, initial_pool_st
     elseif split_strategy == "Si"
         data_splits = DataSplits(train, LabeledInlierSplitStrat(), FullSplitStrat(), FullSplitStrat())
     elseif split_strategy == "Sl"
-        data_splits = DataSplits(train, LabeledSplitStrat(), LabeledSplitStrat(), FullSplitStrat())
+        data_splits = DataSplits(train, LabeledSplitStrat(), FullSplitStrat(), LabeledSplitStrat())
     else
         throw(ArgumentError("Unknown split strategy '$(split_strategy)'."))
     end
