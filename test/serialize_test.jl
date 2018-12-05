@@ -52,6 +52,8 @@
        push!(al_history, :b, 2, 4)
        push!(al_history, :query_label, 1, true)
        push!(al_history, :query_label, 2, false)
+       push!(al_history, :query, 1, [2.0; 5.0])
+       push!(al_history, :query, 2, [1.0; 5.0])
        push!(al_history, :c, 1, OneClassActiveLearning.ConfusionMatrix(1,1,1,1))
        push!(al_history, :c, 2, OneClassActiveLearning.ConfusionMatrix(2,2,2,2))
 

@@ -19,13 +19,31 @@ function ValueHistories.MVHistory(x::Dict{Symbol, UnivalueHistory})
     return mvh
 end
 
+# local extension of base.convert to allow conversion of string arrays to
+# symbol arrays within the scope of this method
+# this needs to be done to deserialize the query_labels
+function Base.convert(::Type{Array{Array{Symbol,1},1}}, a::Array{Any,1})
+    [[Symbol(y) for y in x] for x in a]
+end
+
+function Base.convert(::Type{Vector{Symbol}}, a::Array{Any,1})
+    Symbol.(a)
+end
+
+function Base.convert(::Type{Vector{Array{T, 2}}}, a::Array{Any,1}) where T <: Real
+    [hcat(a[i]...) for i in 1:length(a)]
+end
+
 function Unmarshal.unmarshal(DT::Type{MVHistory}, parsedJson::AbstractDict, verbose::Bool = false, verboseLvl::Int = 0)
     mvh = Dict{Symbol, UnivalueHistory}()
     for (k,v) in parsedJson["mvhistory"]
-        itype = eval(Symbol(parsedJson["mv_itypes"][k]))
-        vtype = Symbol(parsedJson["mv_vtypes"][k])
-        vtype = vtype == Symbol(OneClassActiveLearning.ConfusionMatrix) ? eval(OneClassActiveLearning.ConfusionMatrix) : eval(vtype)
-        push!(mvh, Symbol(k) => History(vtype, v["lastiter"], convert(Vector{itype}, v["iterations"]), convert(Array{vtype}, v["values"])))
+        # Meta.parse may not be the best solution as it introduces
+        # many potential security risks, but it works
+        # string is converted to expression which is then evaluated
+        # now also generic types like Array{T,N} can be parsed correctly
+        itype = eval(Meta.parse(parsedJson["mv_itypes"][k]))
+        vtype = eval(Meta.parse(parsedJson["mv_vtypes"][k]))
+        push!(mvh, Symbol(k) => History(vtype, v["lastiter"], convert(Vector{itype}, v["iterations"]), convert(Array{vtype,1}, v["values"])))
     end
     return MVHistory(mvh)
 end
