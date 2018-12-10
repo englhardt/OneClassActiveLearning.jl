@@ -66,6 +66,14 @@ function JSON.lower(x::T) where T <: SVDD.InitializationStrategy
     return JSON.lower(sprint(print, x))
 end
 
+function JSON.lower(x::T) where T <: SubspaceQueryStrategy
+    return JSON.lower(sprint(print, x))
+end
+
+function JSON.lower(x::T) where T <: Function
+    JSON.lower(sprint(print, x))
+end
+
 function JSON.lower(x::T) where T <: OneClassActiveLearning.Oracle
     return JSON.lower(typeof(x))
 end
