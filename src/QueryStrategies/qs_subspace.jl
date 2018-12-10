@@ -40,7 +40,12 @@ function qs_score(qs::SubspaceQs,
     size(x,1) >= maximum(maximum.(qs.subspaces)) || throw(DimensionMismatch("Maximum subspace dimension is
         larger than numver of dimensions in query data x."))
     subspace_scores = qs_score(qs.single_space_strategy, x, labels, qs.subspaces)
-    return mapreduce(qs.scale_fct, qs.combination_fct, subspace_scores)
+    try
+        return mapreduce(qs.scale_fct, qs.combination_fct, subspace_scores)
+    catch err
+        error(getlogger(@__MODULE__), "Failed to reduce subspaces_scores with scale_fct = $(qs.scale_fct) and combination_fct = $(qs.combination_fct).
+            Make sure that you use a function that is applicable to reduce (e.g., '+' and not 'sum'). \n $(sprint(io -> showerror(io, err)))")
+    end
 end
 
 function qs_score(qs::QueryStrategy,

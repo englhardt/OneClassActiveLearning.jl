@@ -73,8 +73,10 @@
         end
 
         for q in [HighConfidencePQs, DecisionBoundaryPQs]
+            p = copy(params)
+            p[:subspaces] = [[1,2], [3,4], [1,4]]
             @testset "$q" begin
-                sub_qs = @inferred initialize_qs(SubspaceQs{q}, model, dummy_data, params)
+                sub_qs = @inferred initialize_qs(SubspaceQs{q}, model, dummy_data, p)
                 @test_throws DimensionMismatch qs_score(sub_qs, rand(3,10), labels)
                 @test_throws DimensionMismatch qs_score(sub_qs, rand(5,10), labels)
                 scores = qs_score(sub_qs, rand(4, 20), labelmap(fill(:U, 20)))

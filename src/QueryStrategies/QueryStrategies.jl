@@ -1,6 +1,6 @@
 module QueryStrategies
 
-using PyCall
+using PyCall, Memento
 
 const gaussian_kde = PyNULL()
 
@@ -38,6 +38,7 @@ export
     SubspaceQs,
     DataBasedPQs, ModelBasedPQs, HybridPQs,
     QuerySynthesisStrategy,
+    SubspaceQueryStrategy,
     DataBasedQss, ModelBasedQss, HybridQss,
 
     # pool based query strategies
