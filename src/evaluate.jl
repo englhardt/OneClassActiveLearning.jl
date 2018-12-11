@@ -8,6 +8,30 @@ struct ConfusionMatrix
     fn::Int
 end
 
+function Base.show(io::IO, cm::ConfusionMatrix)
+    pad = 9
+    tp = rpad("TP: $(cm.tp)", pad)
+    fp = rpad("FP: $(cm.fp)", pad)
+    fn = rpad("FN: $(cm.fn)", pad)
+    tn = rpad("TN: $(cm.tn)", pad)
+
+    pos_class = rpad(cm.pos_class, 8)
+    neg_class = rpad(cm.neg_class, 8)
+    blank = rpad("", pad)
+
+    println(io, """                 Actual
+                     $blank $(pos_class) $(neg_class)
+                   Predicted  ------------------
+                   $(pos_class)  | $(tp) $(fp)
+                   $(neg_class)  | $(fn) $(tn) """)
+end
+
+function Base.show(io::IO, cms::Array{T, 1}) where T <: ConfusionMatrix
+    for cm in cms
+        println(io,"TP: $(cm.tp) FP: $(cm.fp) TN: $(cm.tn) FN $(cm.fn) [P = :$(cm.pos_class), N = :$(cm.neg_class)]")
+    end
+end
+
 get_positive(x::ConfusionMatrix) = x.tp + x.fn
 
 get_negative(x::ConfusionMatrix) = x.fp + x.tn

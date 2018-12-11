@@ -18,6 +18,7 @@ using Pkg
 using JuMP
 using LIBSVM
 import StatsBase: countmap
+import Base.show
 
 using Formatting
 using Memento
