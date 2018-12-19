@@ -9,6 +9,7 @@
         @testset "RandomQss" begin
             @test_throws ArgumentError RandomQss(epsilon=-0.1)
             @test_throws ArgumentError RandomQss(epsilon=-ones(2))
+            @test_throws MissingLabelTypeException get_query_object(RandomQss(), data, fill(:Lout, 10), history)
             query = get_query_object(RandomQss(), data, labels, history)
             @test size(query) == (2, 1)
         end
@@ -18,6 +19,7 @@
             @test_throws ArgumentError RandomOutlierQss(occ, max_tries=0)
             @test_throws ArgumentError RandomOutlierQss(occ, epsilon=-0.1)
             @test_throws ArgumentError RandomOutlierQss(occ, epsilon=-ones(2))
+            @test_throws MissingLabelTypeException get_query_object(RandomOutlierQss(occ), data, fill(:Lout, 10), history)
             query = get_query_object(RandomOutlierQss(occ), data, labels, history)
             @test size(query) == (2, 1)
         end
