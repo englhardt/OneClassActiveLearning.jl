@@ -22,8 +22,11 @@ function Base.showerror(io::IO, kdee::KDEException)
 end
 
 struct MissingLabelTypeException <: Exception
-    t::Symbol
+    t::Vector{Symbol}
+    MissingLabelTypeException(s...) = new(collect(s))
 end
+
+MissingLabelTypeException(t::Symbol) = MissingLabelTypeException()
 
 function Base.showerror(io::IO, e::MissingLabelTypeException)
     print(io, "QS failed. ")
