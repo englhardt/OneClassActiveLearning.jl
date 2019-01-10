@@ -80,7 +80,7 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
         debug(LOGGER, "[FIT] Fitting done ($(time_fit) s, $(format_bytes(mem_fit))).")
 
         @trace res.al_history i time_fit mem_fit time_set_data
-        if status !== JuMP.MathOptInterface.Success
+        if status !== JuMP.MathOptInterface.OPTIMAL
             warn(LOGGER, "Not solved to optimality. Solver status: $status.")
             res.status[:exit_code] = :solver_error
             return res
