@@ -16,7 +16,7 @@ experiment = Dict{Symbol, Any}(
                    :init_strategy => INIT_STRAT),
     :query_strategy => Dict(:type => :DecisionBoundaryQss,
                             :param => Dict{Symbol, Any}(
-                                :optimizer => ParticleSwarmOptimization(ones(NUM_DIMENSIONS))
+                                :optimizer => ParticleSwarmOptimization()
                             )),
     :split_strategy => OneClassActiveLearning.DataSplits(trues(NUM_OBSERVATIONS)),
     :oracle => QuerySynthesisOCCOracle(SVDDneg, INIT_STRAT, DATA_FILE, SOLVER),
