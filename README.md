@@ -49,12 +49,14 @@ The package offers multiple data splitting strategies.
 - *(Sh)* Split holdout: Model fitting and query selection on the training split, and testing on a distinct holdout sample.
 - *(Sf)* Split full: Model fitting, query selection and testing on the full data set.
 - *(Si)* Split inlier: Like Sf, but model fitting on labeled inliers only.
+- *(Sl)* Split labels: Like Sf, but model fitting on labeled observations (inliers and outliers) only.
 
 The package includes multiple strategies to initialize the initial pool before starting the active learning:
 - *(Pu)* Pool unlabeled: All observations are unlabeled.
 - *(Pp)* Pool percentage: Stratified proportion of labels for p percent of the observations.
-- *(Pn)* Pool number: : Stratified proportion of labels for a fixed number of observations.
-- *(Pa)* Pool attributes: : As many labeled inliers as number of attributes.
+- *(Pn)* Pool number: Stratified proportion of labels for a fixed number of observations.
+- *(Pnin)* Pool number inliers: A fixed number of labeled inliers.
+- *(Pa)* Pool attributes: As many labeled inliers as number of attributes.
 
 ### Active learning strategies
 This is a list of the available active learning strategies:
