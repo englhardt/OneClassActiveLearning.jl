@@ -4,7 +4,7 @@
         experiment = Dict{Symbol, Any}(
             :hash => 0,
             :data_file => TEST_DATA_FILE,
-            :output_file => "OneClassActiveLearning.jl/data/output/scenarioA/data_qs_model_id.tmp",
+            :output_file => TEST_OUTPUT_FILE,
             :model => Dict(:type => :(SVDD.RandomOCClassifier),
                            :param => Dict{Symbol, Any}(),
                            :init_strategy => SVDD.FixedParameterInitialization(GaussianKernel(2), 0.5)),

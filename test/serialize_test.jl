@@ -33,8 +33,8 @@
         id = 42
         experiment = Dict{Symbol, Any}(
                 :hash => id,
-                :data_file => "$(@__DIR__)/../data/input/dummy.csv",
-                :output_file => "OneClassActiveLearning.jl/data/output/scenarioA/data_qs_model_id.tmp",
+                :data_file => TEST_DATA_FILE,
+                :output_file => TEST_OUTPUT_FILE,
                 :model => Dict( :type => :(SVDD.RandomOCClassifier),
                                 :init_strategy => :(SVDD.FixedParameterInitialization(GaussianKernel(2), 0.5))),
                 :query_strategy => Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomPQs), :param => Dict()),

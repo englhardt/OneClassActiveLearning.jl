@@ -1,7 +1,7 @@
 
 @testset "QueryStrategies" begin
 
-    dummy_data, _ = load_data("$(@__DIR__)/../../example/dummy.csv")
+    dummy_data, _ = load_data(TEST_DATA_FILE)
 
     @testset "multi kde" begin
         data = hcat(fill([1, 2, 3, 4,], 3)...)
