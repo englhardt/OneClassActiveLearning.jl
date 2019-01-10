@@ -2,10 +2,11 @@ mutable struct ExplorativeMarginQss <: HybridQss
     occ::SVDD.SVDDClassifier
     optimizer::QuerySynthesisOptimizer
     lambda::Float64
+    use_penalty::Bool
     eps
-    function ExplorativeMarginQss(occ, data; optimizer=nothing, lambda=1.0)
-        !isa(occ.kernel_fct, SquaredExponentialKernel) && throw(ArgumentError("Invalid kernel type $(typeof(occ.kernel_fct))."))
-        new(occ, optimizer, lambda, nothing)
+    function ExplorativeMarginQss(occ, data; optimizer=nothing, lambda=1.0, use_penalty=true)
+        !isa(occ.kernel_fct, SquaredExponentialKernel) && throw(ArgumentError("Invalid kernel type $(typeof(occ.kernel_fct)). Expected type is a SquaredExponentialKernel."))
+        new(occ, optimizer, lambda, use_penalty, nothing)
     end
 end
 
@@ -20,7 +21,7 @@ function qs_score_function(qs::ExplorativeMarginQss, data::Array{T, 2}, labels::
     oc_scoring(x) = -abs.(SVDD.predict(occ_modified, x))
 
     # Train penalty binary SVM if outlier labels are available
-    if haskey(labels, :Lout)
+    if qs.use_penalty && haskey(labels, :Lout)
         labels_binary = fill(:inlier, size(data, 2))
         labels_binary[labels[:Lout]] .= :outlier
         model_binary = LIBSVM.svmtrain(data, labels_binary, gamma=qs.occ.kernel_fct.alpha.value.x, cost=100_000.0)
