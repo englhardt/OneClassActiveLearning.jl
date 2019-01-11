@@ -28,7 +28,7 @@ Original implementation: https://github.com/yuehhua/PSO.jl by Yueh-Hua Tu
 function pso(func::Function, lb::Vector, ub::Vector; args=(), kwargs=Dict(),
              swarmsize=100, ω=0.5, ϕp=0.5, ϕg=0.5, maxiter=100, minstep=1e-8, minfunc=1e-8, verbose=false)
     @assert length(ub) == length(lb)
-    @assert all(ub .> lb)
+    @assert all(ub .>= lb)
 
     function update_position!(x, p, fx, fp)
         i_update = (fx .< fp)
