@@ -2,11 +2,11 @@
 @testset "query synthesis utils" begin
     UTILS = OneClassActiveLearning.QueryStrategies
     @test_throws ArgumentError UTILS.check_epsilon(-1)
-    @test UTILS.check_epsilon(0) == nothing
+    @test UTILS.check_epsilon(0) === nothing
     @test_throws ArgumentError UTILS.check_epsilon([-1])
-    @test UTILS.check_epsilon([0]) == nothing
-    @test UTILS.check_epsilon([0; 5.0]) == nothing
-    @test UTILS.check_epsilon(zeros(5)) == nothing
+    @test UTILS.check_epsilon([0]) === nothing
+    @test UTILS.check_epsilon([0; 5.0]) === nothing
+    @test UTILS.check_epsilon(zeros(5)) === nothing
     @test_throws ArgumentError UTILS.check_limits([-1])
     @test_throws ArgumentError UTILS.check_limits([[-1] [1 2]])
     @test_throws ArgumentError UTILS.check_limits([0 1; 0 0])

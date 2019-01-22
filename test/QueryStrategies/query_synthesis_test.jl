@@ -10,8 +10,8 @@
             @test_throws ArgumentError RandomQss(epsilon=-0.1)
             @test_throws ArgumentError RandomQss(epsilon=-ones(2))
             @test_throws MissingLabelTypeException get_query_object(RandomQss(), data, fill(:Lout, 10), history)
-            @test RandomQss(epsilon=1.0) != nothing
-            @test RandomQss(epsilon=ones(2)) != nothing
+            @test RandomQss(epsilon=1.0) !== nothing
+            @test RandomQss(epsilon=ones(2)) !== nothing
 
         end
 
@@ -21,8 +21,8 @@
             @test_throws ArgumentError RandomOutlierQss(occ, epsilon=-0.1)
             @test_throws ArgumentError RandomOutlierQss(occ, epsilon=-ones(2))
             @test_throws MissingLabelTypeException get_query_object(RandomOutlierQss(occ), data, fill(:Lout, 10), history)
-            @test RandomOutlierQss(occ, epsilon=1.0) != nothing
-            @test RandomOutlierQss(occ, epsilon=ones(2)) != nothing
+            @test RandomOutlierQss(occ, epsilon=1.0) !== nothing
+            @test RandomOutlierQss(occ, epsilon=ones(2)) !== nothing
         end
     end
 
