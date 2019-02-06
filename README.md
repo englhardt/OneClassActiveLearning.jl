@@ -17,8 +17,8 @@ using Pkg
 Pkg.add("https://github.com/englhardt/OneClassActiveLearning.jl.git")
 ```
 
-The results presented in the paper base on a previous version of the package and on Julia 0.6.
-To reproduce the experiment results from the paper, use the old package manager (with Pkg.clone) and checkout OneClassActiveLearning.jl at tag `v1.0`.
+The results presented in the arXiv paper base on a previous version of the package and on Julia 0.6.
+To reproduce the experiment results from the arXiv paper, use the old package manager (with Pkg.clone) and checkout OneClassActiveLearning.jl at tag `v0.1.0`.
 
 ## Overview
 [One-class classifiers](https://en.wikipedia.org/wiki/One-class_classification) learn to identify if objects belong to a specific class, often used for outlier detection.
@@ -76,21 +76,21 @@ This is a list of the available active learning strategies:
 
 #### Extending with a new strategy
 
-A new query strategy `NewQs` can be implemented with the following steps:
+A new query strategy `NewPQs` can be implemented with the following steps:
 
-1. First create a new type `NewQs` and implement:
+1. First create a new type `NewPQs` and implement:
 ```Julia
-qs_score(qs::NewQs, data::Array{T, 2}, pools::Dict{Symbol, Vector{Int}}) where T <: Real
+qs_score(qs::NewPQs, data::Array{T, 2}, pools::Dict{Symbol, Vector{Int}}) where T <: Real
 ```
 Here, `data` is a subset of the full data set which depends on the data splitting strategy.
-The current labels of the active learning cycle are in `pools` (`:U` for a unlabled, `:Lin` for labeled a inlier and `:Lout` for labeled a outlier observation).
+The current labels of the active learning cycle are in `pools` (`:U` for a unlabeled, `:Lin` for labeled a inlier and `:Lout` for labeled a outlier observation).
 The argument `pools` contains a dictionary mapping from the different labels to indices in `data`.
 The output of the function must be a score array, where the score at index `i` belongs to observation `i` in `data`.
 The framework then chooses the observation with the highest score that is still unlabeled.
 
-2. Add a call to the constructor of `NewQs` in `initialize_qs` (`src/QueryStrategies/qs_utils.jl`).
+2. Add a call to the constructor of `NewPQs` in `initialize_qs` (`src/QueryStrategies/qs_utils.jl`).
 
-3. Export `NewQs` in `src/QueryStrategies/QueryStrategies.jl`.
+3. Export `NewPQs` in `src/QueryStrategies/QueryStrategies.jl`.
 
 
 ## Authors
