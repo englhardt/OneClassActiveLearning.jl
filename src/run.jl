@@ -187,6 +187,10 @@ function process_query!(global_query_ids::Vector{Int},
     new_idx_remaining_train = map(id -> get_local_idx(id, split_strategy, pools, Val(:train)), global_remaining_indices)
 
     filtered_query_ids = filter_query_id(global_query_ids, split_strategy, query_pool_labels, Val(:train))
+    # check if query is relevant for train subset and model
+    if isempty(filtered_query_ids)
+        return data, pools, labels
+    end
     train_query_ids = map(id -> get_local_idx(id, split_strategy, pools, Val(:train)), filtered_query_ids)
 
     update_with_feedback!(model, train_data, train_pools, train_query_ids, old_idx_remaining_train, new_idx_remaining_train)
