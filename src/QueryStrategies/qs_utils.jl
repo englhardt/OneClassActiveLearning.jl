@@ -26,8 +26,6 @@ struct MissingLabelTypeException <: Exception
     MissingLabelTypeException(s...) = new(collect(s))
 end
 
-MissingLabelTypeException(t::Symbol) = MissingLabelTypeException()
-
 function Base.showerror(io::IO, e::MissingLabelTypeException)
     print(io, "QS failed. ")
     print(io, "Debug info: labels do not contain '$(e.t)'.")
