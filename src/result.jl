@@ -94,6 +94,17 @@ function al_summarize!(res::Result)
         else
             res.al_summary[e][:ratio_of_outlier_queries] = 0.0
         end
+        # Summary statistics from
+        # Reyes, O. et al. 2018. Statistical comparisons of active learning strategies over multiple datasets.
+        # Knowledge-Based Systems. 145, (2018), 1–14. DOI:https://doi.org/10.1016/j.knosys.2018.01.033
+        res.al_summary[e][:aulc] = 0.5 * sum(scores[2:end] + scores[1:end-1])
+        score_changes_pos = [scores[i] + scores[i+1] for i in 1:length(scores)-1 if scores[i+1] > scores[i]]
+        res.al_summary[e][:reyes_paulc] = isempty(score_changes_pos) ? 0.0 : 0.5 * sum(score_changes_pos)
+        score_changes_non_pos = [scores[i] + scores[i+1] for i in 1:length(scores)-1 if scores[i+1] <= scores[i]]
+        res.al_summary[e][:reyes_naulc] = isempty(score_changes_non_pos) ? 0.0 : 0.5 * sum(score_changes_non_pos)
+        res.al_summary[e][:reyes_tpr] = sum(score_changes[score_changes .> 0])
+        res.al_summary[e][:reyes_tnr] = sum(score_changes[score_changes .<= 0])
+        res.al_summary[e][:reyes_tp] = res.al_summary[e][:reyes_paulc] * res.al_summary[e][:reyes_tpr] - res.al_summary[e][:reyes_naulc] * res.al_summary[e][:reyes_tnr]
     end
     return nothing
 end
