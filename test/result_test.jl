@@ -27,6 +27,13 @@
             @test al_summary[:average_gain] == 1.0
             @test al_summary[:average_loss] == 0.0
             @test al_summary[:ratio_of_outlier_queries] == 2 / 5
+            # Reyes summary statistics
+            @test al_summary[:aulc] == 12.5
+            @test al_summary[:reyes_paulc] == 12.5
+            @test al_summary[:reyes_naulc] == 0.0
+            @test al_summary[:reyes_tpr] == 5.0
+            @test al_summary[:reyes_tnr] == 0.0
+            @test al_summary[:reyes_tp] == 62.5
         end
 
         @testset "1 query" begin
@@ -52,6 +59,13 @@
             @test al_summary[:average_gain] == 1.0
             @test al_summary[:average_loss] == 0.0
             @test al_summary[:ratio_of_outlier_queries] == 0.0
+            # Reyes summary statistics
+            @test al_summary[:aulc] == 0.5
+            @test al_summary[:reyes_paulc] == 0.5
+            @test al_summary[:reyes_naulc] == 0.0
+            @test al_summary[:reyes_tpr] == 1.0
+            @test al_summary[:reyes_tnr] == 0.0
+            @test al_summary[:reyes_tp] == 0.5
         end
 
         @testset "1 query 0 improvement" begin
@@ -77,6 +91,13 @@
             @test al_summary[:average_gain] == 0.0
             @test al_summary[:average_loss] == 0.0
             @test al_summary[:ratio_of_outlier_queries] == 0.0
+            # Reyes summary statistics
+            @test al_summary[:aulc] == 0.0
+            @test al_summary[:reyes_paulc] == 0.0
+            @test al_summary[:reyes_naulc] == 0.0
+            @test al_summary[:reyes_tpr] == 0.0
+            @test al_summary[:reyes_tnr] == 0.0
+            @test al_summary[:reyes_tp] == 0.0
         end
     end
 end
