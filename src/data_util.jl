@@ -85,9 +85,8 @@ function get_initial_pools(data, labels, data_splits, initial_pool_strategy; n=2
     end
     l = fill(:U, size(data, 2))
     if initial_pool_strategy == "Pa"
-        n = min(size(data, 1) + x, size(data, 2))
-        l = fill(:U, size(data, 2))
         label_candidates = findall(data_splits.train .& (labels .== :inlier))
+        n = min(size(data, 1) + x, length(label_candidates))
         l[label_candidates[1:n]] .= convert_labels_to_learning(labels[label_candidates[1:n]])
     elseif initial_pool_strategy ∈ ["Pp", "Pn"]
         p = initial_pool_strategy == "Pp" ? p : min(1.0, n / sum(data_splits.train))

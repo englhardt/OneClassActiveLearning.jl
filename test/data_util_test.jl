@@ -103,6 +103,9 @@ end
             ds, ip = OneClassActiveLearning.get_splits_and_init_pools(data, labels, "Sf", "Pa"; x=x)
             @test ds.train == ds.test == trues(size(data, 2))
             @test length(findall(x -> x == :Lin, ip)) == size(data, 1) + x
+            ds, ip = OneClassActiveLearning.get_splits_and_init_pools(zeros(150, 100), labels, "Sf", "Pa"; x=x)
+            @test ds.train == ds.test == trues(size(data, 2))
+            @test length(findall(x -> x == :Lin, ip)) == length(findall(x -> x == :inlier, labels))
         end
     end
     @testset "holdout" begin
