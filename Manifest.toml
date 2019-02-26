@@ -487,11 +487,11 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[SVDD]]
 deps = ["Distributions", "Documenter", "Ipopt", "JuMP", "LinearAlgebra", "MLBase", "MLKernels", "MLLabelUtils", "Memento", "NearestNeighbors", "Random", "Statistics", "StatsBase", "Test"]
-git-tree-sha1 = "b5b505d98ff79d615170d1af5807584c50758519"
+git-tree-sha1 = "46ea7282a5b0743a95e1a096cef3a9f62214b27d"
 repo-rev = "master"
 repo-url = "https://github.com/englhardt/SVDD.jl"
 uuid = "83536b18-e0df-11e8-1e3f-f991e449cee4"
-version = "0.2.0"
+version = "0.3.0"
 
 [[ScikitLearnBase]]
 deps = ["Compat", "LinearAlgebra", "Random", "Statistics", "Test"]
