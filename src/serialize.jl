@@ -19,19 +19,12 @@ function ValueHistories.MVHistory(x::Dict{Symbol, UnivalueHistory})
     return mvh
 end
 
-# local extension of base.convert to allow conversion of string arrays to
-# symbol arrays within the scope of this method
-# this needs to be done to deserialize the query_labels
-function Base.convert(::Type{Array{Array{Symbol,1},1}}, a::Array{Any,1})
-    [[Symbol(y) for y in x] for x in a]
-end
-
-function Base.convert(::Type{Vector{Symbol}}, a::Array{Any,1})
+function unsafe_convert(::Type{Vector{Symbol}}, a::Array{Any,1})
     Symbol.(a)
 end
 
-function Base.convert(::Type{Vector{Array{T, 2}}}, a::Array{Any,1}) where T <: Real
-    [hcat(a[i]...) for i in 1:length(a)]
+function unsafe_convert(::Type{Vector{Array{T, 2}}}, a::Array{Any,1}) where T <: Real
+    [hcat(x...) for x in a]
 end
 
 function Unmarshal.unmarshal(DT::Type{MVHistory}, parsedJson::AbstractDict, verbose::Bool = false, verboseLvl::Int = 0)
@@ -43,7 +36,12 @@ function Unmarshal.unmarshal(DT::Type{MVHistory}, parsedJson::AbstractDict, verb
         # now also generic types like Array{T,N} can be parsed correctly
         itype = eval(Meta.parse(parsedJson["mv_itypes"][k]))
         vtype = eval(Meta.parse(parsedJson["mv_vtypes"][k]))
-        push!(mvh, Symbol(k) => History(vtype, v["lastiter"], convert(Vector{itype}, v["iterations"]), convert(Array{vtype,1}, v["values"])))
+        if vtype in [Symbol, Array{Int, 2}, Array{Float64, 2}]
+            values = unsafe_convert(Vector{vtype}, v["values"])
+        else
+            values = convert(Array{vtype,1}, v["values"])
+        end
+        push!(mvh, Symbol(k) => History(vtype, v["lastiter"], convert(Vector{itype}, v["iterations"]), values))
     end
     return MVHistory(mvh)
 end
