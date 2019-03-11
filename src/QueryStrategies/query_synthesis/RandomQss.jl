@@ -7,8 +7,5 @@ struct RandomQss <: QuerySynthesisStrategy
 end
 
 function get_query_object(qs::RandomQss, data::Array{T, 2}, labels::Vector{Symbol}, history::Vector{Array{T, 2}})::Array{T, 2} where T <: Real
-    if :U ∉ labels && :Lin ∉ labels
-        throw(MissingLabelTypeException(:U, :Lin))
-    end
-    return rand_in_hypercube(extrema_arrays(data[:, labels .!= :Lout])..., qs.epsilon)
+    return rand_in_hyper_rect(extrema_arrays(data[:, labels .!= :Lout])..., qs.epsilon)
 end

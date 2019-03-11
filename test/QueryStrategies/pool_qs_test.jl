@@ -145,7 +145,6 @@
             pools[5] = :Lin
             indices = [1, 3, 5, 7, 9, 11]
             history = [7]
-            pool_map = MLLabelUtils.labelmap(pools)
             @test scores = OneClassActiveLearning.qs_score(qs, data, MLLabelUtils.labelmap(pools)) == collect(1:6)
             @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
             @test OneClassActiveLearning.get_query_object(qs, data, pools, indices, history) == 11
@@ -157,10 +156,23 @@
             pools[5] = :Lin
             indices = [1, 2, 4, 7, 9]
             history = [7]
-            pool_map = MLLabelUtils.labelmap(pools)
             @test scores = OneClassActiveLearning.qs_score(qs, data, MLLabelUtils.labelmap(pools)) == collect(1:5)
             @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
             @test OneClassActiveLearning.get_query_object(qs, data, pools, indices, history) == 4
         end
+    end
+
+    @testset "HybridQuerySynthesisPQs" begin
+        params = Dict{Symbol, Any}(:qss_type => :RandomQss)
+        qs = OneClassActiveLearning.initialize_qs(HybridQuerySynthesisPQs, SVDD.RandomOCClassifier(dummy_data), dummy_data, params)
+        data = rand(2, 5)
+        pools = fill(:U, 5)
+        pools[5] = :Lin
+        indices = [1, 2, 4, 7, 9]
+        history = [7]
+        @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
+        query_index = OneClassActiveLearning.get_query_object(qs, data, pools, indices, history)
+        @test query_index ∈ indices
+        @test query_index ∉ history
     end
 end
