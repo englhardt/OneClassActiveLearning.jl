@@ -1,26 +1,3 @@
-struct ParticleSwarmOptimization <: QuerySynthesisOptimizer
-    eps::Float64
-    swarmsize::Int
-    maxiter::Int
-    minstep::Float64
-    minfunc::Float64
-    function ParticleSwarmOptimization(; eps=0.1, swarmsize=100, maxiter=100)
-        check_epsilon(eps)
-        new(eps, swarmsize, maxiter, 1e-8, 1e-8)
-    end
-end
-
-function query_synthesis_optimize(f::Function, optimizer::ParticleSwarmOptimization, data::Array{T, 2})::Array{T, 2} where T <: Real
-    eps_padding = estimate_limit_epsilon(data, optimizer.eps)
-    lb, ub = vec(minimum(data, dims=2)) - eps_padding, vec(maximum(data, dims=2)) + eps_padding
-    x_opt, _ = pso(x -> vec(-f(x)), lb, ub;
-                    swarmsize=optimizer.swarmsize,
-                    maxiter=optimizer.maxiter,
-                    minstep=optimizer.minstep,
-                    minfunc=optimizer.minfunc)
-    return reshape(x_opt, size(data, 1), 1)
-end
-
 """
 Vectorized version of the partial swarm optimization without constraints.
 Original implementation: https://github.com/yuehhua/PSO.jl by Yueh-Hua Tu

@@ -21,6 +21,7 @@ include("pool/ExpectedMaximumEntropyPQs.jl")
 include("pool/MinimumLossPQs.jl")
 include("pool/HighConfidencePQs.jl")
 include("pool/DecisionBoundaryPQs.jl")
+include("pool/HybridQuerySynthesisPQs.jl")
 include("pool/NeighborhoodBasedPQs.jl")
 include("pool/BoundaryNeighborCombinationPQs.jl")
 
@@ -30,6 +31,7 @@ include("query_synthesis/TestQss.jl")
 include("query_synthesis/RandomQss.jl")
 include("query_synthesis/RandomOutlierQss.jl")
 include("query_synthesis/DecisionBoundaryQss.jl")
+include("query_synthesis/NaiveExplorativeMarginQss.jl")
 include("query_synthesis/ExplorativeMarginQss.jl")
 
 export
@@ -48,22 +50,22 @@ export
     # model-based query strategies
     RandomOutlierPQs, HighConfidencePQs, DecisionBoundaryPQs,
     # hybrid query strategies
-    NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs,
+    HybridQuerySynthesisPQs, NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs,
 
     # query synthesis query query strategies
     TestQss, RandomQss, RandomOutlierQss,
-    DecisionBoundaryQss, ExplorativeMarginQss,
+    DecisionBoundaryQss, NaiveExplorativeMarginQss, ExplorativeMarginQss,
 
 
     # query synthesis optimizers
     QuerySynthesisOptimizer,
-    ParticleSwarmOptimization,
+    ParticleSwarmOptimization, EvolutionaryOptimization, BlackBoxOptimization,
 
     get_query_object,
     qs_score,
     initialize_qs,
     filter_array,
     multi_kde, KDEException, MissingLabelTypeException,
-    estimate_margin_epsilon, estimate_limit_epsilon
+    estimate_boundary_shift_epsilon, data_limit_epsilon, data_boundaries
 
 end

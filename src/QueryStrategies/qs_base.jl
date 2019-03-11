@@ -13,6 +13,7 @@ abstract type DataBasedQss <: QuerySynthesisStrategy end
 abstract type ModelBasedQss <: QuerySynthesisStrategy end
 abstract type HybridQss <: QuerySynthesisStrategy end
 
+using Distances
 using MLKernels
 using MLLabelUtils
 using NearestNeighbors
@@ -20,6 +21,7 @@ using Statistics
 using LinearAlgebra
 using InteractiveUtils
 using LIBSVM
+using JuMP
 using SVDD
 
 function initialize_qs(qs, model::OCClassifier, data::Array{T, 2}, params)::qs where T <: Real
