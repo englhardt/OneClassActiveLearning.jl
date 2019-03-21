@@ -277,10 +277,10 @@ uuid = "1b4a561d-cfcb-5daf-8433-43fcf8b4bea3"
 version = "0.4.1"
 
 [[LibCURL]]
-deps = ["BinaryProvider", "Compat", "Libdl", "Printf"]
-git-tree-sha1 = "6339c87cb76923a3cf947fcd213cbc364355c9c9"
+deps = ["BinaryProvider", "Libdl", "Printf", "Test"]
+git-tree-sha1 = "d051c8057512ca38a273aaa514145a0b25f24d46"
 uuid = "b27032c2-a3e7-50c8-80cd-2d36dbcbfd21"
-version = "0.4.1"
+version = "0.5.0"
 
 [[LibExpat]]
 deps = ["Compat"]
@@ -495,7 +495,7 @@ uuid = "ea8e919c-243c-51af-8825-aaa63cd721ce"
 
 [[SVDD]]
 deps = ["Distributions", "Ipopt", "JuMP", "LinearAlgebra", "MLBase", "MLKernels", "MLLabelUtils", "Memento", "NearestNeighbors", "Random", "Statistics", "StatsBase", "Test"]
-git-tree-sha1 = "5bac0dc73b54a4d82b1f98afc40de5a710c63567"
+git-tree-sha1 = "c695f8e191412e2a95497471a499ef5af8dae8d1"
 repo-rev = "master"
 repo-url = "https://github.com/englhardt/SVDD.jl"
 uuid = "83536b18-e0df-11e8-1e3f-f991e449cee4"
