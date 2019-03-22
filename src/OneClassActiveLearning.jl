@@ -13,11 +13,13 @@ using DelimitedFiles
 using Statistics
 using Random
 using LinearAlgebra
+using Distances
 using Dates
 using Pkg
 using JuMP
 using LIBSVM
 import StatsBase: countmap
+import MLBase: StratifiedKfold
 import Base.show
 
 using Formatting
@@ -48,8 +50,9 @@ export
     DataSplits,
     get_train, get_test, get_query, calc_mask,
     get_splits_and_init_pools, get_initial_pools,
-    Oracle, PoolOracle, QuerySynthesisFunctionOracle, QuerySynthesisOCCOracle, QuerySynthesisSVMOracle,
-    ask_oracle,
+    Oracle, PoolOracle, QuerySynthesisFunctionOracle, QuerySynthesisKNNOracle,
+    QuerySynthesisOCCOracle, QuerySynthesisSVMOracle, QuerySynthesisCVWrapperOracle,
+    initialize_oracle, ask_oracle,
 
     ConfusionMatrix,
     cohens_kappa,

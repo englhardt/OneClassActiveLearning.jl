@@ -21,6 +21,25 @@ function ask_oracle(oracle::QuerySynthesisFunctionOracle, query_object)
     return oracle.f(query_object)
 end
 
+struct QuerySynthesisKNNOracle <: Oracle
+    data
+    labels::Vector{Symbol}
+    k::Int
+    dist_func::Function
+end
+
+function QuerySynthesisKNNOracle(data::Array{T, 2}, labels::Vector{Symbol}, params::Dict{Symbol, Any}=Dict{Symbol, Any}()) where T <: Real
+    k = get(params, :k, 1)
+    k % 2 == 0 && throw(ArgumentError("Even value k = $k not allowed in QuerySynthesisKNNOracle to prevent decision ties."))
+    dist_func = eval(get(params, :dist_func, :euclidean))
+    return QuerySynthesisKNNOracle(data, labels, k, dist_func)
+end
+
+function ask_oracle(oracle::QuerySynthesisKNNOracle, query_object)
+    sorted_distances = sort([(i, oracle.dist_func(query_object, oracle.data[:, i]), oracle.labels[i]) for i in 1:size(oracle.data, 2)], by = x -> x[2])[1:oracle.k]
+    return count([x[3] for x in sorted_distances] .== :inlier) > length(sorted_distances) * 0.5 ? :inlier : :outlier
+end
+
 struct QuerySynthesisOCCOracle <: Oracle
     classifier::OCClassifier
 end
@@ -103,6 +122,59 @@ end
 
 function ask_oracle(oracle::QuerySynthesisSVMOracle, query_object)
     return first(LIBSVM.svmpredict(oracle.classifier, query_object)[1])
+end
+
+abstract type QuerySynthesisCVWrapperOracle <: Oracle end
+
+function QuerySynthesisCVWrapperOracle(data::Array{T, 2}, labels::Vector{Symbol}, params::Dict{Symbol, Any}=Dict{Symbol, Any}())::Oracle where T <: Real
+    :subtype in keys(params) || throw(ArgumentError("Parameter 'subtype' missing for QuerySynthesisCVWrapperOracle."))
+    !(params[:subtype] <: QuerySynthesisCVWrapperOracle) || throw(ArgumentError("Subtype $(params[:subtype]) not allowed for QuerySynthesisCVWrapperOracle."))
+    gamma_search_range = get(params, :gamma_search_range_oracle, 10.0.^range(-2, stop=2, length=20))
+    C = get(params, :C, 1)
+    num_folds = get(params, :num_folds, 5)
+    metric = eval(get(params, :metric, :matthews_corr))
+
+    data_inliers, data_outliers = SVDD.generate_binary_data_for_tuning(data)
+    if isempty(data_inliers)
+        data_merged = hcat(data, data_outliers)
+        ground_truth = vcat(labels, fill(:outlier, size(data_outliers, 2)))
+    else
+        data_merged = hcat(data, data_inliers, data_outliers)
+        ground_truth = vcat(labels, fill(:inlier, size(data_inliers, 2)),
+                            fill(:outlier, size(data_outliers, 2)))
+    end
+
+    folds = StratifiedKfold(ground_truth, num_folds)
+    best_gamma = 1.0
+    best_score = -Inf
+    info(LOGGER, "[ORACLE] Testing $(length(gamma_search_range)) gamma values.")
+    for gamma in gamma_search_range
+        info(LOGGER, "[ORACLE] Testing gamma = $gamma.")
+        cur_scores = []
+        for f in folds
+            train_mask = falses(length(ground_truth))
+            train_mask[f] .= true
+            test_mask = .~train_mask
+
+            params[:init_strategy] = SimpleCombinedStrategy(FixedGammaStrategy(GaussianKernel(gamma)), FixedCStrategy(C))
+            model = OneClassActiveLearning.initialize_oracle(params[:subtype], data_merged[:, train_mask], ground_truth[train_mask], params)
+
+            prediction = [ask_oracle(model, data_merged[:, i:i]) for i in findall(test_mask)]
+            cm = ConfusionMatrix(prediction, ground_truth[test_mask], pos_class=:inlier, neg_class=:outlier)
+            push!(cur_scores, metric(cm))
+        end
+        score = mean(cur_scores)
+        debug(LOGGER, "[ORACLE] gamma = $gamma, score = $score.")
+        if score >= best_score
+            info(LOGGER, "[ORACLE] New best fond with gamma = $gamma and score = $score.")
+            best_gamma = gamma
+            best_score = score
+        end
+    end
+    info(LOGGER, "[ORACLE] Final gamma = $best_gamma with score = $best_score.")
+    params[:init_strategy] = SimpleCombinedStrategy(FixedGammaStrategy(GaussianKernel(best_gamma)), FixedCStrategy(C))
+    model = OneClassActiveLearning.initialize_oracle(params[:subtype], data_merged, ground_truth, params)
+    return model
 end
 
 function initialize_oracle(oracle, data::Array{T, 2}, labels::Vector{Symbol}, params::Dict{Symbol, Any}=Dict{Symbol, Any}())::Oracle where T <: Real
