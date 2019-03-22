@@ -21,6 +21,13 @@
         @test ask_oracle(oracle, 1) == :inlier
     end
 
+    @testset "QuerySynthesisKNNOracle" begin
+        @test_throws ArgumentError OneClassActiveLearning.initialize_oracle(QuerySynthesisKNNOracle, data, labels, Dict{Symbol, Any}(:k => 2))
+        oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisKNNOracle, data, labels)
+        @test ask_oracle(oracle, data[:, 1:1]) == labels[1]
+        @test ask_oracle(oracle, rand(TEST_DATA_NUM_DIMENSIONS, 1)) ∈ [:inlier, :outlier]
+    end
+
     @testset "QuerySynthesisOCCOracle" begin
         oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisOCCOracle, data, labels, Dict{Symbol, Any}(
             :classifier_type => SVDD.RandomOCClassifier,
@@ -37,6 +44,19 @@
         @test ask_oracle(oracle, rand(TEST_DATA_NUM_DIMENSIONS, 1)) ∈ [:inlier, :outlier]
         oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisSVMOracle, data, labels, Dict{Symbol, Any}(
             :gamma_search_range_oracle => [0.5, 1.0],
+        ))
+        @test ask_oracle(oracle, rand(TEST_DATA_NUM_DIMENSIONS, 1)) ∈ [:inlier, :outlier]
+    end
+
+    @testset "QuerySynthesisCVWrapperOracle" begin
+        @test_throws ArgumentError OneClassActiveLearning.initialize_oracle(QuerySynthesisCVWrapperOracle, data, labels)
+        @test_throws ArgumentError OneClassActiveLearning.initialize_oracle(QuerySynthesisCVWrapperOracle, data, labels, Dict{Symbol, Any}(
+            :subtype => QuerySynthesisCVWrapperOracle,
+        ))
+        oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisCVWrapperOracle, data, labels, Dict{Symbol, Any}(
+            :subtype => QuerySynthesisSVMOracle,
+            :gamma_search_range_oracle => [0.1, 1],
+            :num_folds => 2,
         ))
         @test ask_oracle(oracle, rand(TEST_DATA_NUM_DIMENSIONS, 1)) ∈ [:inlier, :outlier]
     end
