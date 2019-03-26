@@ -18,9 +18,12 @@ using Dates
 using Pkg
 using JuMP
 using LIBSVM
+using Distributions
+using Serialization
 import StatsBase: countmap
 import MLBase: StratifiedKfold
 import Base.show
+import GaussianMixtures: GMM
 
 using Formatting
 using Memento
@@ -51,7 +54,8 @@ export
     get_train, get_test, get_query, calc_mask,
     get_splits_and_init_pools, get_initial_pools,
     Oracle, PoolOracle, QuerySynthesisFunctionOracle, QuerySynthesisKNNOracle,
-    QuerySynthesisOCCOracle, QuerySynthesisSVMOracle, QuerySynthesisCVWrapperOracle,
+    QuerySynthesisGMMOracle, QuerySynthesisOCCOracle, QuerySynthesisSVMOracle,
+    QuerySynthesisCVWrapperOracle,
     initialize_oracle, ask_oracle,
 
     ConfusionMatrix,

@@ -3,6 +3,7 @@ abstract type Oracle end
 
 include("PoolOracle.jl")
 include("QuerySynthesisFunctionOracle.jl")
+include("QuerySynthesisGMMOracle.jl")
 include("QuerySynthesisKNNOracle.jl")
 include("QuerySynthesisOCCOracle.jl")
 include("QuerySynthesisSVMOracle.jl")
