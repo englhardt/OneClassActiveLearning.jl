@@ -28,7 +28,7 @@ using Memento
 include("QueryStrategies/QueryStrategies.jl")
 @reexport using .QueryStrategies
 
-include("oracle.jl")
+include("oracle/oracle.jl")
 include("data_util.jl")
 include("evaluate.jl")
 include("result.jl")
