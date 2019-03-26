@@ -4,4 +4,5 @@
 
 debug/
 
-data/output/
+# Test tmp file
+test/*.tmp
