@@ -11,6 +11,9 @@ using LinearAlgebra
 using Dates
 using JSON, Unmarshal
 using InteractiveUtils
+using Distributions
+using GaussianMixtures
+using Serialization
 
 TEST_SOLVER =  with_optimizer(Ipopt.Optimizer, print_level=0)
 TEST_DATA_FILE = joinpath(@__DIR__, "test.csv")

@@ -6,6 +6,7 @@
     @testset "initialize" begin
         @test_throws ErrorException OneClassActiveLearning.initialize_oracle(OneClassActiveLearning, data, labels)
         @test_throws ArgumentError OneClassActiveLearning.initialize_oracle(QuerySynthesisOCCOracle, data, labels)
+        @test_throws ArgumentError OneClassActiveLearning.initialize_oracle(QuerySynthesisGMMOracle, data, labels)
     end
 
     @testset "PoolOracle" begin
@@ -26,6 +27,22 @@
         oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisKNNOracle, data, labels)
         @test ask_oracle(oracle, data[:, 1:1]) == labels[1]
         @test ask_oracle(oracle, rand(TEST_DATA_NUM_DIMENSIONS, 1)) ∈ [:inlier, :outlier]
+    end
+
+    @testset "QuerySynthesisGMMOracle" begin
+        gmm = rand(GMM, 1, 2)
+        oracle = QuerySynthesisGMMOracle(gmm, 0.1)
+        @test ask_oracle(oracle, rand(2, 1)) ∈ [:inlier, :outlier]
+        f = open(TEST_OUTPUT_FILE, "w")
+        serialize(f, gmm)
+        close(f)
+        oracle_param = Dict{Symbol, Any}(:file => TEST_OUTPUT_FILE)
+        @test_throws ErrorException OneClassActiveLearning.initialize_oracle(QuerySynthesisGMMOracle, data, labels, oracle_param)
+        f = open(TEST_OUTPUT_FILE, "w")
+        serialize(f, oracle)
+        close(f)
+        deserialized_oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisGMMOracle, data, labels, oracle_param)
+        @test ask_oracle(deserialized_oracle, rand(2, 1)) ∈ [:inlier, :outlier]
     end
 
     @testset "QuerySynthesisOCCOracle" begin
