@@ -9,7 +9,8 @@ function QuerySynthesisOCCOracle(classifier_type, init_strategy, data_file::Stri
 end
 
 function QuerySynthesisOCCOracle(classifier_type, init_strategy, data, labels, solver; classifier_params=Dict{Symbol, Any}(), adjust_K=true)
-    oracle = instantiate(classifier_type, data, labels, classifier_params)
+    pools = convert_labels_to_learning(labels)
+    oracle = instantiate(classifier_type, data, pools, classifier_params)
     initialize!(oracle, init_strategy)
     set_adjust_K!(oracle, true)
     SVDD.fit!(oracle, solver)
