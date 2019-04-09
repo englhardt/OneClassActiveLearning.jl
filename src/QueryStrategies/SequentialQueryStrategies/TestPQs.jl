@@ -1,4 +1,4 @@
-struct TestPQs <: PoolQs
+struct TestPQs <: SequentialPQs
   x
   TestPQs(;x = -1) = new(x)
 end
@@ -10,4 +10,4 @@ function qs_score(qs::TestPQs,
          pools::Dict{Symbol, Vector{Int}},
          subspaces::Vector{Vector{Int}}) where T <: Real
    return [collect(1:size(data, 2)) for i in eachindex(subspaces)]
- end
+end

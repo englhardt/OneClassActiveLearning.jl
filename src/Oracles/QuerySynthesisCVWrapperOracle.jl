@@ -32,7 +32,7 @@ function QuerySynthesisCVWrapperOracle(data::Array{T, 2}, labels::Vector{Symbol}
             test_mask = .~train_mask
 
             params[:init_strategy] = SimpleCombinedStrategy(FixedGammaStrategy(GaussianKernel(gamma)), FixedCStrategy(C))
-            model = OneClassActiveLearning.initialize_oracle(params[:subtype], data_merged[:, train_mask], ground_truth[train_mask], params)
+            model = initialize_oracle(params[:subtype], data_merged[:, train_mask], ground_truth[train_mask], params)
 
             prediction = [ask_oracle(model, data_merged[:, i:i]) for i in findall(test_mask)]
             cm = ConfusionMatrix(prediction, ground_truth[test_mask], pos_class=:inlier, neg_class=:outlier)
@@ -48,6 +48,6 @@ function QuerySynthesisCVWrapperOracle(data::Array{T, 2}, labels::Vector{Symbol}
     end
     info(getlogger(@__MODULE__), "[ORACLE] Final gamma = $best_gamma with score = $best_score.")
     params[:init_strategy] = SimpleCombinedStrategy(FixedGammaStrategy(GaussianKernel(best_gamma)), FixedCStrategy(C))
-    model = OneClassActiveLearning.initialize_oracle(params[:subtype], data_merged, ground_truth, params)
+    model = initialize_oracle(params[:subtype], data_merged, ground_truth, params)
     return model
 end

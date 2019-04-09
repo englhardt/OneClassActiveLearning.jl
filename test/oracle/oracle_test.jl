@@ -70,7 +70,7 @@
         @test_throws ArgumentError OneClassActiveLearning.initialize_oracle(QuerySynthesisCVWrapperOracle, data, labels, Dict{Symbol, Any}(
             :subtype => QuerySynthesisCVWrapperOracle,
         ))
-        oracle = OneClassActiveLearning.initialize_oracle(QuerySynthesisCVWrapperOracle, data, labels, Dict{Symbol, Any}(
+        oracle = OneClassActiveLearning.Oracles.initialize_oracle(QuerySynthesisCVWrapperOracle, data, labels, Dict{Symbol, Any}(
             :subtype => QuerySynthesisSVMOracle,
             :gamma_search_range_oracle => [0.1, 1],
             :num_folds => 2,

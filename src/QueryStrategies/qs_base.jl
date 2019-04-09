@@ -1,29 +1,4 @@
 
-abstract type QueryStrategy end
-
-abstract type PoolQs <: QueryStrategy end
-abstract type QuerySynthesisStrategy <: QueryStrategy end
-abstract type SubspaceQueryStrategy <: QueryStrategy end
-
-abstract type DataBasedPQs <: PoolQs end
-abstract type ModelBasedPQs <: PoolQs end
-abstract type HybridPQs <: PoolQs end
-
-abstract type DataBasedQss <: QuerySynthesisStrategy end
-abstract type ModelBasedQss <: QuerySynthesisStrategy end
-abstract type HybridQss <: QuerySynthesisStrategy end
-
-using Distances
-using MLKernels
-using MLLabelUtils
-using NearestNeighbors
-using Statistics
-using LinearAlgebra
-using InteractiveUtils
-using LIBSVM
-using JuMP
-using SVDD
-
 function initialize_qs(qs, model::OCClassifier, data::Array{T, 2}, params)::qs where T <: Real
     if qs <: HybridPQs || qs <: HybridQss
         return qs(model, data; params...)
@@ -42,27 +17,4 @@ function initialize_qs(qs, model::OCClassifier, data::Array{T, 2}, params)::qs w
         return qs(; params...)
     end
     throw(ErrorException("Unknown query strategy of type $(qs)."))
-end
-
-"""
-get_query_object(qs::QueryStrategy, data::Array{T, 2}, pools::Vector{Symbol}, global_indices::Vector{Int}, history::Vector{Int})
-
-# Arguments
-- `query_data`: Subset of the full data set
-- `pools`: Labels for `query_data`
-- `global_indices`: Indices of the observations in `query_data` relative to the full data set.
-- `history`: Indices of previous queries
-"""
-function get_query_object(qs::Q,
-                          query_data::Array{<:Real, 2},
-                          pools::Vector{Symbol},
-                          global_indices::Vector{Int},
-                          history::Vector{Int})::Int where Q <: Union{PoolQs, SubspaceQueryStrategy}
-    pool_map = labelmap(pools)
-    haskey(pool_map, :U) || throw(ArgumentError("No more points that are unlabeled."))
-    scores = qs_score(qs, query_data, pool_map)
-    @assert length(scores) == size(query_data, 2)
-    candidates = [i for i in pool_map[:U] if global_indices[i] ∉ history]
-    local_query_index = candidates[argmax(scores[candidates])]
-    return global_indices[local_query_index]
 end

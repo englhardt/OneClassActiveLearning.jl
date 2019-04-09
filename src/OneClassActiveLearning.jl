@@ -21,19 +21,20 @@ using LIBSVM
 using Distributions
 using Serialization
 import StatsBase: countmap
-import MLBase: StratifiedKfold
 import Base.show
-import GaussianMixtures: GMM
 
 using Formatting
 using Memento
 
+include("data_util.jl")
+include("evaluate.jl")
+
 include("QueryStrategies/QueryStrategies.jl")
 @reexport using .QueryStrategies
 
-include("oracle/oracle.jl")
-include("data_util.jl")
-include("evaluate.jl")
+include("Oracles/Oracles.jl")
+@reexport using .Oracles
+
 include("result.jl")
 include("serialize.jl")
 include("run.jl")
@@ -43,6 +44,7 @@ const LOGGER = getlogger(@__MODULE__)
 
 function __init__()
     Memento.register(LOGGER)
+    # Memento.config!(LOGGER, "debug"; fmt="[{level} | {name}]: {msg}")
 end
 
 export
@@ -53,10 +55,8 @@ export
     DataSplits,
     get_train, get_test, get_query, calc_mask,
     get_splits_and_init_pools, get_initial_pools,
-    Oracle, PoolOracle, QuerySynthesisFunctionOracle, QuerySynthesisKNNOracle,
-    QuerySynthesisGMMOracle, QuerySynthesisOCCOracle, QuerySynthesisSVMOracle,
-    QuerySynthesisCVWrapperOracle,
-    initialize_oracle, ask_oracle,
+    Oracle, PoolOracle,
+    ask_oracle,
 
     ConfusionMatrix,
     cohens_kappa,
@@ -72,6 +72,7 @@ export
     recall,
     get_n,
     f1_score,
+    qs_score,
 
     DataStats, Result
 end

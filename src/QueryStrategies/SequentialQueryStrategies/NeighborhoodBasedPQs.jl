@@ -17,5 +17,5 @@ function qs_score(qs::NeighborhoodBasedPQs, x::Array{T, 2}, labels::Dict{Symbol,
     @assert size(qs.knn, 2) == size(x, 2)
     Lin_indices = SVDD.merge_pools(labels, :Lin)
     τ_nb = -(0.5 .+ 1 / (2 * qs.k) * [length(qs.knn[:, i] ∩ Lin_indices) for i in 1:size(x, 2)])
-    return qs.η * -abs.(SVDD.predict(qs.occ, x)) + (1 - qs.η) * τ_nb
+    return qs.η * -abs.(predict(qs.occ, x)) + (1 - qs.η) * τ_nb
 end
