@@ -14,5 +14,5 @@ function QuerySynthesisGMMOracle(data::Array{T, 2}, labels::Vector{Symbol}, para
 end
 
 function ask_oracle(oracle::QuerySynthesisGMMOracle, query_object)
-    return first(pdf(MixtureModel(oracle.gmm), query_object)) .< oracle.threshold ? :outlier : :inlier
+    return first(Distributions.pdf(Distributions.MixtureModel(oracle.gmm), query_object)) .< oracle.threshold ? :outlier : :inlier
 end

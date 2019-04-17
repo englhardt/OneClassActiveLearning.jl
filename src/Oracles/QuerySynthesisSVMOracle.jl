@@ -4,15 +4,15 @@ struct QuerySynthesisSVMOracle <: Oracle
 end
 
 function QuerySynthesisSVMOracle(init_strategy, data_file::String)
-    data, labels = load_data(data_file)
+    data, labels = OneClassActiveLearning.load_data(data_file)
     return QuerySynthesisSVMOracle(init_strategy, data, labels)
 end
 
 function QuerySynthesisSVMOracle(init_strategy, data, labels)
-    if !isa(init_strategy.gamma_strategy, FixedGammaStrategy)
+    if !isa(init_strategy.gamma_strategy, SVDD.FixedGammaStrategy)
         throw(ArgumentError("Invalid gamma strategy type: $(typeof(init_strategy.gamma_strategy))"))
     end
-    if !isa(init_strategy.C_strategy, FixedCStrategy)
+    if !isa(init_strategy.C_strategy, SVDD.FixedCStrategy)
         throw(ArgumentError("Invalid C strategy type: $(typeof(init_strategy.C_strategy))"))
     end
     oracle = LIBSVM.svmtrain(data, labels; gamma=MLKernels.getvalue(init_strategy.gamma_strategy.kernel.alpha), cost=float(init_strategy.C_strategy.C))
@@ -20,7 +20,7 @@ function QuerySynthesisSVMOracle(init_strategy, data, labels)
 end
 
 function QuerySynthesisSVMOracle(data_file::String; gamma_search_range_oracle=10.0.^range(-2, stop=2, length=20), C=1, metric=cohens_kappa)
-    data, labels = load_data(data_file)
+    data, labels = OneClassActiveLearning.load_data(data_file)
     return QuerySynthesisSVMOracle(data, labels, gamma_search_range_oracle=gamma_search_range_oracle, C=C, metric=metric)
 end
 
@@ -30,7 +30,7 @@ function QuerySynthesisSVMOracle(data, labels; gamma_search_range_oracle=10.0.^r
     for gamma in gamma_search_range_oracle
         c = LIBSVM.svmtrain(data, labels; gamma=float(gamma), cost=float(C))
         prediction = LIBSVM.svmpredict(c, data)[1]
-        cm = ConfusionMatrix(prediction, labels, pos_class=:inlier, neg_class=:outlier)
+        cm = OneClassActiveLearning.ConfusionMatrix(prediction, labels, pos_class=:inlier, neg_class=:outlier)
         score = metric(cm)
         if score > best_score
             best_gamma = gamma

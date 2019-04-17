@@ -19,7 +19,7 @@ function QuerySynthesisCVWrapperOracle(data::Array{T, 2}, labels::Vector{Symbol}
                             fill(:outlier, size(data_outliers, 2)))
     end
 
-    folds = StratifiedKfold(ground_truth, num_folds)
+    folds = MLBase.StratifiedKfold(ground_truth, num_folds)
     best_gamma = 1.0
     best_score = -Inf
     info(getlogger(@__MODULE__), "[ORACLE] Testing $(length(gamma_search_range)) gamma values.")
@@ -35,7 +35,7 @@ function QuerySynthesisCVWrapperOracle(data::Array{T, 2}, labels::Vector{Symbol}
             model = initialize_oracle(params[:subtype], data_merged[:, train_mask], ground_truth[train_mask], params)
 
             prediction = [ask_oracle(model, data_merged[:, i:i]) for i in findall(test_mask)]
-            cm = ConfusionMatrix(prediction, ground_truth[test_mask], pos_class=:inlier, neg_class=:outlier)
+            cm = OneClassActiveLearning.ConfusionMatrix(prediction, ground_truth[test_mask], pos_class=:inlier, neg_class=:outlier)
             push!(cur_scores, metric(cm))
         end
         score = mean(cur_scores)

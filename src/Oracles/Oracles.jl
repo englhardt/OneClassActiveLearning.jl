@@ -1,21 +1,25 @@
 module Oracles
 
-using SVDD
-using LIBSVM
-using MLLabelUtils
-using MLKernels
-using MLBase: StratifiedKfold
-using Distances
-using Distributions
-using Serialization
-import GaussianMixtures: GMM
 using Memento
+using Distances
 
-import ..OneClassActiveLearning: convert_labels_to_learning, cohens_kappa, ConfusionMatrix, load_data, matthews_corr
+import SVDD
+import Distributions
+import LIBSVM
+import MLKernels
 
-abstract type Oracle end
+import GaussianMixtures: GMM
+import MLBase: StratifiedKfold
+import ..OneClassActiveLearning:
+    cohens_kappa,
+    ConfusionMatrix,
+    convert_labels_to_learning,
+    load_data,
+    matthews_corr
 
+include("oracle_base.jl")
 include("oracle_util.jl")
+
 include("PoolOracle.jl")
 include("QuerySynthesisFunctionOracle.jl")
 include("QuerySynthesisGMMOracle.jl")

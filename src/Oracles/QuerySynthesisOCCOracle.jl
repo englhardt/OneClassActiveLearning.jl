@@ -1,23 +1,24 @@
 
 struct QuerySynthesisOCCOracle <: Oracle
-    classifier::OCClassifier
+    classifier::SVDD.OCClassifier
 end
 
 function QuerySynthesisOCCOracle(classifier_type, init_strategy, data_file::String, solver; classifier_params=Dict{Symbol, Any}(), adjust_K=true)
-    data, labels = load_data(data_file)
+    data, labels = OneClassActiveLearning.load_data(data_file)
     return QuerySynthesisOCCOracle(classifier_type, init_strategy, data, labels, solver, classifier_params=classifier_params, adjust_K=adjust_K)
 end
 
 function QuerySynthesisOCCOracle(classifier_type, init_strategy, data, labels, solver; classifier_params=Dict{Symbol, Any}(), adjust_K=true)
-    pools = convert_labels_to_learning(labels)
+    pools = OneClassActiveLearning.convert_labels_to_learning(labels)
     oracle = instantiate(classifier_type, data, pools, classifier_params)
-    initialize!(oracle, init_strategy)
-    set_adjust_K!(oracle, true)
+    SVDD.initialize!(oracle, init_strategy)
+    SVDD.set_adjust_K!(oracle, true)
     SVDD.fit!(oracle, solver)
     return QuerySynthesisOCCOracle(oracle)
 end
 
 function QuerySynthesisOCCOracle(data, labels, params::Dict{Symbol, Any})
+    # inline function declaration
     check_oracle_parameter(params, key) = key in keys(params) || throw(ArgumentError("Parameter '$key' missing for QuerySynthesisOCCOracle."))
     check_oracle_parameter(params, :classifier_type)
     check_oracle_parameter(params, :init_strategy)
