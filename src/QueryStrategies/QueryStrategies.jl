@@ -2,7 +2,10 @@ module QueryStrategies
 
 using Reexport
 using SVDD
+using Distances
 
+import MLKernels
+import MLLabelUtils
 import PyCall
 import LinearAlgebra:
     det
@@ -36,8 +39,11 @@ export
     QueryStrategy,
     PoolQs,
     HybridQuerySynthesisPQs,
+    KDEException, MissingLabelTypeException,
 
-    qs_score,
+    get_query_object,
     initialize_qs,
-    get_query_object
+    qs_score,
+    multi_kde,
+    filter_array
 end

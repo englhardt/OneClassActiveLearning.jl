@@ -1,5 +1,6 @@
 module SubspaceQueryStrategies
 
+import MLLabelUtils
 import ..QueryStrategies:
     QueryStrategy,
 

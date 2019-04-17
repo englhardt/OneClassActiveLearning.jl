@@ -12,16 +12,16 @@ struct MinimumLossPQs <: DataBasedPQs
     p_inlier::Float64
     function MinimumLossPQs(x::Array{T, 2}; bw_method="scott", p_inlier=nothing) where T <: Real
         ((p_inlier === nothing) || !(0 <= p_inlier <= 1)) && throw(ArgumentError("Invalid inlier probability $(p_inlier)."))
-        return new(QueryStrategies.multi_kde(x, bw_method)(x), bw_method, p_inlier)
+        return new(multi_kde(x, bw_method)(x), bw_method, p_inlier)
     end
 end
 
 function qs_score(qs::MinimumLossPQs, x::Array{T, 2}, labels::Dict{Symbol, Array{Int, 1}})::Array{Float64, 1} where T <: Real
-    haskey(labels, :Lin) || throw(QueryStrategies.MissingLabelTypeException(:Lin))
-    s_t_a(u) = QueryStrategies.leave_out_one_cv_kde(hcat(x[:, labels[:Lin]], u), qs.bw_method)
-    s_t_b(u) = haskey(labels, :Lout) ? mean(QueryStrategies.multi_kde(hcat(x[:, labels[:Lin]], u), qs.bw_method)(x[:, labels[:Lout]])) : 0
-    s_o_a = QueryStrategies.leave_out_one_cv_kde(x[:, labels[:Lin]], qs.bw_method)
-    s_o_b(u) = haskey(labels, :Lout) ? mean(QueryStrategies.multi_kde(x[:, labels[:Lin]], qs.bw_method)(hcat(x[:, labels[:Lout]], u))) : 0
+    haskey(labels, :Lin) || throw(MissingLabelTypeException(:Lin))
+    s_t_a(u) = leave_out_one_cv_kde(hcat(x[:, labels[:Lin]], u), qs.bw_method)
+    s_t_b(u) = haskey(labels, :Lout) ? mean(multi_kde(hcat(x[:, labels[:Lin]], u), qs.bw_method)(x[:, labels[:Lout]])) : 0
+    s_o_a = leave_out_one_cv_kde(x[:, labels[:Lin]], qs.bw_method)
+    s_o_b(u) = haskey(labels, :Lout) ? mean(multi_kde(x[:, labels[:Lin]], qs.bw_method)(hcat(x[:, labels[:Lout]], u))) : 0
     s_t(u) = s_t_a(u) - s_t_b(u)
     s_o(u) = s_o_a - s_o_b(u)
     p_inlier = length(labels[:Lin]) / size(x, 2)

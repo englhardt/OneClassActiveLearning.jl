@@ -2,14 +2,18 @@ module OneClassActiveLearning
 
 using Memento
 using Reexport
+using Statistics
 
+import Dates
 import DelimitedFiles
+import Formatting
 import JSON
 import JuMP
 import MLDataUtils
 import MLKernels
 import MLLabelUtils
 import Printf
+import Random
 import ROCAnalysis
 import SVDD
 import Unmarshal

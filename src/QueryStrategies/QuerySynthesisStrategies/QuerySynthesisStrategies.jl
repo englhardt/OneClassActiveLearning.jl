@@ -4,9 +4,10 @@ using Memento
 using Reexport
 using MLKernels
 
-import SVDD
-import LIBSVM
 import JuMP
+import MLLabelUtils
+import LIBSVM
+import SVDD
 
 import ..QueryStrategies:
     HybridPQs,

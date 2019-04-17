@@ -9,7 +9,7 @@ function init_from_experiment(experiment, data, labels, res)
     debug(LOGGER, "[INIT] Initializing model '$(experiment[:model])' with $(format_observations(train_data)) observations.")
     model = SVDD.instantiate(eval(experiment[:model][:type]), train_data, train_pools, experiment[:model][:param])
     SVDD.initialize!(model, eval(experiment[:model][:init_strategy]))
-    SVDD.set_model_fitted!(res, model)
+    set_model_fitted!(res, model)
     SVDD.set_adjust_K!(model, experiment[:param][:adjust_K])
     solver = experiment[:param][:solver]
     debug(LOGGER, "[INIT] Model solver for this experiment is '$(typeof(solver))'.")
@@ -64,7 +64,7 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
 
     train_data, train_pools, _ = get_train(split_strategy, data, pools)
     SVDD.set_data!(model, train_data)
-    SVDD.set_pools!(model, labelmap(train_pools))
+    SVDD.set_pools!(model, MLLabelUtils.labelmap(train_pools))
 
     classify_precision = get(experiment[:param], :classify_precision, SVDD.OPT_PRECISION)
     debug(LOGGER, "Classify precision: $classify_precision")

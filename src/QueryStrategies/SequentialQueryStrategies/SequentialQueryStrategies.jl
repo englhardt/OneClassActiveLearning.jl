@@ -1,6 +1,7 @@
 module SequentialQueryStrategies
 
 import SVDD
+import MLLabelUtils
 import Statistics: mean
 
 import ..QueryStrategies:

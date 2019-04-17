@@ -19,7 +19,7 @@ function BoundaryNeighborCombinationPQs(occ::M, x::Array{T, 2}; η=0.7, p=0.15) 
 end
 
 function BoundaryNeighborCombinationPQs(occ::M, x::Array{T, 2}; η=0.7, p=0.15) where {T <: Real, M <: SVDD.SubOCClassifier}
-    nn_dist = [QueryStrategies.knn_mean_dist(x[s,:]; k=1) for s in occ.subspaces]
+    nn_dist = [knn_mean_dist(x[s,:]; k=1) for s in occ.subspaces]
     BoundaryNeighborCombinationPQs(occ, nn_dist, η, p)
 end
 

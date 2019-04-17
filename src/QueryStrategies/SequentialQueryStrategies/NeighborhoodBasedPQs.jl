@@ -10,7 +10,7 @@ struct NeighborhoodBasedPQs <: HybridPQs
     knn::Array{Int,2}
     η::Float64
     k::Int
-    NeighborhoodBasedPQs(occ::SVDD.OCClassifier, x::Array{T, 2}; η=0.5, k=5) where T <: Real = new(occ, QueryStrategies.knn_indices(x; k=k), η, k)
+    NeighborhoodBasedPQs(occ::SVDD.OCClassifier, x::Array{T, 2}; η=0.5, k=5) where T <: Real = new(occ, knn_indices(x; k=k), η, k)
 end
 
 function qs_score(qs::NeighborhoodBasedPQs, x::Array{T, 2}, labels::Dict{Symbol, Array{Int, 1}})::Array{Float64,1} where T <: Real

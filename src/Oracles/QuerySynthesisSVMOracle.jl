@@ -20,7 +20,7 @@ function QuerySynthesisSVMOracle(init_strategy, data, labels)
 end
 
 function QuerySynthesisSVMOracle(data_file::String; gamma_search_range_oracle=10.0.^range(-2, stop=2, length=20), C=1, metric=cohens_kappa)
-    data, labels = OneClassActiveLearning.load_data(data_file)
+    data, labels = load_data(data_file)
     return QuerySynthesisSVMOracle(data, labels, gamma_search_range_oracle=gamma_search_range_oracle, C=C, metric=metric)
 end
 
@@ -30,7 +30,7 @@ function QuerySynthesisSVMOracle(data, labels; gamma_search_range_oracle=10.0.^r
     for gamma in gamma_search_range_oracle
         c = LIBSVM.svmtrain(data, labels; gamma=float(gamma), cost=float(C))
         prediction = LIBSVM.svmpredict(c, data)[1]
-        cm = OneClassActiveLearning.ConfusionMatrix(prediction, labels, pos_class=:inlier, neg_class=:outlier)
+        cm = ConfusionMatrix(prediction, labels, pos_class=:inlier, neg_class=:outlier)
         score = metric(cm)
         if score > best_score
             best_gamma = gamma

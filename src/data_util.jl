@@ -95,7 +95,7 @@ function get_initial_pools(data, labels, data_splits, initial_pool_strategy; n=2
         l[label_indices] .= convert_labels_to_learning(labels[label_indices])
     elseif initial_pool_strategy == "Pnin"
         label_candidates = findall(data_splits.train .& (labels .== :inlier))
-        label_indices = shuffle(label_candidates)[1:min(length(label_candidates), n)]
+        label_indices = Random.shuffle(label_candidates)[1:min(length(label_candidates), n)]
         l[label_indices] .= convert_labels_to_learning(labels[label_indices])
     end
     return l

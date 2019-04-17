@@ -60,8 +60,8 @@ function ConfusionMatrix(d::Dict)
 end
 
 function ConfusionMatrix(classification, ground_truth; pos_class = :outlier, neg_class = :inlier)
-    @assert islabelenc(classification, LABEL_ENCODING)
-    @assert islabelenc(ground_truth, LABEL_ENCODING)
+    @assert MLLabelUtils.islabelenc(classification, LABEL_ENCODING)
+    @assert MLLabelUtils.islabelenc(ground_truth, LABEL_ENCODING)
     @assert length(classification) == length(ground_truth)
 
     tp = sum((classification .== pos_class) .& (ground_truth .== pos_class))

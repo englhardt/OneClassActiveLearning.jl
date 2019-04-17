@@ -20,8 +20,8 @@ function initialize_qs(qs::DataType, model::SVDD.OCClassifier, data::Array{T, 2}
     elseif qs <: ModelBasedPQs || qs <: ModelBasedQss
         return qs(model; params...)
     elseif qs <: DataBasedPQs || qs <: DataBasedQss
-        kernel = get_kernel(model)
-        if typeof(kernel) == GaussianKernel
+        kernel = SVDD.get_kernel(model)
+        if typeof(kernel) == MLKernels.GaussianKernel
             return qs(data, bw_method=MLKernels.getvalue(strategy.kernel.alpha); params...)
         else
             return qs(data; params...)

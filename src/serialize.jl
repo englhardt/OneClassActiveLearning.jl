@@ -6,7 +6,7 @@ function ==(a::ValueHistories.UnivalueHistory, b::ValueHistories.UnivalueHistory
 end
 
 function ValueHistories.History(DT::Type{V}, lastiter::I, iterations::Vector{I}, values::Vector{V}) where {I,V}
-    h = History(DT)
+    h = ValueHistories.History(DT)
     h.lastiter = lastiter
     h.iterations = iterations
     h.values = values
@@ -132,7 +132,7 @@ end
 
 function Unmarshal.unmarshal(DT::Type{OneClassActiveLearning.Result}, parsedJson::AbstractDict)
     id = parsedJson["id"]
-    al_history = Unmarshal.unmarshal(MVHistory, parsedJson["al_history"])
+    al_history = Unmarshal.unmarshal(ValueHistories.MVHistory, parsedJson["al_history"])
     experiment = convert_to_symbol_keys(parsedJson["experiment"])
     worker_info = convert_to_symbol_keys(parsedJson["worker_info"])
     data_stats = Unmarshal.unmarshal(DataStats, parsedJson["data_stats"])

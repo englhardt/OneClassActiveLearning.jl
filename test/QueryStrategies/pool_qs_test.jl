@@ -80,7 +80,7 @@
             end
         end
 
-        qs_types = [NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs]
+        qs_types = [NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs{SVDD.RandomOCClassifier}]
         qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, params), qs_types)
         for qs in qs_objs
             @testset "HybridPQs $(typeof(qs))" begin
@@ -118,20 +118,20 @@
             qs_types = [MinimumMarginPQs, MinimumLossPQs]
             for qst in qs_types
                 for m in models
-                    @testset "initialize_qs $qst, $m" begin
+                    @testset "initialize_qs $qst, $(typeof(m))" begin
                         # check if qs is instantiated
                         qs = OneClassActiveLearning.initialize_qs(qst, model, dummy_data, Dict(:p_inlier => 0.05))
-                end
+                    end
                 end
             end
 
-            qs_types = [ExpectedMinimumMarginPQs, ExpectedMaximumEntropyPQs] ∪ subtypes(ModelBasedPQs) ∪ [NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs]
+            qs_types = [ExpectedMinimumMarginPQs, ExpectedMaximumEntropyPQs] ∪ subtypes(ModelBasedPQs) ∪ [NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs{SVDD.RandomOCClassifier}]
             for qst in qs_types
                 for m in models
-                    @testset "initialize_qs $qst, $m" begin
+                    @testset "initialize_qs $qst, $(typeof(m))" begin
                         # check if qs is instantiated
                         qs = OneClassActiveLearning.initialize_qs(qst, model, dummy_data, params)
-                end
+                    end
                 end
             end
         end

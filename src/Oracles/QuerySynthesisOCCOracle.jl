@@ -4,13 +4,13 @@ struct QuerySynthesisOCCOracle <: Oracle
 end
 
 function QuerySynthesisOCCOracle(classifier_type, init_strategy, data_file::String, solver; classifier_params=Dict{Symbol, Any}(), adjust_K=true)
-    data, labels = OneClassActiveLearning.load_data(data_file)
+    data, labels = load_data(data_file)
     return QuerySynthesisOCCOracle(classifier_type, init_strategy, data, labels, solver, classifier_params=classifier_params, adjust_K=adjust_K)
 end
 
 function QuerySynthesisOCCOracle(classifier_type, init_strategy, data, labels, solver; classifier_params=Dict{Symbol, Any}(), adjust_K=true)
-    pools = OneClassActiveLearning.convert_labels_to_learning(labels)
-    oracle = instantiate(classifier_type, data, pools, classifier_params)
+    pools = convert_labels_to_learning(labels)
+    oracle = SVDD.instantiate(classifier_type, data, pools, classifier_params)
     SVDD.initialize!(oracle, init_strategy)
     SVDD.set_adjust_K!(oracle, true)
     SVDD.fit!(oracle, solver)

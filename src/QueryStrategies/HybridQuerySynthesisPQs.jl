@@ -21,7 +21,7 @@ function get_query_object(qs::HybridQuerySynthesisPQs,
                           pools::Vector{Symbol},
                           global_indices::Vector{Int},
                           history::Vector{Int})::Int where T <: Real
-    pool_map = labelmap(pools)
+    pool_map = MLLabelUtils.labelmap(pools)
     haskey(pool_map, :U) || throw(ArgumentError("No more points that are unlabeled."))
     # Perform query synthesis
     mask = pools .!= :U

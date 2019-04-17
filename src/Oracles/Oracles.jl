@@ -3,6 +3,7 @@ module Oracles
 using Memento
 using Distances
 using Statistics
+using Serialization
 
 import SVDD
 import Distributions

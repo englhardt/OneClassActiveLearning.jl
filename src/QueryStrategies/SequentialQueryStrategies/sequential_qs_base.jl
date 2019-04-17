@@ -9,7 +9,7 @@ function get_query_object(qs::SequentialPQs,
                         pools::Vector{Symbol},
                         global_indices::Vector{Int},
                         history::Vector{Int})::Int
-    pool_map = labelmap(pools)
+    pool_map = MLLabelUtils.labelmap(pools)
     haskey(pool_map, :U) || throw(ArgumentError("No more points that are unlabeled."))
     scores = qs_score(qs, query_data, pool_map)
     @assert length(scores) == size(query_data, 2)
