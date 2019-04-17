@@ -39,7 +39,7 @@ export
     # ModelBasedQss:
     DecisionBoundaryQss, RandomOutlierQss,
     # HybridQss:
-    ExplorativeMarginQss, NaiveExplorativeMarginQss, HybridQuerySynthesisPQs,
+    ExplorativeMarginQss, NaiveExplorativeMarginQss,
 
     get_query_object,
     estimate_margin_epsilon, estimate_limit_epsilon,
