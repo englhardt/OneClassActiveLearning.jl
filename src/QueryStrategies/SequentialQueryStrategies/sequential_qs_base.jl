@@ -1,14 +1,8 @@
-using NearestNeighbors
+abstract type SequentialPQs <: PoolQs end
 
-function knn_indices(x::Array{T, 2}; k=1::Int)::Array{Int, 2} where T <: Real
-    kdtree = KDTree(x)
-    return hcat(knn(kdtree, x, k + 1, true)[1]...)[2:end,:]
-end
-
-function knn_mean_dist(x::Array{T, 2}; k=1)::Array{Float64,1} where T <: Real
-    kdtree = KDTree(x)
-    return map(d -> mean(d[2:end]), knn(kdtree, x, k + 1, true)[2])
-end
+abstract type DataBasedPQs <: SequentialPQs end
+abstract type ModelBasedPQs <: SequentialPQs end
+abstract type HybridPQs <: SequentialPQs end
 
 function get_query_object(qs::SequentialPQs,
                         query_data::Array{T, 2} where T <: Real,

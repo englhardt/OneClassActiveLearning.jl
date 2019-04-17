@@ -1,22 +1,22 @@
 module SequentialQueryStrategies
-import ...QueryStrategies: PoolQs, qs_score, get_query_object, MissingLabelTypeException, multi_kde, leave_out_one_cv_kde
 
-abstract type SequentialPQs <: PoolQs end
+import SVDD
+import Statistics: mean
 
-abstract type DataBasedPQs <: SequentialPQs end
-abstract type ModelBasedPQs <: SequentialPQs end
-abstract type HybridPQs <: SequentialPQs end
+import ..QueryStrategies:
+    MissingLabelTypeException,
+    PoolQs,
 
-using MLKernels
-using MLLabelUtils
-using NearestNeighbors
-using Statistics
-using LinearAlgebra
-using InteractiveUtils
-using PyCall
-using SVDD
+    get_query_object,
+    knn_indices,
+    knn_mean_dist,
+    leave_out_one_cv_kde,
+    multi_kde,
+    qs_score
 
-include("seq_qs_utils.jl")
+
+include("sequential_qs_base.jl")
+
 include("TestPQs.jl")
 include("RandomPQs.jl")
 include("RandomOutlierPQs.jl")
@@ -32,7 +32,8 @@ include("BoundaryNeighborCombinationPQs.jl")
 export
     SequentialPQs,
     DataBasedPQs,
-    ModelBasedPQs, HybridPQs,
+    ModelBasedPQs,
+    HybridPQs,
 
     # data-based query strategies
     TestPQs, RandomPQs, MinimumMarginPQs, ExpectedMinimumMarginPQs, ExpectedMaximumEntropyPQs,
@@ -40,8 +41,5 @@ export
     # model-based query strategies
     RandomOutlierPQs, HighConfidencePQs, DecisionBoundaryPQs,
     # hybrid query strategies
-    NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs,
-
-    filter_array,
-    multi_kde, KDEException, MissingLabelTypeException
+    NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs
 end

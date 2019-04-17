@@ -7,11 +7,11 @@ Learning and Applications (ICMLA), pages 390–395,
 Dec 2015.
 """
 struct HighConfidencePQs <: ModelBasedPQs
-    occ::OCClassifier
+    occ::SVDD.OCClassifier
 end
 
 function qs_score(qs::HighConfidencePQs, x::Array{T, 2}, labels::Dict{Symbol, Array{Int, 1}})::Array{Float64, 1} where T <: Real
-    return predict(qs.occ, x)
+    return SVDD.predict(qs.occ, x)
 end
 
 function qs_score(qs::HighConfidencePQs,

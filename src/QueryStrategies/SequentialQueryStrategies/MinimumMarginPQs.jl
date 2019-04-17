@@ -12,12 +12,12 @@ struct MinimumMarginPQs <: DataBasedPQs
     p_inlier::Float64
     function MinimumMarginPQs(x::Array{T, 2}; bw_method="scott", p_inlier=nothing) where T <: Real
         ((p_inlier === nothing) || !(0 <= p_inlier <= 1)) && throw(ArgumentError("Invalid inlier probability $(p_inlier)."))
-        return new(multi_kde(x, bw_method)(x), bw_method, p_inlier)
+        return new(QueryStrategies.multi_kde(x, bw_method)(x), bw_method, p_inlier)
     end
 end
 
 function qs_score(qs::MinimumMarginPQs, x::Array{T, 2}, labels::Dict{Symbol, Array{Int, 1}})::Array{Float64, 1} where T <: Real
-    haskey(labels, :Lin) || throw(MissingLabelTypeException(:Lin))
+    haskey(labels, :Lin) || throw(QueryStrategies.MissingLabelTypeException(:Lin))
     p_x_inlier = multi_kde(x[:, labels[:Lin]], qs.bw_method)(x)
     return -abs.((2 * p_x_inlier * qs.p_inlier - qs.p_x) ./ qs.p_x)
 end

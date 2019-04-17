@@ -1,5 +1,5 @@
 struct DecisionBoundaryPQs <: ModelBasedPQs
-    occ::OCClassifier
+    occ::SVDD.OCClassifier
 end
 
 decion_boundary_pqs(predictions) = -abs.(predictions)
