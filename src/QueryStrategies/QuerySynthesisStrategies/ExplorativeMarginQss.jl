@@ -12,10 +12,10 @@ mutable struct ExplorativeMarginQss <: HybridQss
                                   boundary_shift_agg_func=:maximum, lambda=1.0, use_penalty=true)
         !isa(occ.kernel_fct, SquaredExponentialKernel) && throw(ArgumentError("Invalid kernel type $(typeof(occ.kernel_fct)). Expected type is a SquaredExponentialKernel."))
         occ_eps = SVDD.SVDDnegEps(data, fill(:U, size(data, 2)))
-        occ_params = get_model_params(occ)
+        occ_params = SVDD.get_model_params(occ)
         !haskey(occ_params, :C) && !haskey(occ_params, :C1) && throw(ArgumentError("Invalid base learner type $(typeof(occ)). Cannot retrieve C parameter for SVDDnegEps."))
-        occ_eps_init_strat = SimpleCombinedStrategy(FixedGammaStrategy(GaussianKernel(occ.kernel_fct.alpha.value.x)),
-                                                    FixedCStrategy(haskey(occ_params, :C) ? occ_params[:C] : occ_params[:C1]))
+        occ_eps_init_strat = SVDD.SimpleCombinedStrategy(SVDD.FixedGammaStrategy(MLKernels.GaussianKernel(occ.kernel_fct.alpha.value.x)),
+                                                    SVDD.FixedCStrategy(haskey(occ_params, :C) ? occ_params[:C] : occ_params[:C1]))
         new(occ, occ_eps, occ_eps_init_strat, solver, optimizer, boundary_shift_agg_func, lambda, use_penalty, nothing)
     end
 end

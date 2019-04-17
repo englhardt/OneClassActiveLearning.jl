@@ -1,5 +1,4 @@
-
-function estimate_boundary_shift_epsilon(model::OCClassifier, data_outliers::Array{T, 2}; agg_func=:maximum)::Float64 where T <: Real
+function estimate_boundary_shift_epsilon(model::SVDD.OCClassifier, data_outliers::Array{T, 2}; agg_func=:maximum)::Float64 where T <: Real
     return eval(agg_func)(SVDD.predict(model, data_outliers))
 end
 

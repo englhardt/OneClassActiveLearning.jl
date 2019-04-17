@@ -1,5 +1,5 @@
 struct DecisionBoundaryQss <: ModelBasedQss
-    occ::OCClassifier
+    occ::SVDD.OCClassifier
     optimizer::QuerySynthesisOptimizer
     DecisionBoundaryQss(occ; optimizer=nothing) = new(occ, optimizer)
 end

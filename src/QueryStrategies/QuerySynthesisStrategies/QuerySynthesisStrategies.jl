@@ -1,46 +1,34 @@
 module QuerySynthesisStrategies
 
-using MLKernels
-using MLLabelUtils
-using NearestNeighbors
-using Statistics
-using LinearAlgebra
-using InteractiveUtils
-using LIBSVM
-using SVDD
-using JuMP
-using Distances
 using Memento
 using Reexport
+using MLKernels
 
-import ...QueryStrategies: QueryStrategy, qs_score, get_query_object, MissingLabelTypeException, HybridPQs, initialize_qs
+import SVDD
+import LIBSVM
+import JuMP
 
-# Query Synthesis Strategies
-abstract type QuerySynthesisStrategy <: QueryStrategy end
+import ..QueryStrategies:
+    HybridPQs,
+    MissingLabelTypeException,
+    QueryStrategy,
 
-abstract type DataBasedQss <: QuerySynthesisStrategy end
-abstract type ModelBasedQss <: QuerySynthesisStrategy end
-abstract type HybridQss <: QuerySynthesisStrategy end
+    get_query_object,
+    initialize_qs,
+    qs_score
 
+include("query_synthesis_base.jl")
 include("query_synthesis_utils.jl")
 
 include("Optimization/Optimization.jl")
 @reexport using .Optimization
 
-
-include("query_synthesis_utils.jl")
 include("TestQss.jl")
 include("RandomQss.jl")
 include("RandomOutlierQss.jl")
 include("DecisionBoundaryQss.jl")
 include("NaiveExplorativeMarginQss.jl")
 include("ExplorativeMarginQss.jl")
-include("HybridQuerySynthesisPQs.jl")
-
-function get_query_object(qs::QuerySynthesisStrategy, query_data::Array{T, 2}, pools::Vector{Symbol}, history::Vector{Array{T, 2}})::Array{T, 2} where T <: Real
-    return query_synthesis_optimize(qs_score_function(qs, query_data, labelmap(pools)), qs.optimizer, query_data, pools)
-end
-
 
 export
     QuerySynthesisStrategy,

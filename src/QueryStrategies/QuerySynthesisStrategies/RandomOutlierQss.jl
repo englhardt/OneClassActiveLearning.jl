@@ -1,5 +1,5 @@
 struct RandomOutlierQss <: ModelBasedQss
-    occ::OCClassifier
+    occ::SVDD.OCClassifier
     epsilon::Union{Float64, Vector{Float64}}
     max_tries::Int
     function RandomOutlierQss(occ; optimizer=nothing, epsilon=0.1, max_tries=100_000)
