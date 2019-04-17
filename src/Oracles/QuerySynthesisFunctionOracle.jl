@@ -1,6 +1,6 @@
 
 struct QuerySynthesisFunctionOracle <: Oracle
-    f::F where F <: Function
+    f::Function
 end
 
 function ask_oracle(oracle::QuerySynthesisFunctionOracle, query_object)

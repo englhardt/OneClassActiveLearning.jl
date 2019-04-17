@@ -2,6 +2,7 @@ module Oracles
 
 using Memento
 using Distances
+using Statistics
 
 import SVDD
 import Distributions
@@ -10,15 +11,16 @@ import MLKernels
 
 import GaussianMixtures: GMM
 import MLBase: StratifiedKfold
+
 import ..OneClassActiveLearning:
-    cohens_kappa,
     ConfusionMatrix,
+
+    cohens_kappa,
     convert_labels_to_learning,
     load_data,
     matthews_corr
 
 include("oracle_base.jl")
-include("oracle_util.jl")
 
 include("PoolOracle.jl")
 include("QuerySynthesisFunctionOracle.jl")
