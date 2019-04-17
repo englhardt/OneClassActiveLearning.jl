@@ -1,12 +1,13 @@
 module SubspaceQueryStrategies
 
-import ...QueryStrategies: QueryStrategy, qs_score, get_query_object
+import ..QueryStrategies:
+    QueryStrategy,
 
-abstract type SubspaceQueryStrategy <: QueryStrategy end
+    get_query_object,
+    initialize_qs,
+    qs_score
 
-import ...QueryStrategies: initialize_qs
-
-include("subspace_util.jl")
+include("subspace_qs_base.jl")
 include("SubspaceQs.jl")
 
 export

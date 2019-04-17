@@ -1,3 +1,5 @@
+abstract type SubspaceQueryStrategy <: QueryStrategy end
+
 function get_query_object(qs::SubspaceQueryStrategy,
                         query_data::Array{T, 2} where T <: Real,
                         pools::Vector{Symbol},
