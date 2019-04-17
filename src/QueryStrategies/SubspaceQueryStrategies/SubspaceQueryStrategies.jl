@@ -8,6 +8,7 @@ import ..QueryStrategies:
     qs_score
 
 include("subspace_qs_base.jl")
+
 include("SubspaceQs.jl")
 
 export
