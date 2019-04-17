@@ -1,22 +1,22 @@
 
-const NATIVE_LABEL_ENCODING = LabelEnc.NativeLabels(["inlier", "outlier"])
-const LABEL_ENCODING = LabelEnc.NativeLabels([:inlier,:outlier])
-const LEARNING_LABEL_ENCODING = LabelEnc.NativeLabels([:Lin,:Lout])
+const NATIVE_LABEL_ENCODING = MLLabelUtils.LabelEnc.NativeLabels(["inlier", "outlier"])
+const LABEL_ENCODING = MLLabelUtils.LabelEnc.NativeLabels([:inlier,:outlier])
+const LEARNING_LABEL_ENCODING = MLLabelUtils.LabelEnc.NativeLabels([:Lin,:Lout])
 const SplitType = Union{Val{:train}, Val{:test}, Val{:query}}
 
 function load_data(file_path; header=false, native_label_encoding=NATIVE_LABEL_ENCODING)
-    raw_data, _ = header ? readdlm(file_path, ',', header=header) : (readdlm(file_path, ','), nothing)
+    raw_data, _ = header ? DelimitedFiles.readdlm(file_path, ',', header=header) : (DelimitedFiles.readdlm(file_path, ','), nothing)
     data = copy(transpose(float.(raw_data[:, 1:end-1])))
     labels = convert_labels_from_raw(raw_data[:,end])
     return data, labels
 end
 
 function convert_labels_from_raw(raw_labels, native_label_encoding=NATIVE_LABEL_ENCODING)
-    return convertlabel(LABEL_ENCODING, raw_labels, native_label_encoding)
+    return MLLabelUtils.convertlabel(LABEL_ENCODING, raw_labels, native_label_encoding)
 end
 
 function convert_labels_to_learning(labels, label_encoding=LABEL_ENCODING)
-    return convertlabel(LEARNING_LABEL_ENCODING, labels, label_encoding)
+    return MLLabelUtils.convertlabel(LEARNING_LABEL_ENCODING, labels, label_encoding)
 end
 
 abstract type SplitStrategy end
@@ -91,7 +91,7 @@ function get_initial_pools(data, labels, data_splits, initial_pool_strategy; n=2
     elseif initial_pool_strategy ∈ ["Pp", "Pn"]
         p = initial_pool_strategy == "Pp" ? p : min(1.0, n / sum(data_splits.train))
         label_candidates = findall(data_splits.train)
-        (label_indices, _), _ = stratifiedobs((label_candidates, labels[data_splits.train]), p=p)
+        (label_indices, _), _ = MLDataUtils.stratifiedobs((label_candidates, labels[data_splits.train]), p=p)
         l[label_indices] .= convert_labels_to_learning(labels[label_indices])
     elseif initial_pool_strategy == "Pnin"
         label_candidates = findall(data_splits.train .& (labels .== :inlier))
@@ -106,7 +106,7 @@ function get_splits_and_init_pools(data, labels, split_strategy, initial_pool_st
     if split_strategy == "Sf"
         data_splits = DataSplits(train, FullSplitStrat())
     elseif split_strategy == "Sh"
-        (train_indices, train_labels), (test_indices, test_labels) = stratifiedobs((collect(1:length(labels)), labels), p=1-holdout_p)
+        (train_indices, train_labels), (test_indices, test_labels) = MLDataUtils.stratifiedobs((collect(1:length(labels)), labels), p=1-holdout_p)
         train[test_indices] .= false
         data_splits = DataSplits(train, .~train, FullSplitStrat())
     elseif split_strategy == "Si"

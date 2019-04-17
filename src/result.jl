@@ -16,14 +16,14 @@ struct Result
     experiment::Dict
     worker_info::Dict{Symbol, String}
     data_stats::DataStats
-    al_history::MVHistory
+    al_history::ValueHistories.MVHistory
     al_summary::Dict
     status::Dict{Symbol, Symbol}
     Result(experiment) = new(experiment[:hash],
                      experiment,
                      Dict{Symbol, String}(),
                      DataStats(),
-                     MVHistory(),
+                     ValueHistories.MVHistory(),
                      Dict{Symbol, Dict{Symbol, Any}}(),
                      Dict(:exit_code => :initialized))
     Result(id, experiment, worker_info, al_history, al_summary) = new(id, experiment, worker_info, DataStats(), al_history, al_summary, Dict(:exit_code => :initialized))
@@ -42,8 +42,8 @@ function set_data_stats!(res::Result, x::Array{T, 2}, ds::DataSplits) where T <:
 end
 
 function set_model_fitted!(res, model)
-    res.experiment[:model][:fitted] = Dict(:kernel => get_kernel(model),
-                              :model_params => get_model_params(model))
+    res.experiment[:model][:fitted] = Dict(:kernel => SVDD.get_kernel(model),
+                              :model_params => SVDD.get_model_params(model))
     return nothing
 end
 

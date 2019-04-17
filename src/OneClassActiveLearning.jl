@@ -1,30 +1,22 @@
 module OneClassActiveLearning
 
-using Reexport
-using SVDD
-
-using MLLabelUtils, MLKernels, MLDataUtils
-using ROCAnalysis
-using ValueHistories
-using JSON, Unmarshal
-using DataStructures
-using Printf
-using DelimitedFiles
-using Statistics
-using Random
-using LinearAlgebra
-using Distances
-using Dates
-using Pkg
-using JuMP
-using LIBSVM
-using Distributions
-using Serialization
-import StatsBase: countmap
-import Base.show
-
-using Formatting
 using Memento
+using Reexport
+
+import DelimitedFiles
+import JSON
+import JuMP
+import MLDataUtils
+import MLKernels
+import MLLabelUtils
+import Printf
+import ROCAnalysis
+import SVDD
+import Unmarshal
+import ValueHistories
+
+import Base.show
+import StatsBase: countmap
 
 include("data_util.jl")
 include("evaluate.jl")
@@ -44,7 +36,6 @@ const LOGGER = getlogger(@__MODULE__)
 
 function __init__()
     Memento.register(LOGGER)
-    # Memento.config!(LOGGER, "debug"; fmt="[{level} | {name}]: {msg}")
 end
 
 export
@@ -55,8 +46,6 @@ export
     DataSplits,
     get_train, get_test, get_query, calc_mask,
     get_splits_and_init_pools, get_initial_pools,
-    Oracle, PoolOracle,
-    ask_oracle,
 
     ConfusionMatrix,
     cohens_kappa,
@@ -72,7 +61,6 @@ export
     recall,
     get_n,
     f1_score,
-    qs_score,
 
     DataStats, Result
 end
