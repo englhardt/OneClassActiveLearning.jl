@@ -1,12 +1,14 @@
 module Optimization
 
-using BlackBoxOptim
 using Evolutionary
 
-import ..QuerySynthesisStrategies: check_epsilon, data_boundaries
+import BlackBoxOptim
 
-abstract type QuerySynthesisOptimizer end
+import ..QuerySynthesisStrategies:
+    check_epsilon,
+    data_boundaries
 
+include("optimization_base.jl")
 include("BlackBoxOptimization.jl")
 include("EvolutionaryOptimization.jl")
 include("ParticleSwarmOptimization.jl")
