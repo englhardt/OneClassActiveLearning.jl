@@ -50,6 +50,14 @@
                 end
             end
         end
+        @testset "DataBasedPQs GaussianKernel" begin
+            classifier = SVDD.VanillaSVDD(dummy_data)
+            init_strategy = SVDD.SimpleCombinedStrategy(FixedGammaStrategy(MLKernels.GaussianKernel(0.5)), FixedCStrategy(1))
+            SVDD.initialize!(classifier, init_strategy)
+            qs = initialize_qs(MinimumMarginPQs, classifier, dummy_data, Dict(:p_inlier => 0.05))
+            scores = qs_score(qs, dummy_data, labelmap(fill(:Lin, 15)))
+            @test length(scores) == size(dummy_data, 2)
+        end
 
         qs_types = [ExpectedMinimumMarginPQs, ExpectedMaximumEntropyPQs]
         qs_objs = map(x -> initialize_qs(x, SVDD.RandomOCClassifier(dummy_data), dummy_data, params), qs_types)
@@ -88,6 +96,9 @@
                 @test length(scores) == size(dummy_data, 2)
             end
         end
+
+        @testset "Unknown Strategy" begin
+            @test_throws ErrorException qs = initialize_qs(Vector{Int}, SVDD.RandomOCClassifier(dummy_data), dummy_data, params)
 
         @testset "multiple classifiers" begin
 
