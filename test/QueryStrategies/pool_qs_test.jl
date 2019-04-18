@@ -99,7 +99,8 @@
 
         @testset "Unknown Strategy" begin
             @test_throws ErrorException qs = initialize_qs(Vector{Int}, SVDD.RandomOCClassifier(dummy_data), dummy_data, params)
-
+        end
+         
         @testset "multiple classifiers" begin
 
             pools = fill(:U, size(dummy_data, 2))
