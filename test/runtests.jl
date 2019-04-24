@@ -1,8 +1,3 @@
-#activate correct environment
-const project_dir = realpath(joinpath(@__DIR__, ".."))
-@info "Activating project at '$(project_dir)'."
-using Pkg; Pkg.activate(project_dir)
-
 using OneClassActiveLearning
 using SVDD
 using Test
