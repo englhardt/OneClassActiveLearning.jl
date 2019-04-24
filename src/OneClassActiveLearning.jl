@@ -1,39 +1,36 @@
 module OneClassActiveLearning
 
-using Reexport
-using SVDD
-
-using MLLabelUtils, MLKernels, MLDataUtils
-using ROCAnalysis
-using ValueHistories
-using JSON, Unmarshal
-using DataStructures
-using Printf
-using DelimitedFiles
-using Statistics
-using Random
-using LinearAlgebra
-using Distances
 using Dates
-using Pkg
-using JuMP
-using LIBSVM
-using Distributions
-using Serialization
-import StatsBase: countmap
-import MLBase: StratifiedKfold
-import Base.show
-import GaussianMixtures: GMM
-
-using Formatting
+using DelimitedFiles
 using Memento
+using Printf
+using Random
+using Reexport
+using Statistics
+
+import Formatting
+import JSON
+import JuMP
+import MLDataUtils
+import MLKernels
+import MLLabelUtils
+import ROCAnalysis
+import SVDD
+import Unmarshal
+import ValueHistories
+
+import Base.show
+import StatsBase: countmap
+
+include("data_util.jl")
+include("evaluate.jl")
 
 include("QueryStrategies/QueryStrategies.jl")
 @reexport using .QueryStrategies
 
-include("oracle/oracle.jl")
-include("data_util.jl")
-include("evaluate.jl")
+include("Oracles/Oracles.jl")
+@reexport using .Oracles
+
 include("result.jl")
 include("serialize.jl")
 include("run.jl")
@@ -53,10 +50,6 @@ export
     DataSplits,
     get_train, get_test, get_query, calc_mask,
     get_splits_and_init_pools, get_initial_pools,
-    Oracle, PoolOracle, QuerySynthesisFunctionOracle, QuerySynthesisKNNOracle,
-    QuerySynthesisGMMOracle, QuerySynthesisOCCOracle, QuerySynthesisSVMOracle,
-    QuerySynthesisCVWrapperOracle,
-    initialize_oracle, ask_oracle,
 
     ConfusionMatrix,
     cohens_kappa,

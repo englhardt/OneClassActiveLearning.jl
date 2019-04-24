@@ -7,17 +7,17 @@ function init_from_experiment(experiment, data, labels, res)
     # model
     train_data, train_pools, _ = get_train(split_strategy, data, pools)
     debug(LOGGER, "[INIT] Initializing model '$(experiment[:model])' with $(format_observations(train_data)) observations.")
-    model = instantiate(eval(experiment[:model][:type]), train_data, train_pools, experiment[:model][:param])
-    initialize!(model, eval(experiment[:model][:init_strategy]))
+    model = SVDD.instantiate(eval(experiment[:model][:type]), train_data, train_pools, experiment[:model][:param])
+    SVDD.initialize!(model, eval(experiment[:model][:init_strategy]))
     set_model_fitted!(res, model)
-    set_adjust_K!(model, experiment[:param][:adjust_K])
+    SVDD.set_adjust_K!(model, experiment[:param][:adjust_K])
     solver = experiment[:param][:solver]
     debug(LOGGER, "[INIT] Model solver for this experiment is '$(typeof(solver))'.")
 
     # query strategy
     debug(LOGGER, "[INIT] Initializing QS '$(experiment[:query_strategy][:type])'.")
     query_data, _, _ = get_query(split_strategy, data, pools)
-    qs = QueryStrategies.initialize_qs(eval(experiment[:query_strategy][:type]), model, query_data, experiment[:query_strategy][:param])
+    qs = initialize_qs(eval(experiment[:query_strategy][:type]), model, query_data, experiment[:query_strategy][:param])
 
     debug(LOGGER, "[INIT] Initializing oracle.")
     if isa(experiment[:oracle], Oracle)
@@ -31,12 +31,12 @@ function init_from_experiment(experiment, data, labels, res)
 end
 
 function check_active_learn_args(data, labels)
-    MLLabelUtils.islabelenc(labels, OneClassActiveLearning.LABEL_ENCODING) || throw(ArgumentError("Argument labels is in the wrong encoding."))
+    MLLabelUtils.islabelenc(labels, LABEL_ENCODING) || throw(ArgumentError("Argument labels is in the wrong encoding."))
     return size(data, 2) == length(labels) || throw(ArgumentError("Number of observations ($(size(data,2))) does not equal number of labels $(length(labels))."))
 end
 
 function active_learn(experiment::Dict{Symbol, Any})
-    data, labels = OneClassActiveLearning.load_data(experiment[:data_file])
+    data, labels = load_data(experiment[:data_file])
     return active_learn(experiment, data, labels)
 end
 
@@ -63,8 +63,8 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
     end
 
     train_data, train_pools, _ = get_train(split_strategy, data, pools)
-    set_data!(model, train_data)
-    set_pools!(model, labelmap(train_pools))
+    SVDD.set_data!(model, train_data)
+    SVDD.set_pools!(model, MLLabelUtils.labelmap(train_pools))
 
     classify_precision = get(experiment[:param], :classify_precision, SVDD.OPT_PRECISION)
     debug(LOGGER, "Classify precision: $classify_precision")
@@ -82,7 +82,7 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
         redirect_stdout(stdout_orig); redirect_stderr(stderr_orig)
         debug(LOGGER, "[FIT] Fitting done ($(time_fit) s, $(format_bytes(mem_fit))).")
 
-        @trace res.al_history i time_fit mem_fit
+        ValueHistories.@trace res.al_history i time_fit mem_fit
         if status !== JuMP.MathOptInterface.OPTIMAL
             warn(LOGGER, "Not solved to optimality. Solver status: $status.")
             res.status[:exit_code] = :solver_error
@@ -153,7 +153,7 @@ function process_query!(query_data::Array{T, 2},
                         query_labels::Vector{Symbol},
                         model, split_strategy, data, pools, labels) where T <: Real
     size(query_data, 2) == length(query_labels) || throw(DimensionMismatch("Number of queries does not match number of labels."))
-    size(data, 1) == size(query_data, 1) ||throw(DimensionMismatch("Data dimensionality does not match query dimensionality."))
+    size(data, 1) == size(query_data, 1) || throw(DimensionMismatch("Data dimensionality does not match query dimensionality."))
 
     n_old = size(data,2)
     append!(split_strategy.train, trues(length(query_labels)))
@@ -173,13 +173,13 @@ function process_query!(global_query_ids::Vector{Int},
     length(global_query_ids) == length(query_labels) || throw(DimensionMismatch("Number of queries does not match number of labels."))
 
     pools_before = copy(pools)
-    train_mask_before = OneClassActiveLearning.calc_mask(split_strategy.train_strat, split_strategy.train, pools)
+    train_mask_before = calc_mask(split_strategy.train_strat, split_strategy.train, pools)
 
     query_pool_labels = convert_labels_to_learning(query_labels)
     pools[global_query_ids] .= query_pool_labels
     train_data, train_pools, _ = get_train(split_strategy, data, pools)
 
-    train_mask_after = OneClassActiveLearning.calc_mask(split_strategy.train_strat, split_strategy.train, pools)
+    train_mask_after = calc_mask(split_strategy.train_strat, split_strategy.train, pools)
 
     # indices that are in train before and after, relative to the updated train
     global_remaining_indices = findall(train_mask_before .& train_mask_after)
@@ -193,7 +193,7 @@ function process_query!(global_query_ids::Vector{Int},
     end
     train_query_ids = map(id -> get_local_idx(id, split_strategy, pools, Val(:train)), filtered_query_ids)
 
-    update_with_feedback!(model, train_data, train_pools, train_query_ids, old_idx_remaining_train, new_idx_remaining_train)
+    SVDD.update_with_feedback!(model, train_data, train_pools, train_query_ids, old_idx_remaining_train, new_idx_remaining_train)
 
     return data, pools, labels
 end
@@ -203,7 +203,7 @@ function get_query_object_helper(qs::Q,
                                  query_pools::Vector{Symbol},
                                  query_indices::Vector{Int},
                                  history::Vector{Int}=Int[])::Int where T <: Real where Q <: Union{PoolQs, SubspaceQs}
-    return get_query_object(qs, query_data, query_pools, query_indices, history)
+    return QueryStrategies.get_query_object(qs, query_data, query_pools, query_indices, history)
 end
 
 function get_query_object_helper(qs::QuerySynthesisStrategy,
@@ -211,12 +211,12 @@ function get_query_object_helper(qs::QuerySynthesisStrategy,
                                  query_pools::Vector{Symbol},
                                  query_indices::Vector{Int},
                                  history::Vector{Array{T, 2}}=Vector{Array{T, 2}}())::Array{T, 2} where T <: Real
-    return get_query_object(qs, query_data, query_pools, history)
+    return QueryStrategies.get_query_object(qs, query_data, query_pools, history)
 end
 
-function push_query!(al_history::MVHistory, i, query, query_label, time_qs, mem_qs)
+function push_query!(al_history::ValueHistories.MVHistory, i, query, query_label, time_qs, mem_qs)
     push!(al_history, :query_history, i, query)
-    @trace al_history i query_label time_qs mem_qs
+    ValueHistories.@trace al_history i query_label time_qs mem_qs
     return nothing
 end
 
@@ -227,19 +227,19 @@ function push_evaluation_cm!(al_history, i, cm)
     end
 end
 
-function push_evaluation!(al_history::MVHistory, i, predictions::Vector{Vector{Float64}}, labels, classify_precision)
+function push_evaluation!(al_history::ValueHistories.MVHistory, i, predictions::Vector{Vector{Float64}}, labels, classify_precision)
     cm = ConfusionMatrix(SVDD.classify(predictions, Val(:Global), opt_precision=classify_precision), labels)
     push_evaluation_cm!(al_history, i, cm)
     return nothing
 end
 
-function push_evaluation!(al_history::MVHistory, i, predictions, labels, classify_precision)
+function push_evaluation!(al_history::ValueHistories.MVHistory, i, predictions, labels, classify_precision)
     cm = ConfusionMatrix(SVDD.classify.(predictions, opt_precision=classify_precision), labels)
     push_evaluation_cm!(al_history, i, cm)
     push!(al_history, :auc, i, roc_auc(predictions, labels))
     for k in [0.01, 0.02, 0.05, 0.1, 0.2]
-        auc_fpr = OneClassActiveLearning.roc_auc(predictions, labels, fpr = k)
-        auc_fpr_normalized = OneClassActiveLearning.roc_auc(predictions, labels, fpr = k, normalize = true)
+        auc_fpr = roc_auc(predictions, labels, fpr = k)
+        auc_fpr_normalized = roc_auc(predictions, labels, fpr = k, normalize = true)
         push!(al_history, Symbol("auc_fpr_$(k)"), i, auc_fpr)
         push!(al_history, Symbol("auc_fpr_normalized_$(k)"), i, auc_fpr_normalized)
     end

@@ -1,6 +1,6 @@
 
 @testset "query synthesis utils" begin
-    UTILS = OneClassActiveLearning.QueryStrategies
+    UTILS = OneClassActiveLearning.QueryStrategies.QuerySynthesisStrategies
     @test_throws ArgumentError UTILS.check_epsilon(-1)
     @test UTILS.check_epsilon(0) === nothing
     @test_throws ArgumentError UTILS.check_epsilon([-1])

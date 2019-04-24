@@ -1,71 +1,49 @@
 module QueryStrategies
 
-using PyCall, Memento
+using Reexport
+using Distances
 
-const gaussian_kde = PyNULL()
+import MLKernels
+import MLLabelUtils
+import PyCall
+import LinearAlgebra:
+    det
+import Statistics:
+    mean,
+    cov
+import SVDD
+import NearestNeighbors
+
+const gaussian_kde = PyCall.PyNULL()
 
 function __init__()
-    copy!(gaussian_kde, pyimport_conda("scipy.stats", "scipy")[:gaussian_kde])
+    copy!(gaussian_kde, PyCall.pyimport_conda("scipy.stats", "scipy").gaussian_kde)
 end
+
 
 include("qs_base.jl")
 include("qs_utils.jl")
-include("qs_subspace.jl")
 
-include("pool/TestPQs.jl")
-include("pool/RandomPQs.jl")
-include("pool/RandomOutlierPQs.jl")
-include("pool/MinimumMarginPQs.jl")
-include("pool/ExpectedMinimumMarginPQs.jl")
-include("pool/ExpectedMaximumEntropyPQs.jl")
-include("pool/MinimumLossPQs.jl")
-include("pool/HighConfidencePQs.jl")
-include("pool/DecisionBoundaryPQs.jl")
-include("pool/HybridQuerySynthesisPQs.jl")
-include("pool/NeighborhoodBasedPQs.jl")
-include("pool/BoundaryNeighborCombinationPQs.jl")
+include("SequentialQueryStrategies/SequentialQueryStrategies.jl")
+@reexport using .SequentialQueryStrategies
 
-include("query_synthesis/query_synthesis_base.jl")
-include("query_synthesis/query_synthesis_utils.jl")
-include("query_synthesis/TestQss.jl")
-include("query_synthesis/RandomQss.jl")
-include("query_synthesis/RandomOutlierQss.jl")
-include("query_synthesis/DecisionBoundaryQss.jl")
-include("query_synthesis/NaiveExplorativeMarginQss.jl")
-include("query_synthesis/ExplorativeMarginQss.jl")
+include("QuerySynthesisStrategies/QuerySynthesisStrategies.jl")
+@reexport using .QuerySynthesisStrategies
+
+include("HybridQuerySynthesisPQs.jl")
+
+include("SubspaceQueryStrategies/SubspaceQueryStrategies.jl")
+@reexport using .SubspaceQueryStrategies
+
 
 export
     QueryStrategy,
-    PoolQs,
-    SubspaceQs,
-    DataBasedPQs, ModelBasedPQs, HybridPQs,
-    QuerySynthesisStrategy,
-    SubspaceQueryStrategy,
-    DataBasedQss, ModelBasedQss, HybridQss,
-
-    # pool based query strategies
-    # data-based query strategies
-    TestPQs, RandomPQs, MinimumMarginPQs, ExpectedMinimumMarginPQs, ExpectedMaximumEntropyPQs,
-    MinimumLossPQs,
-    # model-based query strategies
-    RandomOutlierPQs, HighConfidencePQs, DecisionBoundaryPQs,
-    # hybrid query strategies
-    HybridQuerySynthesisPQs, NeighborhoodBasedPQs, BoundaryNeighborCombinationPQs,
-
-    # query synthesis query query strategies
-    TestQss, RandomQss, RandomOutlierQss,
-    DecisionBoundaryQss, NaiveExplorativeMarginQss, ExplorativeMarginQss,
-
-
-    # query synthesis optimizers
-    QuerySynthesisOptimizer,
-    ParticleSwarmOptimization, EvolutionaryOptimization, BlackBoxOptimization,
+    HybridQuerySynthesisPQs,
+    KDEException, MissingLabelTypeException,
 
     get_query_object,
-    qs_score,
     initialize_qs,
-    filter_array,
-    multi_kde, KDEException, MissingLabelTypeException,
-    estimate_boundary_shift_epsilon, data_limit_epsilon, data_boundaries
-
+    qs_score,
+    multi_kde,
+    filter_array
 end

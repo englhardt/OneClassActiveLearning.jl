@@ -60,8 +60,8 @@ function ConfusionMatrix(d::Dict)
 end
 
 function ConfusionMatrix(classification, ground_truth; pos_class = :outlier, neg_class = :inlier)
-    @assert islabelenc(classification, LABEL_ENCODING)
-    @assert islabelenc(ground_truth, LABEL_ENCODING)
+    @assert MLLabelUtils.islabelenc(classification, LABEL_ENCODING)
+    @assert MLLabelUtils.islabelenc(ground_truth, LABEL_ENCODING)
     @assert length(classification) == length(ground_truth)
 
     tp = sum((classification .== pos_class) .& (ground_truth .== pos_class))
@@ -85,8 +85,8 @@ end
 
 function roc_auc(predictions::Vector{T}, ground_truth::Vector{Symbol}; fpr = 1.0, normalize = false) where T <: Real
     @assert length(predictions) == length(ground_truth)
-    @assert islabelenc(ground_truth, LABEL_ENCODING)
-    lm = labelmap(ground_truth)
+    @assert MLLabelUtils.islabelenc(ground_truth, LABEL_ENCODING)
+    lm = MLLabelUtils.labelmap(ground_truth)
     r = ROCAnalysis.roc(predictions[lm[:outlier]], predictions[lm[:inlier]])
-    return AUC(r, pfa=fpr, normalize = normalize)
+    return ROCAnalysis.AUC(r, pfa=fpr, normalize = normalize)
 end

@@ -51,11 +51,11 @@ function leave_out_one_cv_kde(x::Array{T, 2}, bw_method="scott")::Float64 where 
 end
 
 function knn_indices(x::Array{T, 2}; k=1::Int)::Array{Int, 2} where T <: Real
-    kdtree = KDTree(x)
-    return hcat(knn(kdtree, x, k + 1, true)[1]...)[2:end,:]
+    kdtree = NearestNeighbors.KDTree(x)
+    return hcat(NearestNeighbors.knn(kdtree, x, k + 1, true)[1]...)[2:end,:]
 end
 
 function knn_mean_dist(x::Array{T, 2}; k=1)::Array{Float64,1} where T <: Real
-    kdtree = KDTree(x)
-    return map(d -> mean(d[2:end]), knn(kdtree, x, k + 1, true)[2])
+    kdtree = NearestNeighbors.KDTree(x)
+    return map(d -> mean(d[2:end]), NearestNeighbors.knn(kdtree, x, k + 1, true)[2])
 end

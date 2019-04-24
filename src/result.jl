@@ -7,8 +7,12 @@ mutable struct DataStats
     train_indices::Vector{Int}
     test_indices::Vector{Int}
     DataStats() = new(0, 0, 0.0, 0.0, Int[], Int[])
-    DataStats(num_observations::Int, num_dimensions::Int, train_fraction::Float64, test_fraction::Float64, train_indices::Vector{Any}, test_indices::Vector{Any}) = new(num_observations, num_dimensions, train_fraction, test_fraction, convert(Vector{Int}, train_indices), convert(Vector{Int}, test_indices))
-    DataStats(num_observations::Int, num_dimensions::Int, train_fraction::Float64, test_fraction::Float64, train_indices::Vector{Int}, test_indices::Vector{Int}) = new(num_observations, num_dimensions, train_fraction, test_fraction, train_indices, test_indices)
+    DataStats(num_observations::Int, num_dimensions::Int, train_fraction::Float64, test_fraction::Float64,
+              train_indices::Vector{Any}, test_indices::Vector{Any}) = new(num_observations, num_dimensions, train_fraction, test_fraction,
+                                                                           convert(Vector{Int}, train_indices), convert(Vector{Int}, test_indices))
+    DataStats(num_observations::Int, num_dimensions::Int, train_fraction::Float64, test_fraction::Float64,
+              train_indices::Vector{Int}, test_indices::Vector{Int}) = new(num_observations, num_dimensions, train_fraction, test_fraction,
+                                                                           train_indices, test_indices)
 end
 
 struct Result
@@ -16,18 +20,20 @@ struct Result
     experiment::Dict
     worker_info::Dict{Symbol, String}
     data_stats::DataStats
-    al_history::MVHistory
+    al_history::ValueHistories.MVHistory
     al_summary::Dict
     status::Dict{Symbol, Symbol}
     Result(experiment) = new(experiment[:hash],
                      experiment,
                      Dict{Symbol, String}(),
                      DataStats(),
-                     MVHistory(),
+                     ValueHistories.MVHistory(),
                      Dict{Symbol, Dict{Symbol, Any}}(),
                      Dict(:exit_code => :initialized))
-    Result(id, experiment, worker_info, al_history, al_summary) = new(id, experiment, worker_info, DataStats(), al_history, al_summary, Dict(:exit_code => :initialized))
-    Result(id, experiment, worker_info, data_stats, al_history, al_summary) = new(id, experiment, worker_info, data_stats, al_history, al_summary, Dict(:exit_code => :initialized))
+    Result(id, experiment, worker_info, al_history, al_summary) = new(id, experiment, worker_info, DataStats(),
+                                                                      al_history, al_summary, Dict(:exit_code => :initialized))
+    Result(id, experiment, worker_info, data_stats, al_history, al_summary) = new(id, experiment, worker_info, data_stats, al_history, al_summary,
+                                                                                  Dict(:exit_code => :initialized))
     Result(id, experiment, worker_info, data_stats, al_history, al_summary, status) = new(id, experiment, worker_info, data_stats, al_history, al_summary, status)
 end
 
@@ -42,8 +48,8 @@ function set_data_stats!(res::Result, x::Array{T, 2}, ds::DataSplits) where T <:
 end
 
 function set_model_fitted!(res, model)
-    res.experiment[:model][:fitted] = Dict(:kernel => get_kernel(model),
-                              :model_params => get_model_params(model))
+    res.experiment[:model][:fitted] = Dict(:kernel => SVDD.get_kernel(model),
+                              :model_params => SVDD.get_model_params(model))
     return nothing
 end
 
@@ -51,7 +57,8 @@ function get_worker_info(;debug = false)
     worker_info = Dict{Symbol, String}()
     worker_info[:julia_version] = string(VERSION)
     debug && (worker_info[:installed_packages] = join( ["$k [$v]" for (k,v) in Pkg.installed()], ','))
-    cmd = Sys.iswindows() ? `cmd /c git -C $(@__DIR__) rev-parse HEAD` : `git -C $(@__DIR__) rev-parse HEAD`
+    dir = @__DIR__
+    cmd = Sys.iswindows() ? `cmd /c git -C $(dir) rev-parse HEAD` : `git -C $(@__DIR__) rev-parse HEAD`
     worker_info[:git_commit] = strip(string(read(cmd, String)))
     worker_info[:utc_time] = string(Dates.now(Dates.UTC))
     worker_info[:hostname] = gethostname()
@@ -59,7 +66,7 @@ function get_worker_info(;debug = false)
 end
 
 function set_worker_info!(res::Result)
-    merge!(res.worker_info, OneClassActiveLearning.get_worker_info())
+    merge!(res.worker_info, get_worker_info())
     return nothing
 end
 
