@@ -9,7 +9,7 @@
                     push!(res.al_history, e, i, float(i))
                     if i > 0
                         push!(res.al_history, :query_history, i, i)
-                        push!(res.al_history, :query_label, i, iseven(i) ? :outlier : :inlier)
+                        push!(res.al_history, :query_labels, i, iseven(i) ? :outlier : :inlier)
                     end
                 end
             end
@@ -44,7 +44,7 @@
                 end
             end
             push!(res.al_history, :query_history, 1, 1)
-            push!(res.al_history, :query_label, 1, :inlier)
+            push!(res.al_history, :query_labels, 1, :inlier)
             OneClassActiveLearning.al_summarize!(res)
             al_summary = res.al_summary[:metric]
             @test al_summary[:start_quality] == 0.0
@@ -76,7 +76,7 @@
                 end
             end
             push!(res.al_history, :query_history, 1, 1)
-            push!(res.al_history, :query_label, 1, :inlier)
+            push!(res.al_history, :query_labels, 1, :inlier)
             OneClassActiveLearning.al_summarize!(res)
             al_summary = res.al_summary[:metric]
             @test al_summary[:start_quality] == 0.0

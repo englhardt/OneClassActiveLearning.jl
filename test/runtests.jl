@@ -24,6 +24,7 @@ Random.seed!(0)
 
 @testset "OneClassActiveLearning" begin
     include("QueryStrategies/pool_qs_test.jl")
+    include("QueryStrategies/batch_qs_test.jl")
     include("QueryStrategies/query_synthesis_utils_test.jl")
     include("QueryStrategies/query_synthesis_optimization_test.jl")
     include("QueryStrategies/query_synthesis_test.jl")

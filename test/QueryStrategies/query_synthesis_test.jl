@@ -37,11 +37,11 @@
         for qs_type in [RandomQss, RandomOutlierQss, TestQss, DecisionBoundaryQss, NaiveExplorativeMarginQss]
             @testset "$qs_type" begin
                 qs = initialize_qs(qs_type, occ, data, Dict(:optimizer => optimizer))
-                query = get_query_object(qs, data, labels, history)
+                query = get_query_objects(qs, data, labels, history)
                 @test size(query) == (size(data, 1), 1)
                 if qs_type == NaiveExplorativeMarginQss
                     labels[end] = :Lout
-                    query = get_query_object(qs, data, labels, history)
+                    query = get_query_objects(qs, data, labels, history)
                     @test size(query) == (size(data, 1), 1)
                 end
             end
@@ -50,10 +50,10 @@
             qs = initialize_qs(ExplorativeMarginQss, occ, data,
                                Dict(:solver => TEST_SOLVER,
                                     :optimizer => optimizer))
-            query = get_query_object(qs, data, labels, history)
+            query = get_query_objects(qs, data, labels, history)
             @test size(query) == (size(data, 1), 1)
             labels[end] = :Lout
-            query = get_query_object(qs, data, labels, history)
+            query = get_query_objects(qs, data, labels, history)
             @test size(query) == (size(data, 1), 1)
         end
     end

@@ -117,25 +117,25 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
             end
             debug(LOGGER, "[QS] Starting query strategy on $(format_observations(query_data)) observations.")
             if i == 0
-                query, time_qs, mem_qs = @timed get_query_object_helper(qs, query_data, query_pools, query_indices)
+                queries, time_qs, mem_qs = @timed get_query_objects_helper(qs, query_data, query_pools, query_indices)
             else
-                query, time_qs, mem_qs = @timed get_query_object_helper(qs, query_data, query_pools, query_indices, values(res.al_history, :query_history))
+                queries, time_qs, mem_qs = @timed get_query_objects_helper(qs, query_data, query_pools, query_indices, values(res.al_history, :query_history))
             end
-            debug(LOGGER, "[QS] Query strategy finished ($(time_qs) s, $(format_bytes(mem_qs))).")
-            query_label = ask_oracle(oracle, query)
 
-            # tmp workaround
-            data, pools, labels = process_query!(isa(query, Array) ? query : [query],
-                                         isa(query_label, Array) ? query_label : [query_label],
+            debug(LOGGER, "[QS] Query strategy scoring done ($(time_qs) s, $(format_bytes(mem_qs))).")
+            debug(LOGGER, "[QS] Updating pools.")
+            query_labels = Oracles.ask_oracle(oracle, queries)
+            data, pools, labels = process_query!(isa(queries, Array) ? queries : [queries],
+                                         isa(query_labels, Array) ? query_labels : [query_labels],
                                          model,
                                          split_strategy,
                                          data,
                                          pools,
                                          labels)
-
-            push_query!(res.al_history, i, query, query_label, time_qs, mem_qs)
-            isa(query, Int) ? debug(LOGGER, "[QS] Query(id = $(query), label = $(query_label))") :
-                             debug(LOGGER, "[QS] Query(label = $(query_label))")
+            debug(LOGGER, "[QS] Storing Query.")
+            push_query!(res.al_history, i, queries, query_labels, time_qs, mem_qs)
+            isa(queries[1], Int) ? debug(LOGGER, "[QS] Query(ids = $(queries), labels = $(query_labels))") :
+                                   debug(LOGGER, "[QS] Query(labels = $(query_labels))")
             debug(LOGGER, "[QS] Query strategy done.")
         end
         debug(LOGGER, "Finished iteration $(i).")
@@ -198,25 +198,25 @@ function process_query!(global_query_ids::Vector{Int},
     return data, pools, labels
 end
 
-function get_query_object_helper(qs::Q,
+function get_query_objects_helper(qs::Q,
                                  query_data::Array{T, 2},
                                  query_pools::Vector{Symbol},
                                  query_indices::Vector{Int},
-                                 history::Vector{Int}=Int[])::Int where T <: Real where Q <: Union{PoolQs, SubspaceQs}
-    return QueryStrategies.get_query_object(qs, query_data, query_pools, query_indices, history)
+                                 history::Vector{Vector{Int}}=Vector{Vector{Int}}())::Vector{Int} where T <: Real where Q <: Union{PoolQs, SubspaceQs}
+    return get_query_objects(qs, query_data, query_pools, query_indices, history)
 end
 
-function get_query_object_helper(qs::QuerySynthesisStrategy,
+function get_query_objects_helper(qs::QuerySynthesisStrategy,
                                  query_data::Array{T, 2},
                                  query_pools::Vector{Symbol},
                                  query_indices::Vector{Int},
                                  history::Vector{Array{T, 2}}=Vector{Array{T, 2}}())::Array{T, 2} where T <: Real
-    return QueryStrategies.get_query_object(qs, query_data, query_pools, history)
+    return get_query_objects(qs, query_data, query_pools, history)
 end
 
-function push_query!(al_history::ValueHistories.MVHistory, i, query, query_label, time_qs, mem_qs)
+function push_query!(al_history::ValueHistories.MVHistory, i, query, query_labels, time_qs, mem_qs)
     push!(al_history, :query_history, i, query)
-    ValueHistories.@trace al_history i query_label time_qs mem_qs
+    ValueHistories.@trace al_history i query_labels time_qs mem_qs
     return nothing
 end
 

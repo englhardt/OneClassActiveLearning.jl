@@ -11,7 +11,7 @@ struct RandomOutlierQss <: ModelBasedQss
     end
 end
 
-function get_query_object(qs::RandomOutlierQss, data::Array{T, 2}, labels::Vector{Symbol}, history::Vector{Array{T, 2}})::Array{T, 2} where T <: Real
+function get_query_objects(qs::RandomOutlierQss, data::Array{T, 2}, labels::Vector{Symbol}, history::Vector{Array{T, 2}})::Array{T, 2} where T <: Real
     data_minima, data_maxima = extrema_arrays(data[:, labels .!= :Lout])
     for i in 1:qs.max_tries
         query_candidate = rand_in_hyper_rect(data_minima, data_maxima, qs.epsilon)

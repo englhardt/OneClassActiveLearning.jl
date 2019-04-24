@@ -8,7 +8,7 @@ import ..QueryStrategies:
     QueryStrategy,
     MissingLabelTypeException,
 
-    get_query_object,
+    get_query_objects,
     knn_indices,
     knn_mean_dist,
     leave_out_one_cv_kde,

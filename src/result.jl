@@ -73,7 +73,7 @@ end
 function al_summarize!(res::Result)
     for e in keys(res.al_history)
         # Skip calculation of summary statistics for some metrics
-        if e ∈ [:cm, :time_fit, :mem_fit, :time_qs, :mem_qs, :query_label,
+        if e ∈ [:cm, :time_fit, :mem_fit, :time_qs, :mem_qs, :query_labels,
             :query_history, :runtime, :time_set_data]
             continue
         end
@@ -95,7 +95,7 @@ function al_summarize!(res::Result)
         end
         res.al_summary[e][:average_gain] = any(score_changes .> 0) ? mean(score_changes[score_changes .> 0]) : 0
         res.al_summary[e][:average_loss] = any(score_changes .< 0) ? mean(score_changes[score_changes .< 0]) : 0
-        query_labels = values(res.al_history, :query_label)
+        query_labels = values(res.al_history, :query_labels)
         if :outlier in query_labels
             res.al_summary[e][:ratio_of_outlier_queries] = sum(query_labels .== :outlier) / length(query_labels)
         else

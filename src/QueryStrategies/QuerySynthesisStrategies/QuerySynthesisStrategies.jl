@@ -15,7 +15,7 @@ import ..QueryStrategies:
     MissingLabelTypeException,
     QueryStrategy,
 
-    get_query_object,
+    get_query_objects,
     initialize_qs,
     qs_score
 

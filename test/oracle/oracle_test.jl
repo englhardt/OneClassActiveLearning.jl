@@ -12,9 +12,7 @@
     @testset "PoolOracle" begin
         oracle = OneClassActiveLearning.initialize_oracle(PoolOracle, data, labels)
         @test isa(oracle, PoolOracle)
-        for i in 1:3
-            @test ask_oracle(oracle, i) == labels[i]
-        end
+        @test ask_oracle(oracle, Array(1:3)) == labels[1:3]
     end
 
     @testset "QuerySynthesisFunctionOracle" begin
