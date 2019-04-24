@@ -1,7 +1,6 @@
 module QueryStrategies
 
 using Reexport
-using SVDD
 using Distances
 
 import MLKernels
@@ -12,9 +11,11 @@ import LinearAlgebra:
 import Statistics:
     mean,
     cov
+import SVDD
 import NearestNeighbors
 
 const gaussian_kde = PyCall.PyNULL()
+
 function __init__()
     copy!(gaussian_kde, PyCall.pyimport_conda("scipy.stats", "scipy").gaussian_kde)
 end
@@ -37,7 +38,6 @@ include("SubspaceQueryStrategies/SubspaceQueryStrategies.jl")
 
 export
     QueryStrategy,
-    PoolQs,
     HybridQuerySynthesisPQs,
     KDEException, MissingLabelTypeException,
 

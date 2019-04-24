@@ -1,7 +1,7 @@
 struct HybridQuerySynthesisPQs <: HybridPQs
     qss::QuerySynthesisStrategy
     dist_func::Function
-    function HybridQuerySynthesisPQs(model::OCClassifier, data::Array{T, 2}; qss_type=nothing, dist_func=:euclidean, other_params...) where T <: Real
+    function HybridQuerySynthesisPQs(model::SVDD.OCClassifier, data::Array{T, 2}; qss_type=nothing, dist_func=:euclidean, other_params...) where T <: Real
         new(initialize_qs(eval(qss_type), model, data, other_params), eval(dist_func))
     end
 end

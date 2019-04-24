@@ -52,7 +52,7 @@ function JSON.json(x::ValueHistories.MVHistory)
     return JSON.json(Dict(:mvhistory => x.storage, :mv_itypes => itypes, :mv_vtypes => vtypes))
 end
 
-function JSON.lower(x::T) where T <: OneClassActiveLearning.SplitStrategy
+function JSON.lower(x::T) where T <: SplitStrategy
     return JSON.lower(typeof(x))
 end
 
@@ -72,7 +72,7 @@ function JSON.lower(x::T) where T <: Function
     JSON.lower(sprint(print, x))
 end
 
-function JSON.lower(x::T) where T <: OneClassActiveLearning.Oracle
+function JSON.lower(x::T) where T <: Oracle
     return JSON.lower(typeof(x))
 end
 
@@ -89,7 +89,7 @@ function JSON.json(res::Result)
     return jsonstring
 end
 
-function write_result_to_file(output_file, r::OneClassActiveLearning.Result)
+function write_result_to_file(output_file, r::Result)
     r_reparsed = JSON.parse(JSON.json(r))
     d = OrderedDict()
     for k in ["id", "experiment", "worker_info", "data_stats", "al_history", "al_summary", "status"]
@@ -130,7 +130,7 @@ function convert_to_symbol_keys(x)
 end
 
 
-function Unmarshal.unmarshal(DT::Type{OneClassActiveLearning.Result}, parsedJson::AbstractDict)
+function Unmarshal.unmarshal(DT::Type{Result}, parsedJson::AbstractDict)
     id = parsedJson["id"]
     al_history = Unmarshal.unmarshal(ValueHistories.MVHistory, parsedJson["al_history"])
     experiment = convert_to_symbol_keys(parsedJson["experiment"])
@@ -138,5 +138,5 @@ function Unmarshal.unmarshal(DT::Type{OneClassActiveLearning.Result}, parsedJson
     data_stats = Unmarshal.unmarshal(DataStats, parsedJson["data_stats"])
     al_summary = unmarshal_al_summary(parsedJson["al_summary"])
     status = Dict(:exit_code => Symbol(parsedJson["status"]["exit_code"]))
-    return OneClassActiveLearning.Result(id, experiment, worker_info, data_stats, al_history, al_summary, status)
+    return Result(id, experiment, worker_info, data_stats, al_history, al_summary, status)
 end

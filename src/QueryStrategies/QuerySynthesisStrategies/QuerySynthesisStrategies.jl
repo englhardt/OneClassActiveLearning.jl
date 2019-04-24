@@ -10,6 +10,7 @@ import LIBSVM
 import SVDD
 
 import ..QueryStrategies:
+    QueryStrategy,
     HybridPQs,
     MissingLabelTypeException,
     QueryStrategy,

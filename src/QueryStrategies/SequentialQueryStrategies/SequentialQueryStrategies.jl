@@ -5,8 +5,8 @@ import MLLabelUtils
 import Statistics: mean
 
 import ..QueryStrategies:
+    QueryStrategy,
     MissingLabelTypeException,
-    PoolQs,
 
     get_query_object,
     knn_indices,
@@ -31,6 +31,7 @@ include("NeighborhoodBasedPQs.jl")
 include("BoundaryNeighborCombinationPQs.jl")
 
 export
+    PoolQs,
     SequentialPQs,
     DataBasedPQs,
     ModelBasedPQs,

@@ -1,4 +1,3 @@
-
 abstract type QuerySynthesisCVWrapperOracle <: Oracle end
 
 function QuerySynthesisCVWrapperOracle(data::Array{T, 2}, labels::Vector{Symbol}, params::Dict{Symbol, Any}=Dict{Symbol, Any}())::Oracle where T <: Real

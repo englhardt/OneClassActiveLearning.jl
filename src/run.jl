@@ -17,13 +17,13 @@ function init_from_experiment(experiment, data, labels, res)
     # query strategy
     debug(LOGGER, "[INIT] Initializing QS '$(experiment[:query_strategy][:type])'.")
     query_data, _, _ = get_query(split_strategy, data, pools)
-    qs = QueryStrategies.initialize_qs(eval(experiment[:query_strategy][:type]), model, query_data, experiment[:query_strategy][:param])
+    qs = initialize_qs(eval(experiment[:query_strategy][:type]), model, query_data, experiment[:query_strategy][:param])
 
     debug(LOGGER, "[INIT] Initializing oracle.")
     if isa(experiment[:oracle], Oracle)
         oracle = experiment[:oracle]
     else
-        oracle = Oracles.initialize_oracle(eval(experiment[:oracle][:type]), data, labels, experiment[:oracle][:param])
+        oracle = initialize_oracle(eval(experiment[:oracle][:type]), data, labels, experiment[:oracle][:param])
     end
 
     info(LOGGER, "[INIT] Initialization done.")
@@ -31,12 +31,12 @@ function init_from_experiment(experiment, data, labels, res)
 end
 
 function check_active_learn_args(data, labels)
-    MLLabelUtils.islabelenc(labels, OneClassActiveLearning.LABEL_ENCODING) || throw(ArgumentError("Argument labels is in the wrong encoding."))
+    MLLabelUtils.islabelenc(labels, LABEL_ENCODING) || throw(ArgumentError("Argument labels is in the wrong encoding."))
     return size(data, 2) == length(labels) || throw(ArgumentError("Number of observations ($(size(data,2))) does not equal number of labels $(length(labels))."))
 end
 
 function active_learn(experiment::Dict{Symbol, Any})
-    data, labels = OneClassActiveLearning.load_data(experiment[:data_file])
+    data, labels = load_data(experiment[:data_file])
     return active_learn(experiment, data, labels)
 end
 
@@ -122,7 +122,7 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
                 query, time_qs, mem_qs = @timed get_query_object_helper(qs, query_data, query_pools, query_indices, values(res.al_history, :query_history))
             end
             debug(LOGGER, "[QS] Query strategy finished ($(time_qs) s, $(format_bytes(mem_qs))).")
-            query_label = Oracles.ask_oracle(oracle, query)
+            query_label = ask_oracle(oracle, query)
 
             # tmp workaround
             data, pools, labels = process_query!(isa(query, Array) ? query : [query],
@@ -153,7 +153,7 @@ function process_query!(query_data::Array{T, 2},
                         query_labels::Vector{Symbol},
                         model, split_strategy, data, pools, labels) where T <: Real
     size(query_data, 2) == length(query_labels) || throw(DimensionMismatch("Number of queries does not match number of labels."))
-    size(data, 1) == size(query_data, 1) ||throw(DimensionMismatch("Data dimensionality does not match query dimensionality."))
+    size(data, 1) == size(query_data, 1) || throw(DimensionMismatch("Data dimensionality does not match query dimensionality."))
 
     n_old = size(data,2)
     append!(split_strategy.train, trues(length(query_labels)))
@@ -173,13 +173,13 @@ function process_query!(global_query_ids::Vector{Int},
     length(global_query_ids) == length(query_labels) || throw(DimensionMismatch("Number of queries does not match number of labels."))
 
     pools_before = copy(pools)
-    train_mask_before = OneClassActiveLearning.calc_mask(split_strategy.train_strat, split_strategy.train, pools)
+    train_mask_before = calc_mask(split_strategy.train_strat, split_strategy.train, pools)
 
     query_pool_labels = convert_labels_to_learning(query_labels)
     pools[global_query_ids] .= query_pool_labels
     train_data, train_pools, _ = get_train(split_strategy, data, pools)
 
-    train_mask_after = OneClassActiveLearning.calc_mask(split_strategy.train_strat, split_strategy.train, pools)
+    train_mask_after = calc_mask(split_strategy.train_strat, split_strategy.train, pools)
 
     # indices that are in train before and after, relative to the updated train
     global_remaining_indices = findall(train_mask_before .& train_mask_after)
@@ -238,8 +238,8 @@ function push_evaluation!(al_history::ValueHistories.MVHistory, i, predictions, 
     push_evaluation_cm!(al_history, i, cm)
     push!(al_history, :auc, i, roc_auc(predictions, labels))
     for k in [0.01, 0.02, 0.05, 0.1, 0.2]
-        auc_fpr = OneClassActiveLearning.roc_auc(predictions, labels, fpr = k)
-        auc_fpr_normalized = OneClassActiveLearning.roc_auc(predictions, labels, fpr = k, normalize = true)
+        auc_fpr = roc_auc(predictions, labels, fpr = k)
+        auc_fpr_normalized = roc_auc(predictions, labels, fpr = k, normalize = true)
         push!(al_history, Symbol("auc_fpr_$(k)"), i, auc_fpr)
         push!(al_history, Symbol("auc_fpr_normalized_$(k)"), i, auc_fpr_normalized)
     end

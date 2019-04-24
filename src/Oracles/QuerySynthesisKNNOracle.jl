@@ -1,4 +1,3 @@
-
 struct QuerySynthesisKNNOracle <: Oracle
     data
     labels::Vector{Symbol}

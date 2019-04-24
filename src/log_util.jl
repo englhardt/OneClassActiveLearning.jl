@@ -15,9 +15,9 @@ end
 function format_bytes(bytes)
     bytes, mb = prettyprint_getunits(bytes, length(_mem_units), Int64(1024))
     if mb == 1
-        Printf.@sprintf("%d %s%s", bytes, _mem_units[mb], bytes==1 ? "" : "s")
+        @sprintf("%d %s%s", bytes, _mem_units[mb], bytes==1 ? "" : "s")
     else
-        Printf.@sprintf("%.3f %s", bytes, _mem_units[mb])
+        @sprintf("%.3f %s", bytes, _mem_units[mb])
     end
 end
 

@@ -1,5 +1,4 @@
 abstract type QueryStrategy end
-abstract type PoolQs <: QueryStrategy end
 
 function qs_score end
 

@@ -5,7 +5,7 @@ const LEARNING_LABEL_ENCODING = MLLabelUtils.LabelEnc.NativeLabels([:Lin,:Lout])
 const SplitType = Union{Val{:train}, Val{:test}, Val{:query}}
 
 function load_data(file_path; header=false, native_label_encoding=NATIVE_LABEL_ENCODING)
-    raw_data, _ = header ? DelimitedFiles.readdlm(file_path, ',', header=header) : (DelimitedFiles.readdlm(file_path, ','), nothing)
+    raw_data, _ = header ? readdlm(file_path, ',', header=header) : (readdlm(file_path, ','), nothing)
     data = copy(transpose(float.(raw_data[:, 1:end-1])))
     labels = convert_labels_from_raw(raw_data[:,end])
     return data, labels

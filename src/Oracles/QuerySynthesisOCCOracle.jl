@@ -1,4 +1,3 @@
-
 struct QuerySynthesisOCCOracle <: Oracle
     classifier::SVDD.OCClassifier
 end

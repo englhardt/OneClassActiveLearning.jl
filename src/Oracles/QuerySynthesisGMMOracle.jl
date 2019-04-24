@@ -1,4 +1,3 @@
-
 struct QuerySynthesisGMMOracle <: Oracle
     gmm::GMM
     threshold::Float64

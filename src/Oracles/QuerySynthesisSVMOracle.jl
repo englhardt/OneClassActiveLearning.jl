@@ -4,7 +4,7 @@ struct QuerySynthesisSVMOracle <: Oracle
 end
 
 function QuerySynthesisSVMOracle(init_strategy, data_file::String)
-    data, labels = OneClassActiveLearning.load_data(data_file)
+    data, labels = load_data(data_file)
     return QuerySynthesisSVMOracle(init_strategy, data, labels)
 end
 

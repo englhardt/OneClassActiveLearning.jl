@@ -1,4 +1,3 @@
-
 struct QuerySynthesisFunctionOracle <: Oracle
     f::Function
 end

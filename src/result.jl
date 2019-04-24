@@ -7,8 +7,12 @@ mutable struct DataStats
     train_indices::Vector{Int}
     test_indices::Vector{Int}
     DataStats() = new(0, 0, 0.0, 0.0, Int[], Int[])
-    DataStats(num_observations::Int, num_dimensions::Int, train_fraction::Float64, test_fraction::Float64, train_indices::Vector{Any}, test_indices::Vector{Any}) = new(num_observations, num_dimensions, train_fraction, test_fraction, convert(Vector{Int}, train_indices), convert(Vector{Int}, test_indices))
-    DataStats(num_observations::Int, num_dimensions::Int, train_fraction::Float64, test_fraction::Float64, train_indices::Vector{Int}, test_indices::Vector{Int}) = new(num_observations, num_dimensions, train_fraction, test_fraction, train_indices, test_indices)
+    DataStats(num_observations::Int, num_dimensions::Int, train_fraction::Float64, test_fraction::Float64,
+              train_indices::Vector{Any}, test_indices::Vector{Any}) = new(num_observations, num_dimensions, train_fraction, test_fraction,
+                                                                           convert(Vector{Int}, train_indices), convert(Vector{Int}, test_indices))
+    DataStats(num_observations::Int, num_dimensions::Int, train_fraction::Float64, test_fraction::Float64,
+              train_indices::Vector{Int}, test_indices::Vector{Int}) = new(num_observations, num_dimensions, train_fraction, test_fraction,
+                                                                           train_indices, test_indices)
 end
 
 struct Result
@@ -26,8 +30,10 @@ struct Result
                      ValueHistories.MVHistory(),
                      Dict{Symbol, Dict{Symbol, Any}}(),
                      Dict(:exit_code => :initialized))
-    Result(id, experiment, worker_info, al_history, al_summary) = new(id, experiment, worker_info, DataStats(), al_history, al_summary, Dict(:exit_code => :initialized))
-    Result(id, experiment, worker_info, data_stats, al_history, al_summary) = new(id, experiment, worker_info, data_stats, al_history, al_summary, Dict(:exit_code => :initialized))
+    Result(id, experiment, worker_info, al_history, al_summary) = new(id, experiment, worker_info, DataStats(),
+                                                                      al_history, al_summary, Dict(:exit_code => :initialized))
+    Result(id, experiment, worker_info, data_stats, al_history, al_summary) = new(id, experiment, worker_info, data_stats, al_history, al_summary,
+                                                                                  Dict(:exit_code => :initialized))
     Result(id, experiment, worker_info, data_stats, al_history, al_summary, status) = new(id, experiment, worker_info, data_stats, al_history, al_summary, status)
 end
 
@@ -60,7 +66,7 @@ function get_worker_info(;debug = false)
 end
 
 function set_worker_info!(res::Result)
-    merge!(res.worker_info, OneClassActiveLearning.get_worker_info())
+    merge!(res.worker_info, get_worker_info())
     return nothing
 end
 

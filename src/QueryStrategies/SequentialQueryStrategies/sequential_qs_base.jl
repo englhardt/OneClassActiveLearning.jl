@@ -1,3 +1,4 @@
+abstract type PoolQs <: QueryStrategy end
 abstract type SequentialPQs <: PoolQs end
 
 abstract type DataBasedPQs <: SequentialPQs end
