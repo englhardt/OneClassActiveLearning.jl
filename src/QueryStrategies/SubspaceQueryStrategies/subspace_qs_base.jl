@@ -11,7 +11,7 @@ function get_query_objects(qs::SubspaceQueryStrategy,
     @assert length(scores) == size(query_data, 2)
     all_history_values = (length(history) > 0) && (collect(Iterators.flatten(history)))
     candidates = [i for i in pool_map[:U] if global_indices[i] ∉ all_history_values]
-    @debug "[QS] Selecting from $(length(candidates)) candidates."
+    debug(Memento.getlogger(@__MODULE__), "[QS] Selecting from $(length(candidates)) candidates.")
     local_query_index = candidates[argmax(scores[candidates])]
     return [global_indices[local_query_index]]
 end

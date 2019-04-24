@@ -1,9 +1,9 @@
 mutable struct IterativeNRBatchQs <: MultiObjectiveBatchQs
     model::SVDD.OCClassifier
     inf_measure::SequentialPQs
-    rep_measure::F1 where F1 <: Function
-    div_measure::F2 where F2 <: Function
-    norm::F3 where F3 <: Function
+    rep_measure::Function
+    div_measure::Function
+    normalization::Function
     k::Int
     λ_inf::Float64
     λ_rep::Float64
@@ -44,25 +44,23 @@ function select_batch(qs::IterativeNRBatchQs, x::Array{T, 2}, labels::Dict{Symbo
     end
 
     #informativeness needs to be computed once every iteration
-    inf_scores = qs_score(qs.inf_measure, x, labels)[candidate_indices]
+    inf_scores_normalized = qs.normalization(qs_score(qs.inf_measure, x, labels)[candidate_indices])
 
     # representativeness needs to be computed once
-    rep_scores = qs.rep_measure(x, labels, candidate_indices)
+    rep_scores_normalized = qs.normalization(qs.rep_measure(x, labels, candidate_indices))
 
     batch_samples = []
-    # empty array hack
-    # if array is set to nothing, method dispatching does not work
-    div_scores = Float64[]
+    div_scores_normalized = Float64[]
 
     for iteration in 1:qs.k
         combined_scores = Vector{Float64}(undef, num_observations)
         if length(batch_samples) == 0
             # first sample for new batch cannot compute diversity to existing samples
-            combined_scores = qs.λ_inf * qs.norm(inf_scores) - qs.λ_rep * qs.norm(rep_scores)
+            combined_scores = qs.λ_inf * inf_scores_normalized - qs.λ_rep * rep_scores_normalized
         else
-            div_scores = qs.div_measure(qs.model, candidate_indices, batch_samples[end], div_scores)
+            div_scores_normalized = qs.normalization(qs.div_measure(qs.model, candidate_indices, batch_samples[end], div_scores_normalized))
             # use normalization function to make value ranges comparable
-            combined_scores = qs.λ_inf * qs.norm(inf_scores) - qs.λ_rep * qs.norm(rep_scores) + qs.λ_div * qs.norm(div_scores)
+            combined_scores = qs.λ_inf * inf_scores_normalized - qs.λ_rep * rep_scores_normalized + qs.λ_div * div_scores_normalized
             # ignore samples already in current batch
             batch_sample_indices = [ind for (ind, val) in enumerate(candidate_indices) if val in batch_samples]
             combined_scores[batch_sample_indices] .= -Inf

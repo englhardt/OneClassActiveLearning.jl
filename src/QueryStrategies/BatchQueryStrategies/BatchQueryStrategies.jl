@@ -1,5 +1,6 @@
 module BatchQueryStrategies
 
+using Memento
 using Random
 
 import SVDD

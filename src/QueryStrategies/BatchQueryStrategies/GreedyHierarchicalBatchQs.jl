@@ -1,8 +1,8 @@
 mutable struct GreedyHierarchicalBatchQs <: MultiObjectiveBatchQs
     model::SVDD.OCClassifier
     inf_measure::SequentialPQs
-    rep_measure::F1 where F1 <: Function
-    div_measure::F2 where F2 <: Function
+    rep_measure::Function
+    div_measure::Function
     k::Int
 
     function GreedyHierarchicalBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol=nothing, diversity::Symbol=nothing,
@@ -41,8 +41,7 @@ function select_batch(qs::GreedyHierarchicalBatchQs, x::Array{T, 2}, labels::Dic
     #informativeness second
     inf_scores = qs_score(qs.inf_measure, x, labels)[most_representative_indices]
     batch_candidate_indices = most_representative_indices[sortperm(inf_scores, rev=true)[1:min(2*qs.k, num_observations)]]
-    # empty array hack
-    # if array is set to nothing, method dispatching does not work
+
     div_scores = Float64[]
     batch_samples = [batch_candidate_indices[1]]
     for iteration in 2:qs.k

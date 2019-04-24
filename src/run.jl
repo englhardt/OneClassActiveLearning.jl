@@ -125,15 +125,15 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
             debug(LOGGER, "[QS] Query strategy scoring done ($(time_qs) s, $(format_bytes(mem_qs))).")
             debug(LOGGER, "[QS] Updating pools.")
             query_labels = Oracles.ask_oracle(oracle, queries)
-            data, pools, labels = process_query!(isa(queries, Array) ? queries : [queries],
+            data, pools, labels = process_queries!(isa(queries, Array) ? queries : [queries],
                                          isa(query_labels, Array) ? query_labels : [query_labels],
                                          model,
                                          split_strategy,
                                          data,
                                          pools,
                                          labels)
-            debug(LOGGER, "[QS] Storing Query.")
-            push_query!(res.al_history, i, queries, query_labels, time_qs, mem_qs)
+            debug(LOGGER, "[QS] Storing queries.")
+            push_queries!(res.al_history, i, queries, query_labels, time_qs, mem_qs)
             isa(queries[1], Int) ? debug(LOGGER, "[QS] Query(ids = $(queries), labels = $(query_labels))") :
                                    debug(LOGGER, "[QS] Query(labels = $(query_labels))")
             debug(LOGGER, "[QS] Query strategy done.")
@@ -149,9 +149,9 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
     return res
 end
 
-function process_query!(query_data::Array{T, 2},
-                        query_labels::Vector{Symbol},
-                        model, split_strategy, data, pools, labels) where T <: Real
+function process_queries!(query_data::Array{T, 2},
+                          query_labels::Vector{Symbol},
+                          model, split_strategy, data, pools, labels) where T <: Real
     size(query_data, 2) == length(query_labels) || throw(DimensionMismatch("Number of queries does not match number of labels."))
     size(data, 1) == size(query_data, 1) || throw(DimensionMismatch("Data dimensionality does not match query dimensionality."))
 
@@ -164,12 +164,12 @@ function process_query!(query_data::Array{T, 2},
     n_new = size(data, 2)
     global_query_ids = collect((n_old + 1):n_new)
 
-    process_query!(global_query_ids, query_labels, model, split_strategy, data, pools, labels)
+    process_queries!(global_query_ids, query_labels, model, split_strategy, data, pools, labels)
 end
 
-function process_query!(global_query_ids::Vector{Int},
-                        query_labels::Vector{Symbol},
-                        model, split_strategy, data, pools, labels)
+function process_queries!(global_query_ids::Vector{Int},
+                          query_labels::Vector{Symbol},
+                          model, split_strategy, data, pools, labels)
     length(global_query_ids) == length(query_labels) || throw(DimensionMismatch("Number of queries does not match number of labels."))
 
     pools_before = copy(pools)
@@ -214,8 +214,8 @@ function get_query_objects_helper(qs::QuerySynthesisStrategy,
     return get_query_objects(qs, query_data, query_pools, history)
 end
 
-function push_query!(al_history::ValueHistories.MVHistory, i, query, query_labels, time_qs, mem_qs)
-    push!(al_history, :query_history, i, query)
+function push_queries!(al_history::ValueHistories.MVHistory, i, queries, query_labels, time_qs, mem_qs)
+    push!(al_history, :query_history, i, queries)
     ValueHistories.@trace al_history i query_labels time_qs mem_qs
     return nothing
 end

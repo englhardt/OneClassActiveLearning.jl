@@ -6,7 +6,7 @@ struct EnsembleBatchQs <: BatchPQs
     model_indices::Vector{Vector{Int}}
     batch_models::Vector{SVDD.OCClassifier}
 
-    function EnsembleBatchQs(model::SVDD.OCClassifier, sequential_strategy::SequentialPQs; k::Int=0, solver_type::DataType=nothing, solver_params::Dict{Symbol, Any}=nothing)::EnsembleBatchQs
+    function EnsembleBatchQs(model::SVDD.OCClassifier, sequential_strategy::SequentialPQs; k::Int=0, solver::JuMP.OptimizerFactory=nothing)::EnsembleBatchQs
         (model == nothing) && throw(ArgumentError("No model specified."))
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
@@ -17,11 +17,10 @@ struct EnsembleBatchQs <: BatchPQs
 
         model_indices = Vector{Vector{Int}}()
         batch_models = Vector{SVDD.OCClassifier}()
-        solver = JuMP.with_optimizer(solver_type; solver_params...)
         for i in 1:k
             new_model = deepcopy(model)
             push!(batch_models, new_model)
-            # sample ca 1/k indices
+            # sample 1 / k indices
             indices = sample(1:num_observations, samples_per_batch, replace=false, ordered=true)
             push!(model_indices, indices)
         end

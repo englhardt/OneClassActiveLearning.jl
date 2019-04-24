@@ -116,8 +116,7 @@
                 filled_params = Dict{Symbol, Any}(
                     :k => batch_size,
                     :SequentialStrategy => sequential_strategy,
-                    :solver_type => Ipopt.Optimizer,
-                    :solver_params => Dict{Symbol, Any}(:print_level => 0)
+                    :solver => TEST_SOLVER
                 )
                 model = SVDD.SVDDneg(dummy_data, dummy_labels)
                 init_strategy = SimpleCombinedStrategy(FixedGammaStrategy(MLKernels.GaussianKernel(0.1)), FixedCStrategy(0.7))

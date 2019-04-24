@@ -1,5 +1,7 @@
 module SubspaceQueryStrategies
 
+using Memento
+
 import MLLabelUtils
 import ..QueryStrategies:
     QueryStrategy,

@@ -1,9 +1,9 @@
 mutable struct EnumerativeBatchQs <: MultiObjectiveBatchQs
     model::SVDD.OCClassifier
     inf_measure::SequentialPQs
-    rep_measure::F1 where F1 <: Function
-    div_measure::F2 where F2 <: Function
-    norm::F3 where F3 <: Function
+    rep_measure::Function
+    div_measure::Function
+    normalization::Function
     k::Int
     λ_inf::Float64
     λ_rep::Float64
@@ -43,10 +43,10 @@ function select_batch(qs::EnumerativeBatchQs, x::Array{T, 2}, labels::Dict{Symbo
         return candidate_indices
     end
     #informativeness needs to be computed once every iteration
-    inf_scores_normalized = qs.norm(qs_score(qs.inf_measure, x, labels)[candidate_indices])
-    
+    inf_scores_normalized = qs.normalization(qs_score(qs.inf_measure, x, labels)[candidate_indices])
+
     # representativeness needs to be computed once
-    rep_scores_normalized = qs.norm(qs.rep_measure(x, labels, candidate_indices))
+    rep_scores_normalized = qs.normalization(qs.rep_measure(x, labels, candidate_indices))
 
     best_batch = Vector{Int}()
     best_score = -Inf
@@ -55,7 +55,6 @@ function select_batch(qs::EnumerativeBatchQs, x::Array{T, 2}, labels::Dict{Symbo
         inf_score = sum(inf_scores_normalized[batch])/qs.k
         rep_score = sum(rep_scores_normalized[batch])/qs.k
         div_score = qs.div_measure(qs.model, x, candidate_indices[batch])
-        # use normalization function to make value ranges comparable
         combined_score = qs.λ_inf * inf_score + qs.λ_rep * rep_score + qs.λ_div * div_score
 
         if combined_score > best_score

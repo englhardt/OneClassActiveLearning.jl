@@ -1,8 +1,8 @@
 mutable struct EnumHierarchicalBatchQs <: MultiObjectiveBatchQs
     model::SVDD.OCClassifier
     inf_measure::SequentialPQs
-    rep_measure::F1 where F1 <: Function
-    div_measure::F2 where F2 <: Function
+    rep_measure::Function
+    div_measure::Function
     k::Int
 
     function EnumHierarchicalBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol=nothing, diversity::Symbol=nothing,
