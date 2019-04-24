@@ -15,7 +15,7 @@ mutable struct ExplorativeMarginQss <: HybridQss
         occ_params = SVDD.get_model_params(occ)
         !haskey(occ_params, :C) && !haskey(occ_params, :C1) && throw(ArgumentError("Invalid base learner type $(typeof(occ)). Cannot retrieve C parameter for SVDDnegEps."))
         occ_eps_init_strat = SVDD.SimpleCombinedStrategy(SVDD.FixedGammaStrategy(MLKernels.GaussianKernel(occ.kernel_fct.alpha.value.x)),
-                                                    SVDD.FixedCStrategy(haskey(occ_params, :C) ? occ_params[:C] : occ_params[:C1]))
+                                                         SVDD.FixedCStrategy(haskey(occ_params, :C) ? occ_params[:C] : occ_params[:C1]))
         new(occ, occ_eps, occ_eps_init_strat, solver, optimizer, boundary_shift_agg_func, lambda, use_penalty, nothing)
     end
 end

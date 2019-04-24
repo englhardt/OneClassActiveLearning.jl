@@ -13,7 +13,7 @@ get_query_object(qs::QueryStrategy, data::Array{T, 2}, pools::Vector{Symbol}, gl
 """
 function get_query_object end
 
-function initialize_qs(qs::DataType, model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, params)::qs
+function initialize_qs(qs::DataType, model::SVDD.OCClassifier, data::Array{T, 2}, params)::QueryStrategy where T <: Real
     if qs <: HybridPQs || qs <: HybridQss
         return qs(model, data; params...)
     elseif qs <: ModelBasedPQs || qs <: ModelBasedQss

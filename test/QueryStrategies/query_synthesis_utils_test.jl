@@ -25,6 +25,6 @@
     @test all(test_minima .<= test_data .<= test_maxima)
     test_data = UTILS.rand_in_hyper_rect(test_minima, test_maxima, -0.1)
     @test all(test_minima .<= test_data .<= test_maxima)
-    test_data = UTILS.rand_in_hyper_rect(test_minima, test_maxima, [-0.11; -0.12])
+    test_data = UTILS.rand_in_hyper_rect(test_minima, test_maxima, [1.0; 1.0])
     @test all(test_minima .<= test_data .<= test_maxima)
 end
