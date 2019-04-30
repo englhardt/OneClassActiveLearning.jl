@@ -66,7 +66,8 @@
         worker_info = OneClassActiveLearning.get_worker_info()
         expected = OneClassActiveLearning.Result(id, experiment, worker_info, DataStats(1, 1, 0.1, 0.1, [1,2,3,4], [5,6,7]), al_history, al_summary)
 
-        actual = Unmarshal.unmarshal(OneClassActiveLearning.Result, JSON.parse(JSON.json(expected)))
+        OneClassActiveLearning.write_result_to_file(TEST_OUTPUT_FILE, expected)
+        actual = Unmarshal.unmarshal(OneClassActiveLearning.Result, JSON.parsefile(TEST_OUTPUT_FILE))
         @test actual.id == 42
         @test length(actual.experiment[:param][:initial_pools]) == 123
         @test haskey(actual.worker_info, :hostname)

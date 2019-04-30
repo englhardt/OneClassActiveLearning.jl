@@ -8,6 +8,7 @@ using Random
 using Reexport
 using Statistics
 
+import DataStructures
 import Formatting
 import JSON
 import JuMP
