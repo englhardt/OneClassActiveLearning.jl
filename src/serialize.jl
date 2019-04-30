@@ -80,9 +80,9 @@ function JSON.json(res::Result)
     jsonstring = "{"
     jsonstring *= "\"id\":" * JSON.json(res.id) * ","
     jsonstring *= "\"experiment\":" * JSON.json(res.experiment) * ","
-    jsonstring *= "\"al_history\":" * JSON.json(res.al_history) * ","
     jsonstring *= "\"worker_info\":" * JSON.json(res.worker_info) * ","
     jsonstring *= "\"data_stats\":" * JSON.json(res.data_stats) * ","
+    jsonstring *= "\"al_history\":" * JSON.json(res.al_history) * ","
     jsonstring *= "\"al_summary\":" * JSON.json(res.al_summary) * ","
     jsonstring *= "\"status\":" * JSON.json(res.status)
     jsonstring *= "}"
@@ -91,7 +91,7 @@ end
 
 function write_result_to_file(output_file, r::Result)
     r_reparsed = JSON.parse(JSON.json(r))
-    d = OrderedDict()
+    d = DataStructures.OrderedDict()
     for k in ["id", "experiment", "worker_info", "data_stats", "al_history", "al_summary", "status"]
         d[k] = r_reparsed[k]
     end
