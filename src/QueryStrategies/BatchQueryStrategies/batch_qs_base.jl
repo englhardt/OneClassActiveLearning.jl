@@ -46,7 +46,7 @@ function set_iterative_div_measure!(strategy::MultiObjectiveBatchQs, name::Symbo
             data = model.data
             # vector containing norms of columns
             # use vec() as otherwise a row vector is returned as opposed to a column vector
-            div_scores = vec(sqrt.(sum(abs2, data[:,candidate_indices] .- data[:,j], dims=1)))
+            div_scores = Distances.colwise(Distances.Euclidean(), data[:,candidate_indices], data[:,j])
             if (length(old_scores) > 0)
                 div_scores = min.(div_scores, old_scores)
             end
@@ -80,17 +80,19 @@ function set_enumerative_div_measure!(strategy::MultiObjectiveBatchQs, name::Sym
         end
     elseif (name == :EuclideanDistance)
         strategy.div_measure = (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
-            min_div = Inf
-            batch_size = length(batch)
-            for i in 1:batch_size
-                for j in i+1:batch_size
-                    @inbounds div = sqrt.(sum(abs2, data[:,i] .- data[:,j]))
-                    min_div = min(div, min_div)
-                end
-            end
-            return min_div
+            # Compute pairwise distances, save only upper diagonal matrix
+            distances = LinearAlgebra.UpperTriangular(Distances.pairwise(Distances.Euclidean(), data, data))
+            # Values on diagonal are always 0
+            # ignore them for minimum computation by setting them to Inf
+            distances[LinearAlgebra.diagind(distances)] .= Inf
+
+            return minimum(distances)
         end
     else
         throw(ArgumentError("Invalid diversity measure $(name) specified."))
     end
+end
+
+function min_max_normalization(x::Vector{Float64})::Vector{Float64}
+    return (x .- min(x...)) ./ (max(x...) - min(x...))
 end

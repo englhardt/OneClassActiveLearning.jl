@@ -11,8 +11,12 @@ struct ClusterBatchQs <: BatchPQs
 end
 
 """
-For maximum diversity in batch selection.
-Compute k-medoids clustering with k=batchsize, return cluster centers
+Ensures selection of an informative, representative and diverse batch
+by clustering the most informative observations and then using the k
+cluster centers as batch query.
+
+Number of most informative observations selected = 10*batch_size,
+Number of clusters computed = batch_size
 """
 function select_batch(qs::ClusterBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)
@@ -27,7 +31,7 @@ function select_batch(qs::ClusterBatchQs, x::Array{T, 2}, labels::Dict{Symbol, V
     descending_indices = sortperm(candidate_scores; rev=true)
     best_m = x[:, candidate_indices[descending_indices[1:m]]]
 
-    distances = pairwise(Euclidean(), best_m)
+    distances = Distances.pairwise(Distances.Euclidean(), best_m)
     clustering = kmedoids(distances, qs.k)
 
     medoid_indices = clustering.medoids

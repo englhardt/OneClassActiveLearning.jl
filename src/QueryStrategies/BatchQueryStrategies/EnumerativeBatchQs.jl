@@ -15,19 +15,15 @@ mutable struct EnumerativeBatchQs <: MultiObjectiveBatchQs
         (model == nothing) && throw(ArgumentError("No model specified."))
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
-        # min max normalization
-        function normalization(x::Vector{Float64})::Vector{Float64}
-            return (x .- min(x...)) ./ (max(x...) - min(x...))
-        end
-
         # normalize λs
-        λ_s = λ_inf+λ_rep+λ_div
+        λ_s = λ_inf + λ_rep + λ_div
         λ_inf = λ_inf / λ_s
         λ_rep = λ_rep / λ_s
         λ_div = λ_div / λ_s
 
         not_initialized = x->throw(ErrorException("Calling not initialized function."))
-        strategy = new(model, informativeness, not_initialized, not_initialized, normalization, k, λ_inf, λ_rep, λ_div)
+        # min_max_normalization function can be found in batch_qs_base.jl
+        strategy = new(model, informativeness, not_initialized, not_initialized, min_max_normalization, k, λ_inf, λ_rep, λ_div)
 
         # set up measures
         set_rep_measure!(strategy, representativeness)

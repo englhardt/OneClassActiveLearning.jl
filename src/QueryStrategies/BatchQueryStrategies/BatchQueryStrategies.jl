@@ -7,6 +7,8 @@ import SVDD
 import MLLabelUtils
 import MLKernels
 import JuMP
+import Distances
+import LinearAlgebra
 
 import ..QueryStrategies:
     MissingLabelTypeException,
@@ -18,7 +20,6 @@ import ..SequentialQueryStrategies:
     qs_score
 import IterTools: subsets
 import Clustering: kmedoids
-import Distances: pairwise, Euclidean
 import StatsBase: sample
 
 include("batch_qs_base.jl")
