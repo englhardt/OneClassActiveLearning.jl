@@ -28,6 +28,9 @@ struct EnsembleBatchQs <: BatchPQs
     end
 end
 
+"""
+Select best batch by selecting best observation from each ensemble member.
+"""
 function select_batch(qs::EnsembleBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)
     if num_observations <= qs.k

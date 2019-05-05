@@ -2,6 +2,19 @@ abstract type BatchPQs <: PoolQs end
 abstract type ExtendingBatchQs <: BatchPQs end
 abstract type MultiObjectiveBatchQs <: BatchPQs end
 
+"""
+    select_batch(batch_query_strategy, query_data, label_map, candidate_indices)
+Applies batch_query_strategy to select the most useful unlabeled observations
+from query_data.
+
+label_map is used to find out which observations in query_data are still unlabeled,
+candidate_indices is used to find out which observations in query_data are valid
+candidates for the query.
+
+Returns list of indices of most useful observations.
+"""
+function select_batch end
+
 function get_query_objects(qs::BatchPQs,
                            query_data::Array{T, 2} where T <: Real,
                            pools::Vector{Symbol},
@@ -16,6 +29,10 @@ function get_query_objects(qs::BatchPQs,
     return global_indices[local_query_indices]
 end
 
+"""
+rep_measure computes representativeness of observations.
+Only KDE is supported so far.
+"""
 function set_rep_measure!(strategy::MultiObjectiveBatchQs, name::Symbol)::Function
     if (name == :KDE)
         strategy.rep_measure = (data::Array{T, 2} where T <: Real, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int}) -> begin

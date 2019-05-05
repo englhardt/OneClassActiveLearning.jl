@@ -33,6 +33,12 @@ mutable struct EnumerativeBatchQs <: MultiObjectiveBatchQs
     end
 end
 
+"""
+Select best batch with weighted sum of requirements.
+
+Enumerative selection: Compute weighted sum for all possible candidates.
+Warning: This may take a while.
+"""
 function select_batch(qs::EnumerativeBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)
     if num_observations <= qs.k

@@ -33,6 +33,12 @@ mutable struct IterativeNRBatchQs <: MultiObjectiveBatchQs
     end
 end
 
+"""
+Select best batch with weighted sum of requirements.
+Iterative selection: diversity is only computed to previously selected observations.
+
+Negative Representativeness: representativeness factor for weighted sum is negative.
+"""
 function select_batch(qs::IterativeNRBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)
     if num_observations <= qs.k

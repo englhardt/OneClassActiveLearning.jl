@@ -11,8 +11,8 @@ struct RandomBestBatchQs <: ExtendingBatchQs
 end
 
 """
-candidates are indices in x which need to be considered,
-returns indices of best batch in x
+Use sequential strategy, randomly select batch_size observations from batch_size + m
+observations with highest usefulness.
 """
 function select_batch(qs::RandomBestBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)

@@ -7,6 +7,8 @@ using Printf
 using Random
 using Reexport
 using Statistics
+using SVDD
+using DataStructures
 
 import Formatting
 import JSON
@@ -15,7 +17,6 @@ import MLDataUtils
 import MLKernels
 import MLLabelUtils
 import ROCAnalysis
-import SVDD
 import Unmarshal
 import ValueHistories
 

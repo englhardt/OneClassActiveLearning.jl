@@ -9,8 +9,7 @@ struct TopKBatchQs <: ExtendingBatchQs
 end
 
 """
-candidates are indices in x which need to be considered,
-returns indices of best batch in x
+Use sequential strategy, select batch_size observations with highest usefulness.
 """
 function select_batch(qs::TopKBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)
