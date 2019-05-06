@@ -22,7 +22,7 @@
 
     @testset "batch_qs" begin
         labels = labelmap(fill(:U, 10))
-        candidate_indices = [collect(inds) for inds in [1:3, 1:5]]
+        candidate_indices = [collect(inds) for inds in [1:3, 1:10]]
 
         @testset "AllRandomBatchQs" begin
             qs_type = AllRandomBatchQs
