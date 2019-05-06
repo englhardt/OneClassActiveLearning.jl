@@ -143,7 +143,7 @@
                     end
                     for filled_params in params
                         @testset "$(filled_params)" begin
-                            test_batch_qs(qs_type, filled_params, classifier, dummy_data, labels, candidate_indices)
+                            test_batch_qs(qs_type, filled_params, model, dummy_data, labels, candidate_indices)
                         end
                     end
                 end
@@ -176,7 +176,7 @@
                     for invalid_params in [invalid_rep_params, invalid_div_params]
                         @test_throws ArgumentError initialize_qs(qs_type, model, dummy_data, invalid_params)
                     end
-                    test_batch_qs(qs_type, params, classifier, dummy_data, labels, candidate_indices)
+                    test_batch_qs(qs_type, params, model, dummy_data, labels, candidate_indices)
                 end
             end
         end
