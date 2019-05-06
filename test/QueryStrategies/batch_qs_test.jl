@@ -10,8 +10,8 @@
     batch_size = 5
 
     @testset "initialize_qs" begin
-        labels_list = [labelmap(fill(:U, 10)), labelmap(fill(:Lin, 10)), labelmap(fill(:Lout, 10))]
-        candidate_indices = [collect(inds) for inds in [1:3, 1:5, 1:8]]
+        labels = labelmap(fill(:U, 10))
+        candidate_indices = [collect(inds) for inds in [1:3, 1:5]]
 
         @testset "all random" begin
             qs_type = AllRandomBatchQs
@@ -21,14 +21,10 @@
 
             @test_throws ArgumentError initialize_qs(qs_type, SVDD.RandomOCClassifier(dummy_data), dummy_data, empty_params)
             qs = initialize_qs(qs_type, SVDD.RandomOCClassifier(dummy_data), dummy_data, filled_params)
-            for labels in labels_list
-                for candidates in candidate_indices
-                    batch_indices = select_batch(qs, dummy_data, labels, candidates)
-                    @test length(batch_indices) == min(length(candidates), batch_size)
-                    for ind in batch_indices
-                        @test ind ∈ candidates
-                    end
-                end
+            for candidates in candidate_indices
+                batch_indices = select_batch(qs, dummy_data, labels, candidates)
+                @test length(batch_indices) == min(length(candidates), batch_size)
+                @test issubset(batch_indices, Set(candidates))
             end
         end
 
@@ -40,14 +36,10 @@
                     :SequentialStrategy => sequential_strategy
                 )
                 qs = initialize_qs(qs_type, SVDD.RandomOCClassifier(dummy_data), dummy_data, filled_params)
-                for labels in labels_list
-                    for candidates in candidate_indices
-                        batch_indices = select_batch(qs, dummy_data, labels, candidates)
-                        @test length(batch_indices) == min(length(candidates), batch_size)
-                        for ind in batch_indices
-                            @test ind ∈ candidates
-                        end
-                    end
+                for candidates in candidate_indices
+                    batch_indices = select_batch(qs, dummy_data, labels, candidates)
+                    @test length(batch_indices) == min(length(candidates), batch_size)
+                    @test issubset(batch_indices, Set(candidates))
                 end
             end # TopK
 
@@ -57,21 +49,17 @@
                     :k => batch_size,
                     :m => m,
                     :SequentialStrategy => sequential_strategy
-                ) for m in [-1,0,1,100]]
+                ) for m in [-1, 0]]
                 for filled_params in params
                     if filled_params[:m] == -1
                         @test_throws ArgumentError initialize_qs(qs_type, SVDD.RandomOCClassifier(dummy_data), dummy_data, filled_params)
                         continue
                     end
                     qs = initialize_qs(qs_type, SVDD.RandomOCClassifier(dummy_data), dummy_data, filled_params)
-                    for labels in labels_list
-                        for candidates in candidate_indices
-                            batch_indices = select_batch(qs, dummy_data, labels, candidates)
-                            @test length(batch_indices) == min(length(candidates), batch_size)
-                            for ind in batch_indices
-                                @test ind ∈ candidates
-                            end
-                        end
+                    for candidates in candidate_indices
+                        batch_indices = select_batch(qs, dummy_data, labels, candidates)
+                        @test length(batch_indices) == min(length(candidates), batch_size)
+                        @test issubset(batch_indices, Set(candidates))
                     end
                 end
             end # RandomBest
@@ -85,14 +73,10 @@
                 )
                 @test_throws ArgumentError initialize_qs(qs_type, SVDD.RandomOCClassifier(dummy_data), dummy_data, empty_params)
                 qs = initialize_qs(qs_type, SVDD.RandomOCClassifier(dummy_data), dummy_data, filled_params)
-                for labels in labels_list
-                    for candidates in candidate_indices
-                        batch_indices = select_batch(qs, dummy_data, labels, candidates)
-                        @test length(batch_indices) == min(length(candidates), batch_size)
-                        for ind in batch_indices
-                            @test ind ∈ candidates
-                        end
-                    end
+                for candidates in candidate_indices
+                    batch_indices = select_batch(qs, dummy_data, labels, candidates)
+                    @test length(batch_indices) == min(length(candidates), batch_size)
+                    @test issubset(batch_indices, Set(candidates))
                 end
             end # KMedoids
 
@@ -102,16 +86,13 @@
                     :SequentialStrategy => sequential_strategy
                 )
                 qs = initialize_qs(ClusterBatchQs, SVDD.RandomOCClassifier(dummy_data), dummy_data, filled_params)
-                for labels in labels_list
-                    for candidates in candidate_indices
-                        batch_indices = select_batch(qs, dummy_data, labels, candidates)
-                        @test length(batch_indices) == min(length(candidates), batch_size)
-                        for ind in batch_indices
-                            @test ind ∈ candidates
-                        end
-                    end
+                for candidates in candidate_indices
+                    batch_indices = select_batch(qs, dummy_data, labels, candidates)
+                    @test length(batch_indices) == min(length(candidates), batch_size)
+                    @test issubset(batch_indices, Set(candidates))
                 end
             end # Cluster
+
             @testset "Ensemble" begin
                 filled_params = Dict{Symbol, Any}(
                     :k => batch_size,
@@ -127,9 +108,7 @@
                     try
                         batch_indices = select_batch(qs, dummy_data, labels, candidates)
                         @test length(batch_indices) == min(length(candidates), batch_size)
-                        for ind in batch_indices
-                            @test ind ∈ candidates
-                        end
+                        @test issubset(batch_indices, Set(candidates))
                     catch e
                         # This strategy depends on the solver finding a solution
                         # for the submodels.
@@ -156,11 +135,10 @@
                 :SequentialStrategy => sequential_strategy,
                 :representativeness => rep,
                 :diversity => div,
-                :λ_inf => linf,
-                :λ_rep => lrep,
-                :λ_div => ldiv
-            ) for rep in [:KDE] for div in [:AngleDiversity, :EuclideanDistance]
-            for linf in 0:4 for lrep in 0:4 for ldiv in 0:4 if (linf + lrep + ldiv > 0)]
+                :λ_inf => 1,
+                :λ_rep => 1,
+                :λ_div => 1
+            ) for rep in [:KDE] for div in [:AngleDiversity, :EuclideanDistance]]
             invalid_rep_params = Dict{Symbol, Any}(
                 :k => batch_size,
                 :SequentialStrategy => sequential_strategy,
@@ -188,14 +166,10 @@
                     for filled_params in params
                         @testset "$(filled_params)" begin
                             qs = initialize_qs(qs_type, model, dummy_data, filled_params)
-                            for labels in labels_list
-                                for candidates in candidate_indices
-                                    batch_indices = select_batch(qs, dummy_data, labels, candidates)
-                                    @test length(batch_indices) == min(length(candidates), batch_size)
-                                    for ind in batch_indices
-                                        @test ind ∈ candidates
-                                    end
-                                end
+                            for candidates in candidate_indices
+                                batch_indices = select_batch(qs, dummy_data, labels, candidates)
+                                @test length(batch_indices) == min(length(candidates), batch_size)
+                                @test issubset(batch_indices, Set(candidates))
                             end
                         end
                     end
@@ -232,14 +206,10 @@
                     for filled_params in params
                         @testset "$(filled_params)" begin
                             qs = initialize_qs(qs_type, model, dummy_data, filled_params)
-                            for labels in labels_list
-                                for candidates in candidate_indices
-                                    batch_indices = select_batch(qs, dummy_data, labels, candidates)
-                                    @test length(batch_indices) == min(length(candidates), batch_size)
-                                    for ind in batch_indices
-                                        @test ind ∈ candidates
-                                    end
-                                end
+                            for candidates in candidate_indices
+                                batch_indices = select_batch(qs, dummy_data, labels, candidates)
+                                @test length(batch_indices) == min(length(candidates), batch_size)
+                                @test issubset(batch_indices, Set(candidates))
                             end
                         end
                     end
@@ -257,7 +227,7 @@
             indices = [1, 3, 5, 7, 9, 11]
             history = [[7]]
             @test_throws ArgumentError OneClassActiveLearning.get_query_objects(qs, data, fill(:Lin, 5), indices, history)
-            @test OneClassActiveLearning.get_query_objects(qs, data, pools, indices, history) == [1,3,5,11]
+            @test OneClassActiveLearning.get_query_objects(qs, data, pools, indices, history) == [1, 3, 5, 11]
         end
 
         @testset "b" begin
@@ -267,7 +237,7 @@
             indices = [1, 2, 4, 7, 9]
             history = [[7]]
             @test_throws ArgumentError OneClassActiveLearning.get_query_objects(qs, data, fill(:Lin, 5), indices, history)
-            @test OneClassActiveLearning.get_query_objects(qs, data, pools, indices, history) == [1,2,4]
+            @test OneClassActiveLearning.get_query_objects(qs, data, pools, indices, history) == [1, 2, 4]
         end
     end # get_query_objects
 end # Batch Query Strategies
