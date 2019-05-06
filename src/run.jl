@@ -48,19 +48,19 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
     set_worker_info!(res)
     set_data_stats!(res, data, experiment[:split_strategy])
 
-    model, pools, solver, qs, split_strategy, oracle = #try
+    model, pools, solver, qs, split_strategy, oracle = try
         init_from_experiment(experiment, data, labels, res)
-    # catch e
-    #     warn(LOGGER, e)
-    #     if isa(e, KDEException)
-    #         res.status[:exit_code] = :kde_error
-    #     elseif isa(e, MissingLabelTypeException)
-    #         res.status[:exit_code] = :missing_label_type
-    #     else
-    #         throw(e)
-    #     end
-    #     return res
-    # end
+    catch e
+        warn(LOGGER, e)
+        if isa(e, KDEException)
+            res.status[:exit_code] = :kde_error
+        elseif isa(e, MissingLabelTypeException)
+            res.status[:exit_code] = :missing_label_type
+        else
+            throw(e)
+        end
+        return res
+    end
 
     train_data, train_pools, _ = get_train(split_strategy, data, pools)
     SVDD.set_data!(model, train_data)
