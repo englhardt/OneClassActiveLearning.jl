@@ -6,6 +6,6 @@ function PoolOracle(data, labels, params::Dict{Symbol, Any})
     return PoolOracle(labels)
 end
 
-function ask_oracle(oracle::PoolOracle, query_ids::Vector{Int})
+function ask_oracle(oracle::PoolOracle, query_ids::Vector{Int})::Vector{Symbol}
     return oracle.labels[query_ids]
 end

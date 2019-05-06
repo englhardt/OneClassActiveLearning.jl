@@ -48,6 +48,6 @@ function QuerySynthesisSVMOracle(data, labels, params::Dict{Symbol, Any})
     end
 end
 
-function ask_oracle(oracle::QuerySynthesisSVMOracle, query_object)
-    return first(LIBSVM.svmpredict(oracle.classifier, query_object)[1])
+function ask_oracle(oracle::QuerySynthesisSVMOracle, query_object::Array{T, 2})::Vector{Symbol} where T <: Real
+    return LIBSVM.svmpredict(oracle.classifier, query_object)[1]
 end

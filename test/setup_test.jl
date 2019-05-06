@@ -46,7 +46,7 @@
             exp =  deepcopy(experiment)
             exp[:query_strategy] = Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomQss),
                                         :param => Dict{Symbol, Any}())
-            exp[:oracle] = OneClassActiveLearning.QuerySynthesisFunctionOracle(_ -> :inlier)
+            exp[:oracle] = OneClassActiveLearning.QuerySynthesisFunctionOracle(x -> fill(:inlier, size(x, 2)))
 
             expected_experiment = deepcopy(exp)
 
