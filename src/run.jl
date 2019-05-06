@@ -125,13 +125,7 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
             debug(LOGGER, "[QS] Query strategy scoring done ($(time_qs) s, $(format_bytes(mem_qs))).")
             debug(LOGGER, "[QS] Updating pools.")
             query_labels = Oracles.ask_oracle(oracle, queries)
-            data, pools, labels = process_queries!(isa(queries, Array) ? queries : [queries],
-                                         isa(query_labels, Array) ? query_labels : [query_labels],
-                                         model,
-                                         split_strategy,
-                                         data,
-                                         pools,
-                                         labels)
+            data, pools, labels = process_queries!(queries, query_labels, model, split_strategy, data, pools, labels)
             debug(LOGGER, "[QS] Storing queries.")
             push_queries!(res.al_history, i, queries, query_labels, time_qs, mem_qs)
             isa(queries[1], Int) ? debug(LOGGER, "[QS] Query(ids = $(queries), labels = $(query_labels))") :
