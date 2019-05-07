@@ -112,7 +112,7 @@
         end
 
         @testset "weighted sum objective" begin
-            qs_types = [IterativeBatchQs, IterativeNRBatchQs, EnumerativeBatchQs]
+            qs_types = [IterativeBatchQs, EnumerativeBatchQs]
             params = [Dict{Symbol, Any}(
                 :k => batch_size,
                 :SequentialStrategy => sequential_strategy,

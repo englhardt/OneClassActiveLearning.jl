@@ -28,7 +28,6 @@ include("TopKBatchQs.jl")
 include("RandomBestBatchQs.jl")
 include("AllRandomBatchQs.jl")
 include("IterativeBatchQs.jl")
-include("IterativeNRBatchQs.jl")
 include("EnumHierarchicalBatchQs.jl")
 include("GreedyHierarchicalBatchQs.jl")
 include("KMedoidsBatchQs.jl")
@@ -45,7 +44,6 @@ export
 
     MultiObjectiveBatchQs,
     IterativeBatchQs,
-    IterativeNRBatchQs,
     GreedyHierarchicalBatchQs,
     EnumHierarchicalBatchQs,
     EnumerativeBatchQs,
