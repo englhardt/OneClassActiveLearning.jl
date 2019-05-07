@@ -44,10 +44,10 @@ function select_batch(qs::EnumerativeBatchQs, x::Array{T, 2}, labels::Dict{Symbo
     if num_observations <= qs.k
         return candidate_indices
     end
-    #informativeness needs to be computed once every iteration
+    #informativeness
     inf_scores_normalized = qs.normalization(qs_score(qs.inf_measure, x, labels)[candidate_indices])
 
-    # representativeness needs to be computed once
+    # representativeness
     rep_scores_normalized = qs.normalization(qs.rep_measure(x, labels, candidate_indices))
 
     best_batch = Vector{Int}()
