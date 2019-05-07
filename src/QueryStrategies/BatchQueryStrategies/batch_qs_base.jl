@@ -33,10 +33,10 @@ end
 rep_measure computes representativeness of observations.
 Only KDE is supported so far.
 """
-function set_rep_measure!(strategy::MultiObjectiveBatchQs, name::Symbol)::Function
+function get_rep_measure(name::Symbol)::Function
     if (name == :KDE)
-        strategy.rep_measure = (data::Array{T, 2} where T <: Real, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int}) -> begin
-            γ = MLKernels.getvalue(strategy.model.kernel_fct.alpha)
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int}) -> begin
+            γ = MLKernels.getvalue(model.kernel_fct.alpha)
             return multi_kde(data, γ)(data[:,candidate_indices])
         end
     else
@@ -48,9 +48,9 @@ end
 div_measure computes diversity of all samples to one specific sample
 Iterative computation: only value for added sample needs to be computed, old_scores saves aggregated result
 """
-function set_iterative_div_measure!(strategy::MultiObjectiveBatchQs, name::Symbol)::Function
+function get_iterative_div_measure(name::Symbol)::Function
     if (name == :AngleDiversity)
-        strategy.div_measure = (model::SVDD.OCClassifier, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
+        return (model::SVDD.OCClassifier, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
             K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
             div_scores = [-abs(K[i,j]) / (sqrt(K[i,i]) * sqrt(K[j,j])) for i in candidate_indices]
             if (length(old_scores) > 0)
@@ -59,7 +59,7 @@ function set_iterative_div_measure!(strategy::MultiObjectiveBatchQs, name::Symbo
             return div_scores
         end
     elseif (name == :EuclideanDistance)
-        strategy.div_measure = (model::SVDD.OCClassifier, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
+        return (model::SVDD.OCClassifier, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
             data = model.data
             # vector containing norms of columns
             # use vec() as otherwise a row vector is returned as opposed to a column vector
@@ -81,9 +81,9 @@ currently two measures are implemented:
 :AngleDiversity - Batch diversity is minimal angle between two batch samples in kernel space
 :EuclideanDistance - Batch diversity is minimal euclidean distance between two batch samples in feature space
 """
-function set_enumerative_div_measure!(strategy::MultiObjectiveBatchQs, name::Symbol)::Function
+function get_enumerative_div_measure(name::Symbol)::Function
     if (name == :AngleDiversity)
-        strategy.div_measure = (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
             K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
             min_div = Inf
             batch_size = length(batch)
@@ -96,7 +96,7 @@ function set_enumerative_div_measure!(strategy::MultiObjectiveBatchQs, name::Sym
             return min_div
         end
     elseif (name == :EuclideanDistance)
-        strategy.div_measure = (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
             # Compute pairwise distances, save only upper diagonal matrix
             distances = LinearAlgebra.UpperTriangular(Distances.pairwise(Distances.Euclidean(), data, dims=2))
             # Values on diagonal are always 0
@@ -112,4 +112,8 @@ end
 
 function min_max_normalization(x::Vector{Float64})::Vector{Float64}
     return (x .- min(x...)) ./ (max(x...) - min(x...))
+end
+
+function normalize_weights(weights...)
+    return weights ./ sum(weights)
 end

@@ -1,4 +1,5 @@
 @testset "BatchQueryStrategies" begin
+    BQS = OneClassActiveLearning.QueryStrategies.BatchQueryStrategies
 
     dummy_data, dummy_labels = load_data(TEST_DATA_FILE)
     classifier = SVDD.RandomOCClassifier(dummy_data)
@@ -18,6 +19,10 @@
             @test length(batch_indices) == min(length(candidates), batch_size)
             @test issubset(batch_indices, Set(candidates))
         end
+    end
+
+    @testset "batch_qs utils" begin
+        @test all(BQS.normalize_weights(1, 1, 1) .≈ (1/3, 1/3, 1/3))
     end
 
     @testset "batch_qs" begin

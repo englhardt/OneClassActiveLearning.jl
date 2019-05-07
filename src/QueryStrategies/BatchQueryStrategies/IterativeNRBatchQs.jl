@@ -1,4 +1,4 @@
-mutable struct IterativeNRBatchQs <: MultiObjectiveBatchQs
+struct IterativeNRBatchQs <: MultiObjectiveBatchQs
     model::SVDD.OCClassifier
     inf_measure::SequentialPQs
     rep_measure::Function
@@ -15,21 +15,10 @@ mutable struct IterativeNRBatchQs <: MultiObjectiveBatchQs
         (model == nothing) && throw(ArgumentError("No model specified."))
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
-        # normalize λs
-        λ_s = λ_inf + λ_rep + λ_div
-        λ_inf = λ_inf / λ_s
-        λ_rep = λ_rep / λ_s
-        λ_div = λ_div / λ_s
-
-        not_initialized = x->throw(ErrorException("Calling not initialized function."))
-        # min_max_normalization function can be found in batch_qs_base.jl
-        strategy = new(model, informativeness, not_initialized, not_initialized, min_max_normalization, k, λ_inf, λ_rep, λ_div)
-
-        # set up measures
-        set_rep_measure!(strategy, representativeness)
-        set_iterative_div_measure!(strategy, diversity)
-
-        return strategy
+        λ_inf, λ_rep, λ_div = normalize_weights(λ_inf, λ_rep, λ_div)
+        representativeness_measure = get_rep_measure(representativeness)
+        diversity_measure = get_iterative_div_measure(diversity)
+        return new(model, informativeness, representativeness_measure, diversity_measure, min_max_normalization, k, λ_inf, λ_rep, λ_div)
     end
 end
 
@@ -45,11 +34,11 @@ function select_batch(qs::IterativeNRBatchQs, x::Array{T, 2}, labels::Dict{Symbo
         return candidate_indices
     end
 
-    #informativeness needs to be computed once every iteration
+    #informativeness
     inf_scores_normalized = qs.normalization(qs_score(qs.inf_measure, x, labels)[candidate_indices])
 
-    # representativeness needs to be computed once
-    rep_scores_normalized = qs.normalization(qs.rep_measure(x, labels, candidate_indices))
+    # representativeness
+    rep_scores_normalized = qs.normalization(qs.rep_measure(qs.model, x, labels, candidate_indices))
 
     batch_samples = []
     div_scores_normalized = Float64[]

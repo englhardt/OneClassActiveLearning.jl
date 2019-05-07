@@ -1,4 +1,4 @@
-mutable struct GreedyHierarchicalBatchQs <: MultiObjectiveBatchQs
+struct GreedyHierarchicalBatchQs <: MultiObjectiveBatchQs
     model::SVDD.OCClassifier
     inf_measure::SequentialPQs
     rep_measure::Function
@@ -11,14 +11,9 @@ mutable struct GreedyHierarchicalBatchQs <: MultiObjectiveBatchQs
         (model == nothing) && throw(ArgumentError("No model specified."))
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
-        not_initialized = x->throw(ErrorException("Calling not initialized function."))
-        strategy = new(model, informativeness, not_initialized, not_initialized, k)
-
-        # set up measures
-        set_rep_measure!(strategy, representativeness)
-        set_iterative_div_measure!(strategy, diversity)
-
-        return strategy
+        representativeness_measure = get_rep_measure(representativeness)
+        diversity_measure = get_iterative_div_measure(diversity)
+        return new(model, informativeness, representativeness_measure, diversity_measure, k)
     end
 end
 
@@ -34,11 +29,11 @@ function select_batch(qs::GreedyHierarchicalBatchQs, x::Array{T, 2}, labels::Dic
         return candidate_indices
     end
 
-    # representativeness first
-    rep_scores = qs.rep_measure(x, labels, candidate_indices)
+    # representativeness
+    rep_scores = qs.rep_measure(qs.model, x, labels, candidate_indices)
     most_representative_indices = candidate_indices[sortperm(rep_scores, rev=true)[1:min(4*qs.k, num_observations)]]
 
-    #informativeness second
+    #informativeness
     inf_scores = qs_score(qs.inf_measure, x, labels)[most_representative_indices]
     batch_candidate_indices = most_representative_indices[sortperm(inf_scores, rev=true)[1:min(2*qs.k, num_observations)]]
 
