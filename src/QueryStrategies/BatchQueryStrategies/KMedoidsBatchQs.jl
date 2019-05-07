@@ -19,7 +19,7 @@ function select_batch(qs::KMedoidsBatchQs, x::Array{T, 2}, labels::Dict{Symbol, 
     end
 
     candidates = x[:, candidate_indices]
-    distances = Distances.pairwise(Distances.Euclidean(), candidates)
+    distances = Distances.pairwise(Distances.Euclidean(), candidates, dims=2)
     clustering = kmedoids(distances, qs.k)
 
     medoid_indices = clustering.medoids

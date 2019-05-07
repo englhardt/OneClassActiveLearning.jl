@@ -31,7 +31,7 @@ function select_batch(qs::ClusterBatchQs, x::Array{T, 2}, labels::Dict{Symbol, V
     descending_indices = sortperm(candidate_scores; rev=true)
     best_m = x[:, candidate_indices[descending_indices[1:m]]]
 
-    distances = Distances.pairwise(Distances.Euclidean(), best_m)
+    distances = Distances.pairwise(Distances.Euclidean(), best_m, dims=2)
     clustering = kmedoids(distances, qs.k)
 
     medoid_indices = clustering.medoids

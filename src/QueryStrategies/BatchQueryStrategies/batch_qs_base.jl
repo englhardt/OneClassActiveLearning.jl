@@ -98,7 +98,7 @@ function set_enumerative_div_measure!(strategy::MultiObjectiveBatchQs, name::Sym
     elseif (name == :EuclideanDistance)
         strategy.div_measure = (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
             # Compute pairwise distances, save only upper diagonal matrix
-            distances = LinearAlgebra.UpperTriangular(Distances.pairwise(Distances.Euclidean(), data, data))
+            distances = LinearAlgebra.UpperTriangular(Distances.pairwise(Distances.Euclidean(), data, dims=2))
             # Values on diagonal are always 0
             # ignore them for minimum computation by setting them to Inf
             distances[LinearAlgebra.diagind(distances)] .= Inf
