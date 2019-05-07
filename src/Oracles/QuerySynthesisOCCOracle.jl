@@ -26,6 +26,6 @@ function QuerySynthesisOCCOracle(data, labels, params::Dict{Symbol, Any})
     return QuerySynthesisOCCOracle(params[:classifier_type], params[:init_strategy], data, labels, params[:solver], additional_params...)
 end
 
-function ask_oracle(oracle::QuerySynthesisOCCOracle, query_object::Array{T, 2})::Vector{Symbol} where T <: Real
-    return SVDD.classify.(SVDD.predict(oracle.classifier, query_object))
+function ask_oracle(oracle::QuerySynthesisOCCOracle, query_objects::Array{T, 2})::Vector{Symbol} where T <: Real
+    return SVDD.classify.(SVDD.predict(oracle.classifier, query_objects))
 end
