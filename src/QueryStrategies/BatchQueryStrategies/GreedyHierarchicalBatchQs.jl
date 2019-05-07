@@ -41,7 +41,7 @@ function select_batch(qs::GreedyHierarchicalBatchQs, x::Array{T, 2}, labels::Dic
     batch_samples = [batch_candidate_indices[1]]
     for iteration in 2:qs.k
 
-        div_scores = qs.div_measure(qs.model, candidate_indices, batch_samples[end], div_scores)
+        div_scores = qs.div_measure(qs.model, x, candidate_indices, batch_samples[end], div_scores)
         # find candidate with best score
         best_sample_index = candidate_indices[argmax(div_scores)]
 

@@ -49,7 +49,7 @@ function select_batch(qs::IterativeNRBatchQs, x::Array{T, 2}, labels::Dict{Symbo
             # first sample for new batch cannot compute diversity to existing samples
             combined_scores = qs.λ_inf * inf_scores_normalized - qs.λ_rep * rep_scores_normalized
         else
-            div_scores_normalized = qs.normalization(qs.div_measure(qs.model, candidate_indices, batch_samples[end], div_scores_normalized))
+            div_scores_normalized = qs.normalization(qs.div_measure(qs.model, x, candidate_indices, batch_samples[end], div_scores_normalized))
             # use normalization function to make value ranges comparable
             combined_scores = qs.λ_inf * inf_scores_normalized - qs.λ_rep * rep_scores_normalized + qs.λ_div * div_scores_normalized
             # ignore samples already in current batch

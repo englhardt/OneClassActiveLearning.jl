@@ -37,7 +37,7 @@ function get_rep_measure(name::Symbol)::Function
     if (name == :KDE)
         return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int}) -> begin
             γ = MLKernels.getvalue(model.kernel_fct.alpha)
-            return multi_kde(data, γ)(data[:,candidate_indices])
+            return multi_kde(data, γ)(data[:, candidate_indices])
         end
     else
         return throw(ArgumentError("Invalid representativeness measure $(name) specified."))
@@ -50,8 +50,14 @@ Iterative computation: only value for added sample needs to be computed, old_sco
 """
 function get_iterative_div_measure(name::Symbol)::Function
     if (name == :AngleDiversity)
-        return (model::SVDD.OCClassifier, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
-            K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
+            if model.data == data
+                # reuse model kernel matrix
+                K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
+            else
+                # compute a new kernel matrix because query data differs from model data
+                K = MLKernels.kernelmatrix(Val(:col), model.kernel_fct, data)
+            end
             div_scores = [-abs(K[i,j]) / (sqrt(K[i,i]) * sqrt(K[j,j])) for i in candidate_indices]
             if (length(old_scores) > 0)
                 div_scores = min.(div_scores, old_scores)
@@ -59,8 +65,7 @@ function get_iterative_div_measure(name::Symbol)::Function
             return div_scores
         end
     elseif (name == :EuclideanDistance)
-        return (model::SVDD.OCClassifier, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
-            data = model.data
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
             # vector containing norms of columns
             # use vec() as otherwise a row vector is returned as opposed to a column vector
             div_scores = Distances.colwise(Distances.Euclidean(), data[:,candidate_indices], data[:,j])
@@ -84,7 +89,13 @@ currently two measures are implemented:
 function get_enumerative_div_measure(name::Symbol)::Function
     if (name == :AngleDiversity)
         return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
-            K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
+            if model.data == data
+                # reuse model kernel matrix
+                K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
+            else
+                # compute a new kernel matrix because query data differs from model data
+                K = MLKernels.kernelmatrix(Val(:col), model.kernel_fct, data)
+            end
             min_div = Inf
             batch_size = length(batch)
             for i in 1:batch_size
