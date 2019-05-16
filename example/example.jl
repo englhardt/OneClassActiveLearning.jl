@@ -1,6 +1,6 @@
 using Logging
 
-example_scenario = joinpath(@__DIR__, "example_batch_qs.jl")
+example_scenario = joinpath(@__DIR__, "example_pool_qs.jl")
 if !isempty(ARGS)
     length(ARGS) > 1 && error("Please only supply one scenario.")
     example_scenario = joinpath(@__DIR__, "example_$(ARGS[1]).jl")
