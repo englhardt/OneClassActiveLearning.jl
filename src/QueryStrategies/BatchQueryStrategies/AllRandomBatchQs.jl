@@ -16,5 +16,5 @@ function select_batch(qs::AllRandomBatchQs, x::Array{T, 2}, labels::Dict{Symbol,
         return candidate_indices
     end
 
-    return sample(candidate_indices, qs.k, replace=false, ordered=true)
+    return sample(candidate_indices, qs.k, replace=false)
 end

@@ -26,6 +26,6 @@ function select_batch(qs::RandomBestBatchQs, x::Array{T, 2}, labels::Dict{Symbol
     # find best k+m elements
     best_k_m = candidate_indices[descending_indices[1:min(qs.k + qs.m, end)]]
     # take random sample of size k from best elements
-    best_sampled = sample(best_k_m, qs.k, replace=false, ordered=true)
+    best_sampled = sample(best_k_m, qs.k, replace=false)
     return best_sampled
 end

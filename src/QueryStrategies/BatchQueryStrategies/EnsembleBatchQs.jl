@@ -19,7 +19,7 @@ struct EnsembleBatchQs <: BatchPQs
             new_model = deepcopy(model)
             push!(batch_models, new_model)
             # sample 1 / k indices
-            indices = sample(1:num_observations, samples_per_batch, replace=false, ordered=true)
+            indices = sample(1:num_observations, samples_per_batch, replace=false)
             push!(model_indices, indices)
         end
         return new(model, k, sequential_strategy, solver, model_indices, batch_models)

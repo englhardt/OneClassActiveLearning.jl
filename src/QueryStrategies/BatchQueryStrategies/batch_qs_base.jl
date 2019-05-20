@@ -35,9 +35,9 @@ Only KDE is supported so far.
 """
 function get_rep_measure(name::Symbol)::Function
     if (name == :KDE)
-        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int}) -> begin
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, labels::Dict{Symbol, Vector{Int}}, batch::Vector{Int}) -> begin
             γ = MLKernels.getvalue(model.kernel_fct.alpha)
-            return multi_kde(data, γ)(data[:, candidate_indices])
+            return multi_kde(data, γ)(data[:, batch])
         end
     else
         return throw(ArgumentError("Invalid representativeness measure $(name) specified."))
@@ -50,7 +50,7 @@ Iterative computation: only value for added sample needs to be computed, old_sco
 """
 function get_iterative_div_measure(name::Symbol)::Function
     if (name == :AngleDiversity)
-        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}, candidate::Int, old_scores::Vector{Float64}) -> begin
             if model.data == data
                 # reuse model kernel matrix
                 K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
@@ -58,16 +58,16 @@ function get_iterative_div_measure(name::Symbol)::Function
                 # compute a new kernel matrix because query data differs from model data
                 K = MLKernels.kernelmatrix(Val(:col), model.kernel_fct, data)
             end
-            div_scores = [-abs(K[i,j]) / (sqrt(K[i,i]) * sqrt(K[j,j])) for i in candidate_indices]
-            if (length(old_scores) > 0)
+            div_scores = [-abs(K[i, candidate]) / (sqrt(K[i, i]) * sqrt(K[candidate, candidate])) for i in batch]
+            if !isempty(old_scores)
                 div_scores = min.(div_scores, old_scores)
             end
             return div_scores
         end
     elseif (name == :EuclideanDistance)
-        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
-            div_scores = Distances.colwise(Distances.Euclidean(), data[:,candidate_indices], data[:,j])
-            if (length(old_scores) > 0)
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}, candidate::Int, old_scores::Vector{Float64}) -> begin
+            div_scores = Distances.colwise(Distances.Euclidean(), data[:, batch], data[:, candidate])
+            if !isempty(old_scores)
                 div_scores = min.(div_scores, old_scores)
             end
             return div_scores
@@ -98,7 +98,7 @@ function get_div_measure(name::Symbol)::Function
             batch_size = length(batch)
             for i in 1:batch_size
                 for j in i+1:batch_size
-                    @inbounds div = -abs(K[i,j]) / (sqrt(K[i,i]) * sqrt(K[j,j]))
+                    @inbounds div = -abs(K[i, j]) / (sqrt(K[i, i]) * sqrt(K[j, j]))
                     min_div = min(div, min_div)
                 end
             end
