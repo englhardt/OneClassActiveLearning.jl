@@ -7,7 +7,7 @@ abstract type MultiObjectiveBatchQs <: BatchPQs end
 Applies batch_query_strategy to select the most useful unlabeled observations
 from query_data.
 
-label_map is used to find out which observations in query_data are still unlabeled,
+pools is used to find out which observations in query_data are still unlabeled,
 candidate_indices is used to find out which observations in query_data are valid
 candidates for the query.
 
@@ -22,7 +22,7 @@ function get_query_objects(qs::BatchPQs,
                            history::Vector{Vector{Int}})::Vector{Int}
     pool_map = MLLabelUtils.labelmap(pools)
     haskey(pool_map, :U) || throw(ArgumentError("No more points that are unlabeled."))
-    all_history_values = (length(history) > 0) && (collect(Iterators.flatten(history)))
+    all_history_values = collect(Iterators.flatten(history))
     candidate_indices = [i for i in pool_map[:U] if global_indices[i] ∉ all_history_values]
     debug(getlogger(@__MODULE__), "[QS] Selecting best batch of $(qs.k) from $(length(candidate_indices)) candidates.")
     local_query_indices = select_batch(qs, query_data, pool_map, candidate_indices)
@@ -66,8 +66,6 @@ function get_iterative_div_measure(name::Symbol)::Function
         end
     elseif (name == :EuclideanDistance)
         return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, candidate_indices::Vector{Int}, j::Int, old_scores::Vector{Float64}) -> begin
-            # vector containing norms of columns
-            # use vec() as otherwise a row vector is returned as opposed to a column vector
             div_scores = Distances.colwise(Distances.Euclidean(), data[:,candidate_indices], data[:,j])
             if (length(old_scores) > 0)
                 div_scores = min.(div_scores, old_scores)
@@ -81,12 +79,12 @@ end
 
 """
 div_measure computes diversity of the samples in a batch
-enumerative computation: compute diversity for the whole batch each time
+enumerative computation: compute diversity for the whole batch from scratch
 currently two measures are implemented:
 :AngleDiversity - Batch diversity is minimal angle between two batch samples in kernel space
 :EuclideanDistance - Batch diversity is minimal euclidean distance between two batch samples in feature space
 """
-function get_enumerative_div_measure(name::Symbol)::Function
+function get_div_measure(name::Symbol)::Function
     if (name == :AngleDiversity)
         return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
             if model.data == data
@@ -122,9 +120,9 @@ function get_enumerative_div_measure(name::Symbol)::Function
 end
 
 function min_max_normalization(x::Vector{Float64})::Vector{Float64}
-    return (x .- min(x...)) ./ (max(x...) - min(x...))
+    return (x .- minimum(x)) ./ (maximum(x) - minimum(x))
 end
 
 function normalize_weights(weights...)
-    return weights ./ sum(weights)
+    return weights ./ sum(abs.(weights))
 end

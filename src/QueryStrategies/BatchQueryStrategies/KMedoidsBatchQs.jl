@@ -9,7 +9,7 @@ end
 
 """
 For maximum diversity in batch selection.
-Compute k-medoids clustering with k=batchsize, return cluster centers
+Compute k-medoids clustering with k=batchsize, return cluster medoids
 """
 function select_batch(qs::KMedoidsBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)

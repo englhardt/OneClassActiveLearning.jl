@@ -36,9 +36,8 @@ function select_batch(qs::IterativeBatchQs, x::Array{T, 2}, labels::Dict{Symbol,
     # representativeness
     rep_scores_normalized = qs.normalization(qs.rep_measure(qs.model, x, labels, candidate_indices))
 
-    batch_samples = []
+    batch_samples = Int[]
     div_scores_normalized = Float64[]
-
     for iteration in 1:qs.k
         combined_scores = Vector{Float64}(undef, num_observations)
         if length(batch_samples) == 0
@@ -46,13 +45,10 @@ function select_batch(qs::IterativeBatchQs, x::Array{T, 2}, labels::Dict{Symbol,
             combined_scores = qs.λ_inf * inf_scores_normalized + qs.λ_rep * rep_scores_normalized
         else
             div_scores_normalized = qs.normalization(qs.div_measure(qs.model, x, candidate_indices, batch_samples[end], div_scores_normalized))
-            # use normalization function to make value ranges comparable
             combined_scores = qs.λ_inf * inf_scores_normalized + qs.λ_rep * rep_scores_normalized + qs.λ_div * div_scores_normalized
-            # ignore samples already in current batch
             batch_sample_indices = [ind for (ind, val) in enumerate(candidate_indices) if val in batch_samples]
             combined_scores[batch_sample_indices] .= -Inf
         end
-        # find candidate with best score
         best_sample_index = candidate_indices[argmax(combined_scores)]
 
         push!(batch_samples, best_sample_index)

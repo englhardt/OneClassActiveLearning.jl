@@ -23,6 +23,7 @@
 
     @testset "batch_qs utils" begin
         @test all(BQS.normalize_weights(1, 1, 1) .≈ (1/3, 1/3, 1/3))
+        @test all(BQS.normalize_weights(-1, 1, 1) .≈ (-1/3, 1/3, 1/3))
     end
 
     @testset "batch_qs" begin

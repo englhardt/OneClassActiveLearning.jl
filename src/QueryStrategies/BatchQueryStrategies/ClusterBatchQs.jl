@@ -23,10 +23,9 @@ function select_batch(qs::ClusterBatchQs, x::Array{T, 2}, labels::Dict{Symbol, V
         return candidate_indices
     end
 
-    m = min(num_observations, 10*qs.k)
+    m = min(num_observations, 10 * qs.k)
 
-    sequential_strategy = qs.sequentialQs
-    candidate_scores = qs_score(sequential_strategy, x, labels)[candidate_indices]
+    candidate_scores = qs_score(qs.sequentialQs, x, labels)[candidate_indices]
     descending_indices = sortperm(candidate_scores; rev=true)
     best_m = x[:, candidate_indices[descending_indices[1:m]]]
 
@@ -35,5 +34,5 @@ function select_batch(qs::ClusterBatchQs, x::Array{T, 2}, labels::Dict{Symbol, V
 
     medoid_indices = clustering.medoids
 
-    return candidate_indices[medoid_indices]
+    return return candidate_indices[descending_indices[1:m]][medoid_indices]
 end

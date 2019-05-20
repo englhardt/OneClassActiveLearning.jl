@@ -29,18 +29,16 @@ function select_batch(qs::GreedyHierarchicalBatchQs, x::Array{T, 2}, labels::Dic
 
     # representativeness
     rep_scores = qs.rep_measure(qs.model, x, labels, candidate_indices)
-    most_representative_indices = candidate_indices[sortperm(rep_scores, rev=true)[1:min(4*qs.k, num_observations)]]
+    most_representative_indices = candidate_indices[sortperm(rep_scores, rev=true)[1:min(4 * qs.k, num_observations)]]
 
     #informativeness
     inf_scores = qs_score(qs.inf_measure, x, labels)[most_representative_indices]
-    batch_candidate_indices = most_representative_indices[sortperm(inf_scores, rev=true)[1:min(2*qs.k, num_observations)]]
+    batch_candidate_indices = most_representative_indices[sortperm(inf_scores, rev=true)[1:min(2 * qs.k, num_observations)]]
 
+    batch_samples = batch_candidate_indices[1:1]
     div_scores = Float64[]
-    batch_samples = [batch_candidate_indices[1]]
     for iteration in 2:qs.k
-
         div_scores = qs.div_measure(qs.model, x, candidate_indices, batch_samples[end], div_scores)
-        # find candidate with best score
         best_sample_index = candidate_indices[argmax(div_scores)]
 
         push!(batch_samples, best_sample_index)

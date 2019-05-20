@@ -15,7 +15,7 @@ struct EnumerativeBatchQs <: MultiObjectiveBatchQs
 
         λ_inf, λ_rep, λ_div = normalize_weights(λ_inf, λ_rep, λ_div)
         representativeness_measure = get_rep_measure(representativeness)
-        diversity_measure = get_enumerative_div_measure(diversity)
+        diversity_measure = get_div_measure(diversity)
         return new(model, informativeness, representativeness_measure, diversity_measure, min_max_normalization, k, λ_inf, λ_rep, λ_div)
     end
 end

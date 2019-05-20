@@ -10,7 +10,7 @@ struct EnumHierarchicalBatchQs <: MultiObjectiveBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
         representativeness_measure = get_rep_measure(representativeness)
-        diversity_measure = get_enumerative_div_measure(diversity)
+        diversity_measure = get_div_measure(diversity)
         return new(model, informativeness, representativeness_measure, diversity_measure, k)
     end
 end

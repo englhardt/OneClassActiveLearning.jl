@@ -9,7 +9,6 @@ struct EnsembleBatchQs <: BatchPQs
     function EnsembleBatchQs(model::SVDD.OCClassifier, sequential_strategy::SequentialPQs; k::Int, solver::JuMP.OptimizerFactory)::EnsembleBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
-        model_data = model.data
         labels = MLLabelUtils.labelmap2vec(model.pools)
         num_observations = size(model.data, 2)
         samples_per_batch = ceil(Int, num_observations/k)
@@ -36,7 +35,6 @@ function select_batch(qs::EnsembleBatchQs, x::Array{T, 2}, labels::Dict{Symbol, 
         return candidate_indices
     end
 
-    model_data = qs.model.data
     label_list = MLLabelUtils.labelmap2vec(labels)
 
     batch_samples = []
@@ -44,7 +42,7 @@ function select_batch(qs::EnsembleBatchQs, x::Array{T, 2}, labels::Dict{Symbol, 
         # set ensemble model parameters (data + labels)
         indices = qs.model_indices[i]
         model = qs.batch_models[i]
-        SVDD.set_data!(model, model_data[:, indices])
+        SVDD.set_data!(model, qs.model.data[:, indices])
         SVDD.set_pools!(model, MLLabelUtils.labelmap(label_list[indices]))
 
         STDOUT_orig, STDERR_orig = stdout, stderr
@@ -58,13 +56,7 @@ function select_batch(qs::EnsembleBatchQs, x::Array{T, 2}, labels::Dict{Symbol, 
 
         candidate_scores = qs_score(qs.sequential_strategy, x, labels)[candidate_indices]
         descending_indices = sortperm(candidate_scores; rev=true)
-        for i in 1:qs.k
-            sample_ind = candidate_indices[descending_indices[i]]
-            if sample_ind ∉ batch_samples
-                push!(batch_samples, sample_ind)
-                break
-            end
-        end
+        push!(batch_samples, first(x for x in candidate_indices[descending_indices] if x ∉ batch_samples))
     end
     return batch_samples
 end
