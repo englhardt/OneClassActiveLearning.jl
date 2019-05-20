@@ -7,8 +7,6 @@ struct GreedyHierarchicalBatchQs <: MultiObjectiveBatchQs
 
     function GreedyHierarchicalBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol, diversity::Symbol,
         k::Int)::GreedyHierarchicalBatchQs
-        # check basic params
-        (model == nothing) && throw(ArgumentError("No model specified."))
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
         representativeness_measure = get_rep_measure(representativeness)

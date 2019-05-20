@@ -7,7 +7,6 @@ struct EnsembleBatchQs <: BatchPQs
     batch_models::Vector{SVDD.OCClassifier}
 
     function EnsembleBatchQs(model::SVDD.OCClassifier, sequential_strategy::SequentialPQs; k::Int, solver::JuMP.OptimizerFactory)::EnsembleBatchQs
-        (model == nothing) && throw(ArgumentError("No model specified."))
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
         model_data = model.data
