@@ -7,7 +7,7 @@ _A Julia package for One-Class Active Learning._
 This package implements active learning strategies for one-class learning.
 The package has been developed as part of a benchmark suite for [active learning](https://en.wikipedia.org/wiki/Active_learning_(machine_learning)) strategies for one-class classification. For more information about this research project, see the [OCAL project](https://www.ipd.kit.edu/ocal/) website, and the companion paper.
 
-> Holger Trittenbach, Adrian Englhardt, Klemens Böhm, "An Overview and a Benchmark of Active Learning for One-Class Classification" [arXiv:1808.04759](https://arxiv.org/abs/1808.04759), 14 Aug 2018
+> Holger Trittenbach, Adrian Englhardt, Klemens Böhm, "An Overview and a Benchmark of Active Learning for One-Class Classification" [arXiv:1808.04759v2](https://arxiv.org/abs/1808.04759v2), 14 May 2019
 
 ## Installation
 This package requires at least Julia 1.0.
