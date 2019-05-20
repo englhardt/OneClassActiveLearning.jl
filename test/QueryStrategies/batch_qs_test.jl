@@ -12,7 +12,7 @@
     batch_size = 5
 
     function test_batch_qs(qs_type, params::Dict{Symbol, Any}, classifier, data, labels, candidate_indices)
-        @test_throws Union{MethodError, ArgumentError} initialize_qs(qs_type, classifier, data, empty_params)
+        @test_throws Union{UndefKeywordError, MethodError, ArgumentError} initialize_qs(qs_type, classifier, data, empty_params)
         qs = initialize_qs(qs_type, classifier, data, Dict(params))
         for candidates in candidate_indices
             batch_indices = select_batch(qs, data, labels, candidates)
@@ -62,7 +62,7 @@
             params = Dict{Symbol, Any}(
                 :k => batch_size
             )
-            @test_throws ArgumentError initialize_qs(qs_type, SVDD.RandomOCClassifier(dummy_data), dummy_data, empty_params)
+            @test_throws UndefKeywordError initialize_qs(qs_type, SVDD.RandomOCClassifier(dummy_data), dummy_data, empty_params)
             test_batch_qs(qs_type, params, classifier, dummy_data, labels, candidate_indices)
         end
 

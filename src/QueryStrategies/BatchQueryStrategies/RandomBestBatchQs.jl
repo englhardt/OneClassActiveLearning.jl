@@ -3,7 +3,7 @@ struct RandomBestBatchQs <: ExtendingBatchQs
     k::Int
     m::Int
 
-    function RandomBestBatchQs(sequentialQs::SequentialPQs; k::Int=0, m::Int=0)::RandomBatchQs
+    function RandomBestBatchQs(sequentialQs::SequentialPQs; k::Int, m::Int=0)::RandomBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
         (m < 0) && throw(ArgumentError("Invalid batch increase m=$(m)."))
         return new(sequentialQs, k, m)

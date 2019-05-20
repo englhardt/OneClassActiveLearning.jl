@@ -1,7 +1,7 @@
 struct AllRandomBatchQs <: BatchPQs
     k::Int
 
-    function AllRandomBatchQs(;k::Int=0)::AllRandomBatchQs
+    function AllRandomBatchQs(; k::Int)::AllRandomBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
         return new(k)
     end

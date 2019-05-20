@@ -5,8 +5,8 @@ struct GreedyHierarchicalBatchQs <: MultiObjectiveBatchQs
     div_measure::Function
     k::Int
 
-    function GreedyHierarchicalBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol=nothing, diversity::Symbol=nothing,
-        k::Int=0)::GreedyHierarchicalBatchQs
+    function GreedyHierarchicalBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol, diversity::Symbol,
+        k::Int)::GreedyHierarchicalBatchQs
         # check basic params
         (model == nothing) && throw(ArgumentError("No model specified."))
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))

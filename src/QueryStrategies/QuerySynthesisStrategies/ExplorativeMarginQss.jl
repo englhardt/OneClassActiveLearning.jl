@@ -8,7 +8,7 @@ mutable struct ExplorativeMarginQss <: HybridQss
     lambda::Float64
     use_penalty::Bool
     eps
-    function ExplorativeMarginQss(occ, data; solver=nothing, optimizer=nothing,
+    function ExplorativeMarginQss(occ, data; solver::JuMP.OptimizerFactory, optimizer::QuerySynthesisOptimizer,
                                   boundary_shift_agg_func=:maximum, lambda=1.0, use_penalty=true)
         !isa(occ.kernel_fct, SquaredExponentialKernel) && throw(ArgumentError("Invalid kernel type $(typeof(occ.kernel_fct)). Expected type is a SquaredExponentialKernel."))
         occ_eps = SVDD.SVDDnegEps(data, fill(:U, size(data, 2)))

@@ -2,7 +2,7 @@ struct TopKBatchQs <: ExtendingBatchQs
     sequentialQs::SequentialPQs
     k::Int
 
-    function TopKBatchQs(sequentialQs::SequentialPQs; k::Int=0)::TopKBatchQs
+    function TopKBatchQs(sequentialQs::SequentialPQs; k::Int)::TopKBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
         return new(sequentialQs, k)
     end

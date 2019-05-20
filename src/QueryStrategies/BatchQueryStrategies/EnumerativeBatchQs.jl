@@ -9,8 +9,8 @@ struct EnumerativeBatchQs <: MultiObjectiveBatchQs
     λ_rep::Float64
     λ_div::Float64
 
-    function EnumerativeBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol=nothing, diversity::Symbol=nothing,
-        k::Int=0, λ_inf::T1 where T1<:Real =0.33, λ_rep::T2 where T2 <: Real=0.33, λ_div::T3 where T3 <: Real=0.33)::EnumerativeBatchQs
+    function EnumerativeBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol, diversity::Symbol,
+        k::Int, λ_inf::T1 where T1<:Real=0.33, λ_rep::T2 where T2 <: Real=0.33, λ_div::T3 where T3 <: Real=0.33)::EnumerativeBatchQs
         # check basic params
         (model == nothing) && throw(ArgumentError("No model specified."))
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
