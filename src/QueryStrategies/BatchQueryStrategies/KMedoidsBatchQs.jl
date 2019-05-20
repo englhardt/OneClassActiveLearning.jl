@@ -1,10 +1,9 @@
 struct KMedoidsBatchQs <: BatchPQs
     k::Int
-    max_iterations::Int
 
-    function KMedoidsBatchQs(;k::Int, max_iterations::Int=1000)::KMedoidsBatchQs
+    function KMedoidsBatchQs(; k::Int)::KMedoidsBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
-        return new(k, max_iterations)
+        return new(k)
     end
 end
 

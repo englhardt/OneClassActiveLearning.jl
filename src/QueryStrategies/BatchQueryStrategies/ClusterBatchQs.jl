@@ -2,11 +2,10 @@ struct ClusterBatchQs <: BatchPQs
     model::SVDD.OCClassifier
     sequentialQs::SequentialPQs
     k::Int
-    max_iterations::Int
 
-    function ClusterBatchQs(model::SVDD.OCClassifier, sequential_strategy::SequentialPQs; k::Int, max_iterations::Int=1000)::ClusterBatchQs
+    function ClusterBatchQs(model::SVDD.OCClassifier, sequential_strategy::SequentialPQs; k::Int)::ClusterBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
-        return new(model, sequential_strategy, k, max_iterations)
+        return new(model, sequential_strategy, k)
     end
 end
 
