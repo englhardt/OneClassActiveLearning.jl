@@ -12,7 +12,10 @@ function QuerySynthesisKNNOracle(data::Array{T, 2}, labels::Vector{Symbol}, para
     return QuerySynthesisKNNOracle(data, labels, k, dist_func)
 end
 
-function ask_oracle(oracle::QuerySynthesisKNNOracle, query_object)
-    sorted_distances = sort([(i, oracle.dist_func(query_object, oracle.data[:, i]), oracle.labels[i]) for i in 1:size(oracle.data, 2)], by = x -> x[2])[1:oracle.k]
-    return count([x[3] for x in sorted_distances] .== :inlier) > length(sorted_distances) * 0.5 ? :inlier : :outlier
+function ask_oracle(oracle::QuerySynthesisKNNOracle, query_objects::Array{T, 2})::Vector{Symbol} where T <: Real
+    function ask_oracle(q)
+        sorted_distances = sort([(i, oracle.dist_func(q, oracle.data[:, i]), oracle.labels[i]) for i in 1:size(oracle.data, 2)], by = x -> x[2])[1:oracle.k]
+        return count([x[3] for x in sorted_distances] .== :inlier) > length(sorted_distances) * 0.5 ? :inlier : :outlier
+    end
+    return [ask_oracle(query_objects[:, i]) for i in 1:size(query_objects, 2)]
 end

@@ -1,4 +1,3 @@
-# The subspace example requires the Gurobi solver
 using Gurobi
 const DATA_FILE = joinpath(@__DIR__, "dummy.csv")
 const NUM_DIMENSIONS, NUM_OBSERVATIONS = size(load_data(DATA_FILE)[1])
@@ -8,17 +7,17 @@ experiment = Dict{Symbol, Any}(
     :hash => 1,
     :data_file => DATA_FILE,
     :data_set_name => "Dummy",
-    :output_file => joinpath(@__DIR__, "example_subspace_qs.json"),
-    :log_dir => joinpath(@__DIR__, "example_subspace_qs.log"),
+    :output_file => joinpath(@__DIR__, "example_batch_qs.json"),
+    :log_dir => joinpath(@__DIR__, "example_batch_qs.log"),
     :split_strategy_name => "Sf",
     :initial_pool_strategy_name => "Pu",
-    :model => Dict(:type => :SubSVDD,
-                   :param => Dict{Symbol, Any}(:subspaces => [[1,2], [6,7]]),
-                   :init_strategy => SimpleSubspaceStrategy(RuleOfThumbScott(),
-                                                            FixedCStrategy(0.1),
-                                                            gamma_scope=Val(:Subspace))),
-    :query_strategy => Dict(:type => :(SubspaceQs{RandomPQs}),
-                           :param => Dict{Symbol, Any}(:subspaces => [[1,2], [6,7]])),
+    :model => Dict(:type => :SVDDneg,
+                   :param => Dict{Symbol, Any}(),
+                   :init_strategy => SimpleCombinedStrategy(RuleOfThumbScott(), BoundedTaxErrorEstimate(0.05, 0.02, 0.98))),
+    :query_strategy => Dict(:type => :AllRandomBatchQs,
+                            :param => Dict{Symbol, Any}(
+                                :k => 8
+                            )),
     :split_strategy => OneClassActiveLearning.DataSplits(trues(NUM_OBSERVATIONS)),
     :oracle => Dict{Symbol, Any}(
         :type => :PoolOracle,

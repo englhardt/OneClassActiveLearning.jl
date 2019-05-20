@@ -100,7 +100,7 @@
             end
         end
 
-        @testset "process_query!" begin
+        @testset "process_queries!" begin
             data = rand(4,10)
             subspaces = [[1,2], [3,4]]
             pools = fill(:U, size(data,2))
@@ -120,7 +120,7 @@
                 model = SVDD.SubSVDD(train_data, subspaces, train_pools)
                 set_param!(model, Dict(:weight_update_strategy => update_strategy))
                 initialize!(model, init_strategy)
-                data_updated, pools_updated, labels_updated = OneClassActiveLearning.process_query!(global_query_ids, query_labels, model, split_strategy, data, pools, labels)
+                data_updated, pools_updated, labels_updated = OneClassActiveLearning.process_queries!(global_query_ids, query_labels, model, split_strategy, data, pools, labels)
                 # FullSplit -> first train index and third train index are updated
                 @test all(model.v .== [5.0, 1.0, 42.0, 1.0, 1.0, 1.0, 1.0, 1.0])
             end
@@ -132,7 +132,7 @@
                 set_param!(model, Dict(:weight_update_strategy => update_strategy))
                 initialize!(model, init_strategy)
 
-                data_updated, pools_updated, labels_updated = OneClassActiveLearning.process_query!(global_query_ids, query_labels, model, split_strategy, data, pools, labels)
+                data_updated, pools_updated, labels_updated = OneClassActiveLearning.process_queries!(global_query_ids, query_labels, model, split_strategy, data, pools, labels)
                 # FullSplit -> first train observation is removed because it is labled :Lout, second train observation in updated data set is updated
                 @test all(model.v .== [1.0, 42.0, 1.0, 1.0, 1.0, 1.0, 1.0])
             end

@@ -1,10 +1,12 @@
 module SubspaceQueryStrategies
 
+using Memento
+
 import MLLabelUtils
 import ..QueryStrategies:
     QueryStrategy,
 
-    get_query_object,
+    get_query_objects,
     initialize_qs,
     qs_score
 

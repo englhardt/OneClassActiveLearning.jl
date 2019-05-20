@@ -11,9 +11,9 @@ matrix:
 notifications:
   email: false
 addons:
-    apt_packages:
-        - gfortran
-        - hdf5-tools
+  apt_packages:
+    - gfortran
+    - hdf5-tools
 
 cache:
     directories:

@@ -20,12 +20,14 @@ function __init__()
     copy!(gaussian_kde, PyCall.pyimport_conda("scipy.stats", "scipy").gaussian_kde)
 end
 
-
 include("qs_base.jl")
 include("qs_utils.jl")
 
 include("SequentialQueryStrategies/SequentialQueryStrategies.jl")
 @reexport using .SequentialQueryStrategies
+
+include("BatchQueryStrategies/BatchQueryStrategies.jl")
+@reexport using .BatchQueryStrategies
 
 include("QuerySynthesisStrategies/QuerySynthesisStrategies.jl")
 @reexport using .QuerySynthesisStrategies
@@ -41,7 +43,7 @@ export
     HybridQuerySynthesisPQs,
     KDEException, MissingLabelTypeException,
 
-    get_query_object,
+    get_query_objects,
     initialize_qs,
     qs_score,
     multi_kde,

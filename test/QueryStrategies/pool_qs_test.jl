@@ -1,5 +1,5 @@
 
-@testset "QueryStrategies" begin
+@testset "SequentialQueryStrategies" begin
 
     dummy_data, _ = load_data(TEST_DATA_FILE)
 
@@ -98,9 +98,9 @@
         end
 
         @testset "Unknown Strategy" begin
-            @test_throws ErrorException qs = initialize_qs(Vector{Int}, SVDD.RandomOCClassifier(dummy_data), dummy_data, params)
+            @test_throws ErrorException initialize_qs(Vector{Int}, SVDD.RandomOCClassifier(dummy_data), dummy_data, params)
         end
-         
+
         @testset "multiple classifiers" begin
 
             pools = fill(:U, size(dummy_data, 2))
@@ -149,17 +149,17 @@
         end
     end
 
-    @testset "get_query_object" begin
+    @testset "get_query_objects" begin
         qs = OneClassActiveLearning.TestPQs()
         @testset "a" begin
             data = rand(2, 6)
             pools = fill(:U, 6)
             pools[5] = :Lin
             indices = [1, 3, 5, 7, 9, 11]
-            history = [7]
+            history = [[7]]
             @test scores = OneClassActiveLearning.qs_score(qs, data, MLLabelUtils.labelmap(pools)) == collect(1:6)
-            @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
-            @test OneClassActiveLearning.get_query_object(qs, data, pools, indices, history) == 11
+            @test_throws ArgumentError OneClassActiveLearning.get_query_objects(qs, data, fill(:Lin, 5), indices, history)
+            @test OneClassActiveLearning.get_query_objects(qs, data, pools, indices, history) == [11]
         end
 
         @testset "b" begin
@@ -167,10 +167,10 @@
             pools = fill(:U, 5)
             pools[5] = :Lin
             indices = [1, 2, 4, 7, 9]
-            history = [7]
+            history = [[7]]
             @test scores = OneClassActiveLearning.qs_score(qs, data, MLLabelUtils.labelmap(pools)) == collect(1:5)
-            @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
-            @test OneClassActiveLearning.get_query_object(qs, data, pools, indices, history) == 4
+            @test_throws ArgumentError OneClassActiveLearning.get_query_objects(qs, data, fill(:Lin, 5), indices, history)
+            @test OneClassActiveLearning.get_query_objects(qs, data, pools, indices, history) == [4]
         end
     end
 
@@ -181,10 +181,11 @@
         pools = fill(:U, 5)
         pools[5] = :Lin
         indices = [1, 2, 4, 7, 9]
-        history = [7]
-        @test_throws ArgumentError OneClassActiveLearning.get_query_object(qs, data, fill(:Lin, 5), indices, history)
-        query_index = OneClassActiveLearning.get_query_object(qs, data, pools, indices, history)
-        @test query_index ∈ indices
-        @test query_index ∉ history
+        history = [[7]]
+        @test_throws ArgumentError OneClassActiveLearning.get_query_objects(qs, data, fill(:Lin, 5), indices, history)
+        query_index = OneClassActiveLearning.get_query_objects(qs, data, pools, indices, history)
+        @test length(query_index) == 1
+        @test query_index[1] ∈ indices
+        @test query_index[1] ∉ history
     end
 end

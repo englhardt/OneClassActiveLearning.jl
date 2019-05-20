@@ -5,7 +5,7 @@ mutable struct NaiveExplorativeMarginQss <: HybridQss
     lambda::Float64
     use_penalty::Bool
     eps
-    function NaiveExplorativeMarginQss(occ, data; optimizer=nothing, boundary_shift_agg_func=:maximum, lambda=1.0, use_penalty=true)
+    function NaiveExplorativeMarginQss(occ, data; optimizer::QuerySynthesisOptimizer, boundary_shift_agg_func=:maximum, lambda=1.0, use_penalty=true)
         !isa(occ.kernel_fct, MLKernels.SquaredExponentialKernel) && throw(ArgumentError("Invalid kernel type $(typeof(occ.kernel_fct)). Expected type is a SquaredExponentialKernel."))
         new(occ, optimizer, boundary_shift_agg_func, lambda, use_penalty, nothing)
     end
