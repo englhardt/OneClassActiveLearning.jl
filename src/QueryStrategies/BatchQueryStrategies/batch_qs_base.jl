@@ -122,7 +122,3 @@ end
 function min_max_normalization(x::Vector{Float64})::Vector{Float64}
     return (x .- minimum(x)) ./ (maximum(x) - minimum(x))
 end
-
-function normalize_weights(weights...)
-    return weights ./ sum(abs.(weights))
-end

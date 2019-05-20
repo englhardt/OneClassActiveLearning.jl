@@ -10,10 +10,9 @@ struct EnumerativeBatchQs <: MultiObjectiveBatchQs
     λ_div::Float64
 
     function EnumerativeBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol, diversity::Symbol,
-        k::Int, λ_inf::T1 where T1<:Real=0.33, λ_rep::T2 where T2 <: Real=0.33, λ_div::T3 where T3 <: Real=0.33)::EnumerativeBatchQs
+        k::Int, λ_inf::T1 where T1<:Real=1, λ_rep::T2 where T2 <: Real=1, λ_div::T3 where T3 <: Real=1)::EnumerativeBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
-        λ_inf, λ_rep, λ_div = normalize_weights(λ_inf, λ_rep, λ_div)
         representativeness_measure = get_rep_measure(representativeness)
         diversity_measure = get_div_measure(diversity)
         return new(model, informativeness, representativeness_measure, diversity_measure, min_max_normalization, k, λ_inf, λ_rep, λ_div)
