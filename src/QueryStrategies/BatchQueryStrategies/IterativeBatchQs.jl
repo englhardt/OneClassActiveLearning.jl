@@ -36,15 +36,17 @@ function select_batch(qs::IterativeBatchQs, x::Array{T, 2}, labels::Dict{Symbol,
     rep_scores_normalized = qs.normalization(qs.rep_measure(qs.model, x, labels, candidate_indices))
 
     batch_samples = Int[]
-    div_scores_normalized = Float64[]
+    div_scores = Float64[]
     for iteration in 1:qs.k
         combined_scores = Vector{Float64}(undef, num_observations)
         if length(batch_samples) == 0
             # first sample for new batch cannot compute diversity to existing samples
             combined_scores = qs.λ_inf * inf_scores_normalized + qs.λ_rep * rep_scores_normalized
         else
-            div_scores_normalized = qs.normalization(qs.div_measure(qs.model, x, batch_samples[end], candidate_indices, div_scores_normalized))
-            combined_scores = qs.λ_inf * inf_scores_normalized + qs.λ_rep * rep_scores_normalized + qs.λ_div * div_scores_normalized
+            div_scores = qs.div_measure(qs.model, x, batch_samples[end], candidate_indices, div_scores)
+            # unormalized div_scores are needed for incremental diversity computation
+            # normalize div_scores to combine scores
+            combined_scores = qs.λ_inf * inf_scores_normalized + qs.λ_rep * rep_scores_normalized + qs.λ_div * qs.normalization(div_scores)
             batch_sample_indices = [ind for (ind, val) in enumerate(candidate_indices) if val in batch_samples]
             combined_scores[batch_sample_indices] .= -Inf
         end
