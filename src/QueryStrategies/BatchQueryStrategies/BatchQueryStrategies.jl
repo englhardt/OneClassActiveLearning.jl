@@ -51,5 +51,7 @@ export
     EnsembleBatchQs,
     ClusterBatchQs,
 
-    select_batch
+    select_batch,
+    angle_batch_diversity,
+    euclidean_batch_diversity
 end
