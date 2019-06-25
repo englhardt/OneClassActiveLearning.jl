@@ -62,7 +62,7 @@ function get_incremental_div_measure(name::Symbol)::Function
                 K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
             else
                 # compute a new kernel matrix because query data differs from model data
-                K = MLKernels.kernelmatrix(Val(:col), model.kernel_fct, data)
+                K = MLKernels.kernelmatrix(Val(:col), SVDD.get_kernel(model), data)
             end
             div_scores = [-abs(K[i, new_in_batch_idx]) / (sqrt(K[i, i]) * sqrt(K[new_in_batch_idx, new_in_batch_idx])) for i in candidates]
             if !isempty(old_scores)
@@ -83,9 +83,40 @@ function get_incremental_div_measure(name::Symbol)::Function
     end
 end
 
+function angle_batch_diversity(kernel::MLKernels.Kernel, data::Array{T, 2}) where T <: Real
+    K = MLKernels.kernelmatrix(Val(:col), kernel, data)
+    return angle_batch_diversity(K)
+end
+
+"""
+The angle batch diversity is minimal angle between all pairs in the batch and
+is calculated in the kernel space
+"""
+function angle_batch_diversity(K::Array{T, 2}) where T <: Real
+    min_div = Inf
+    for i in 1:size(K, 1)
+        for j in i+1:size(K, 2)
+            @inbounds div = -abs(K[i, j]) / (sqrt(K[i, i]) * sqrt(K[j, j]))
+            min_div = min(div, min_div)
+        end
+    end
+    return min_div
+end
+
+"""
+The euclidean batch diversity is the minimal euclidean distance between all pairs
+in the batch and is calculated in the feature space
+"""
+function euclidean_batch_diversity(data::Array{T, 2}) where T <: Real
+    distances = Distances.pairwise(Distances.Euclidean(), data, dims=2)
+    distances[LinearAlgebra.diagind(distances)] .= Inf
+    return minimum(distances)
+end
+
 """
 div_measure computes diversity of the samples in a batch
 enumerative computation: compute diversity for the whole batch from scratch
+
 currently two measures are implemented:
 :AngleDiversity - Batch diversity is minimal angle between two batch samples in kernel space
 :EuclideanDistance - Batch diversity is minimal euclidean distance between two batch samples in feature space
@@ -95,30 +126,16 @@ function get_div_measure(name::Symbol)::Function
         return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
             if model.data == data
                 # reuse model kernel matrix
-                K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
+                K = SVDD.is_K_adjusted(model) ? model.K_adjusted[batch, batch] : model.K[batch, batch]
+                return angle_batch_diversity(K)
             else
                 # compute a new kernel matrix because query data differs from model data
-                K = MLKernels.kernelmatrix(Val(:col), model.kernel_fct, data)
+                return angle_batch_diversity(SVDD.get_kernel(model), data[:, batch])
             end
-            min_div = Inf
-            batch_size = length(batch)
-            for i in 1:batch_size
-                for j in i+1:batch_size
-                    @inbounds div = -abs(K[i, j]) / (sqrt(K[i, i]) * sqrt(K[j, j]))
-                    min_div = min(div, min_div)
-                end
-            end
-            return min_div
         end
     elseif (name == :EuclideanDistance)
         return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}) -> begin
-            # Compute pairwise distances, save only upper diagonal matrix
-            distances = LinearAlgebra.UpperTriangular(Distances.pairwise(Distances.Euclidean(), data, dims=2))
-            # Values on diagonal are always 0
-            # ignore them for minimum computation by setting them to Inf
-            distances[LinearAlgebra.diagind(distances)] .= Inf
-
-            return minimum(distances)
+            return euclidean_batch_diversity(data[:, batch])
         end
     else
         throw(ArgumentError("Invalid diversity measure $(name) specified."))
