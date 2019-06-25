@@ -19,8 +19,8 @@ function ValueHistories.MVHistory(x::Dict{Symbol, ValueHistories.UnivalueHistory
     return mvh
 end
 
-function unsafe_convert(::Type{Vector{Symbol}}, a::Array{Any,1})
-    Symbol.(a)
+function unsafe_convert(::Type{Vector{Vector{Symbol}}}, a::Array{Any,1})
+    [Symbol.(x) for x in a]
 end
 
 function unsafe_convert(::Type{Vector{Array{T, 2}}}, a::Array{Any,1}) where T <: Real
@@ -36,7 +36,7 @@ function Unmarshal.unmarshal(DT::Type{ValueHistories.MVHistory}, parsedJson::Abs
         # now also generic types like Array{T,N} can be parsed correctly
         itype = eval(Meta.parse(parsedJson["mv_itypes"][k]))
         vtype = eval(Meta.parse(parsedJson["mv_vtypes"][k]))
-        if vtype in [Symbol, Array{Int, 2}, Array{Float64, 2}]
+        if vtype in [Vector{Symbol}, Array{Int, 2}, Array{Float64, 2}]
             values = unsafe_convert(Vector{vtype}, v["values"])
         else
             values = convert(Array{vtype,1}, v["values"])
