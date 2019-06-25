@@ -10,7 +10,7 @@ struct GreedyHierarchicalBatchQs <: MultiObjectiveBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
         representativeness_measure = get_rep_measure(representativeness)
-        diversity_measure = get_iterative_div_measure(diversity)
+        diversity_measure = get_incremental_div_measure(diversity)
         return new(model, informativeness, representativeness_measure, diversity_measure, k)
     end
 end
@@ -38,7 +38,7 @@ function select_batch(qs::GreedyHierarchicalBatchQs, x::Array{T, 2}, labels::Dic
     batch_samples = batch_candidate_indices[1:1]
     div_scores = Float64[]
     for iteration in 2:qs.k
-        div_scores = qs.div_measure(qs.model, x, candidate_indices, batch_samples[end], div_scores)
+        div_scores = qs.div_measure(qs.model, x, batch_samples[end], candidate_indices, div_scores)
         best_sample_index = candidate_indices[argmax(div_scores)]
 
         push!(batch_samples, best_sample_index)
