@@ -14,7 +14,7 @@ struct IterativeBatchQs <: MultiObjectiveBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
         representativeness_measure = get_rep_measure(representativeness)
-        diversity_measure = get_iterative_div_measure(diversity)
+        diversity_measure = get_incremental_div_measure(diversity)
         return new(model, informativeness, representativeness_measure, diversity_measure, min_max_normalization, k, λ_inf, λ_rep, λ_div)
     end
 end
@@ -43,7 +43,7 @@ function select_batch(qs::IterativeBatchQs, x::Array{T, 2}, labels::Dict{Symbol,
             # first sample for new batch cannot compute diversity to existing samples
             combined_scores = qs.λ_inf * inf_scores_normalized + qs.λ_rep * rep_scores_normalized
         else
-            div_scores_normalized = qs.normalization(qs.div_measure(qs.model, x, candidate_indices, batch_samples[end], div_scores_normalized))
+            div_scores_normalized = qs.normalization(qs.div_measure(qs.model, x, batch_samples[end], candidate_indices, div_scores_normalized))
             combined_scores = qs.λ_inf * inf_scores_normalized + qs.λ_rep * rep_scores_normalized + qs.λ_div * div_scores_normalized
             batch_sample_indices = [ind for (ind, val) in enumerate(candidate_indices) if val in batch_samples]
             combined_scores[batch_sample_indices] .= -Inf

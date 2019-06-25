@@ -45,12 +45,18 @@ function get_rep_measure(name::Symbol)::Function
 end
 
 """
-div_measure computes diversity of all samples to one specific sample
-Iterative computation: only value for added sample needs to be computed, old_scores saves aggregated result
+div_measure computes diversity of all candidates incrementally
+Incremental computation: only diversity of the candidates to the last sample that
+has been added to the batch (new_in_batch_idx) must be computed,
+old_scores saves aggregated result, i.e., the diversity to the rest of the batch
+
+currently two measures are implemented:
+:AngleDiversity - Batch diversity is minimal angle between two batch samples in kernel space
+:EuclideanDistance - Batch diversity is minimal euclidean distance between two batch samples in feature space
 """
-function get_iterative_div_measure(name::Symbol)::Function
+function get_incremental_div_measure(name::Symbol)::Function
     if (name == :AngleDiversity)
-        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}, candidate::Int, old_scores::Vector{Float64}) -> begin
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, new_in_batch_idx::Int, candidates::Vector{Int}, old_scores::Vector{Float64}) -> begin
             if model.data == data
                 # reuse model kernel matrix
                 K = SVDD.is_K_adjusted(model) ? model.K_adjusted : model.K
@@ -58,15 +64,15 @@ function get_iterative_div_measure(name::Symbol)::Function
                 # compute a new kernel matrix because query data differs from model data
                 K = MLKernels.kernelmatrix(Val(:col), model.kernel_fct, data)
             end
-            div_scores = [-abs(K[i, candidate]) / (sqrt(K[i, i]) * sqrt(K[candidate, candidate])) for i in batch]
+            div_scores = [-abs(K[i, new_in_batch_idx]) / (sqrt(K[i, i]) * sqrt(K[new_in_batch_idx, new_in_batch_idx])) for i in candidates]
             if !isempty(old_scores)
                 div_scores = min.(div_scores, old_scores)
             end
             return div_scores
         end
     elseif (name == :EuclideanDistance)
-        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, batch::Vector{Int}, candidate::Int, old_scores::Vector{Float64}) -> begin
-            div_scores = Distances.colwise(Distances.Euclidean(), data[:, batch], data[:, candidate])
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, new_in_batch_idx::Int, candidates::Vector{Int}, old_scores::Vector{Float64}) -> begin
+            div_scores = Distances.colwise(Distances.Euclidean(), data[:, candidates], data[:, new_in_batch_idx])
             if !isempty(old_scores)
                 div_scores = min.(div_scores, old_scores)
             end
