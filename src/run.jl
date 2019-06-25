@@ -130,6 +130,7 @@ function active_learn(experiment::Dict{Symbol, Any}, data::Array{T, 2}, labels::
             push_queries!(res.al_history, i, queries, query_labels, time_qs, mem_qs)
             isa(queries[1], Int) ? debug(LOGGER, "[QS] Query(ids = $(queries), labels = $(query_labels))") :
                                    debug(LOGGER, "[QS] Query(labels = $(query_labels))")
+            push_eval_queries!(res.al_history, i, model, data, queries)
             debug(LOGGER, "[QS] Query strategy done.")
         end
         debug(LOGGER, "Finished iteration $(i).")
@@ -211,6 +212,23 @@ end
 function push_queries!(al_history::ValueHistories.MVHistory, i, queries, query_labels, time_qs, mem_qs)
     push!(al_history, :query_history, i, queries)
     ValueHistories.@trace al_history i query_labels time_qs mem_qs
+    return nothing
+end
+
+function push_eval_queries!(al_history::ValueHistories.MVHistory, i, model::OCClassifier, data::Array{T, 2}, queries::Vector{Int}) where T <: Real
+    return push_eval_queries!(al_history, i, model, data, data[:, queries])
+end
+
+function push_eval_queries!(al_history::ValueHistories.MVHistory, i, model::OCClassifier, data::Array{T, 2}, queries::Array{T, 2}) where T <: Real
+    if size(queries, 2) < 2
+        angle_div, euclidean_div = 0.0, 0.0
+    else
+        kernel = SVDD.get_kernel(model)
+        angle_div = kernel !== nothing ? angle_batch_diversity(kernel, queries) : -1
+        euclidean_div = euclidean_batch_diversity(queries)
+    end
+    push!(al_history, :angle_batch_diversity, i, angle_div)
+    push!(al_history, :euclidean_batch_diversity, i, euclidean_div)
     return nothing
 end
 

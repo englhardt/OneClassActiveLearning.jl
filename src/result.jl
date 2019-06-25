@@ -74,7 +74,8 @@ function al_summarize!(res::Result)
     for e in keys(res.al_history)
         # Skip calculation of summary statistics for some metrics
         if e ∈ [:cm, :time_fit, :mem_fit, :time_qs, :mem_qs, :query_labels,
-            :query_history, :runtime, :time_set_data]
+            :query_history, :runtime, :time_set_data,
+            :angle_batch_diversity, :euclidean_batch_diversity]
             continue
         end
         res.al_summary[e] = Dict()

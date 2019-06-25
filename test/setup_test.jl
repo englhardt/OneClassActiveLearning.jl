@@ -14,7 +14,7 @@
                            :initial_pools => fill(:U, TEST_DATA_NUM_OBSERVATIONS),
                            :adjust_K => true))
 
-        @testset "pool based" begin
+        @testset "pool based single query" begin
             exp =  deepcopy(experiment)
             exp[:query_strategy] = Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomPQs),
                                         :param => Dict{Symbol, Any}())
@@ -27,6 +27,42 @@
 
             @test res.status[:exit_code] == :success
             @test length(res.al_history, :query_history) == 5
+            @test length(res.al_history, :angle_batch_diversity) == 5
+            @test length(res.al_history, :euclidean_batch_diversity) == 5
+            @test all(values(res.al_history, :angle_batch_diversity) .≈ 0.0)
+            @test all(values(res.al_history, :euclidean_batch_diversity) .≈ 0.0)
+            @test length(res.al_history, :time_qs) == 5
+            @test all(values(res.al_history, :time_qs) .> 0.0)
+
+            @test length(res.al_history, :time_fit) == 6
+            @test all(values(res.al_history, :time_fit) .> 0.0)
+
+            @test length(res.al_history, :query_history) == 5
+            @test !isempty(res.worker_info)
+
+            @test length(res.al_history, :cm) == 6
+            @test OneClassActiveLearning.cohens_kappa(last(res.al_history[:cm])[2]) ≈ last(res.al_history[:cohens_kappa])[2]
+
+            @test res.experiment[:param][:initial_pools] == expected_experiment[:param][:initial_pools]
+        end
+
+        @testset "pool based batch query" begin
+            exp =  deepcopy(experiment)
+            exp[:query_strategy] = Dict(:type => :(OneClassActiveLearning.QueryStrategies.AllRandomBatchQs),
+                                        :param => Dict{Symbol, Any}(:k => 5))
+            exp[:oracle] = Dict(:type => :PoolOracle,
+                                :param => Dict{Symbol, Any}())
+
+            expected_experiment = deepcopy(exp)
+
+            res = OneClassActiveLearning.active_learn(exp)
+
+            @test res.status[:exit_code] == :success
+            @test length(res.al_history, :query_history) == 5
+            @test all(length.(values(res.al_history, :query_history)) .== 5)
+            @test length(res.al_history, :angle_batch_diversity) == 5
+            @test length(res.al_history, :euclidean_batch_diversity) == 5
+            @test all(.~(values(res.al_history, :euclidean_batch_diversity) .≈ 0.0))
             @test length(res.al_history, :time_qs) == 5
             @test all(values(res.al_history, :time_qs) .> 0.0)
 
@@ -57,6 +93,10 @@
 
             @test res.status[:exit_code] == :success
             @test length(res.al_history, :query_history) == 5
+            @test length(res.al_history, :angle_batch_diversity) == 5
+            @test length(res.al_history, :euclidean_batch_diversity) == 5
+            @test all(values(res.al_history, :angle_batch_diversity) .≈ 0.0)
+            @test all(values(res.al_history, :euclidean_batch_diversity) .≈ 0.0)
             @test length(res.al_history, :time_qs) == 5
             @test all(values(res.al_history, :time_qs) .> 0.0)
 
