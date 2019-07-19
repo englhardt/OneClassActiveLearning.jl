@@ -24,6 +24,7 @@ import ..OneClassActiveLearning:
 include("oracle_base.jl")
 
 include("PoolOracle.jl")
+include("NoisyOracle.jl")
 include("QuerySynthesisFunctionOracle.jl")
 include("QuerySynthesisGMMOracle.jl")
 include("QuerySynthesisKNNOracle.jl")
@@ -34,6 +35,7 @@ include("QuerySynthesisCVWrapperOracle.jl")
 export
     Oracle,
     PoolOracle,
+    NoisyOracle,
     QuerySynthesisFunctionOracle,
     QuerySynthesisGMMOracle,
     QuerySynthesisKNNOracle,
