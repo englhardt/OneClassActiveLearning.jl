@@ -4,7 +4,8 @@ struct NoisyOracle <: Oracle
 end
 
 function NoisyOracle(data, labels, params::Dict{Symbol, Any})
-    return NoisyOracle(eval(params[:oracle_type])(data, labels, params), params[:p])
+    suboracle = initialize_oracle(eval(params[:subtype]), data, labels, get(params, :subparams, Dict{Symbol, Any}()))
+    return NoisyOracle(suboracle, params[:p])
 end
 
 function ask_oracle(oracle::NoisyOracle, queries::Union{Vector{Int}, Array{T, 2}})::Vector{Symbol} where T <: Real

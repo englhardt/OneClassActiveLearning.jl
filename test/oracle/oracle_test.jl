@@ -18,16 +18,17 @@
 
     @testset "NoisyOracle" begin
         oracle = OneClassActiveLearning.initialize_oracle(NoisyOracle, data, labels, Dict{Symbol, Any}(
-            :oracle_type => PoolOracle,
-            :p => 0.5
+            :p => 0.5,
+            :subtype => :PoolOracle,
+            :subparams => Dict{Symbol, Any}()
         ))
         query_ids = Array(1:3)
         feedback = ask_oracle(oracle, query_ids)
         @test length(feedback) == 3
         @test issubset(Set(feedback), expected_feedback)
         oracle = OneClassActiveLearning.initialize_oracle(NoisyOracle, data, labels, Dict{Symbol, Any}(
-            :oracle_type => PoolOracle,
-            :p => 1
+            :p => 1,
+            :subtype => :PoolOracle
         ))
         feedback = ask_oracle(oracle, query_ids)
         @test length(feedback) == 3
