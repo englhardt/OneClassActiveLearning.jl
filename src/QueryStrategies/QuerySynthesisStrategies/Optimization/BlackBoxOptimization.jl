@@ -8,9 +8,10 @@ struct BlackBoxOptimization <: QuerySynthesisOptimizer
 end
 
 function query_synthesis_optimize(f::Function, optimizer::BlackBoxOptimization, data::Array{T, 2}, labels::Vector{Symbol})::Array{T, 2} where T <: Real
-    lb, ub = vec.(data_boundaries(data[:, labels .!= :Lout]))
+    lb, ub = vec.(data_boundaries(data[:, labels .!= :Lout], optimizer.eps))
     res = BlackBoxOptim.bboptimize(x -> -first(f(reshape(x, length(x), 1)));
-        NumDimensions=size(data, 1), Method=optimizer.method, lowerBound=lb, upperBound=ub,
+        NumDimensions=size(data, 1), Method=optimizer.method,
+        SearchRange=[(lb[i], ub[i]) for i in eachindex(lb)],
         TraceMode=:silent, optimizer.params...)
     return reshape(BlackBoxOptim.best_candidate(res), size(data, 1), 1)
 end

@@ -11,7 +11,7 @@ struct ParticleSwarmOptimization <: QuerySynthesisOptimizer
 end
 
 function query_synthesis_optimize(f::Function, optimizer::ParticleSwarmOptimization, data::Array{T, 2}, labels::Vector{Symbol})::Array{T, 2} where T <: Real
-    lb, ub = vec.(data_boundaries(data[:, labels .!= :Lout]))
+    lb, ub = vec.(data_boundaries(data[:, labels .!= :Lout], optimizer.eps))
     x_opt, _ = pso(x -> vec(-f(x)), lb, ub;
                     swarmsize=optimizer.swarmsize,
                     maxiter=optimizer.maxiter,
