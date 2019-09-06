@@ -52,7 +52,7 @@ old_scores saves aggregated result, i.e., the diversity to the rest of the batch
 
 currently two measures are implemented:
 :AngleDiversity - Batch diversity is minimal angle between two batch samples in kernel space
-:EuclideanDistance - Batch diversity is minimal euclidean distance between two batch samples in feature space
+:EuclideanDistance - Batch diversity is minimal euclidean distance between two batch samples in data space
 """
 function get_incremental_div_measure(name::Symbol)::Function
     if (name == :AngleDiversity)
@@ -83,6 +83,26 @@ function get_incremental_div_measure(name::Symbol)::Function
     end
 end
 
+function pairwise_angle_distance(kernel::MLKernels.Kernel, data::Array{T, 2}) where T <: Real
+    K = MLKernels.kernelmatrix(Val(:col), kernel, data)
+    return pairwise_angle_distance(K)
+end
+
+"""
+Calculate the pairwise angle between all observations in the kernel space.
+Kernel matrix is copied.
+"""
+function pairwise_angle_distance(K::Array{T, 2}) where T <: Real
+    angle_dist = deepcopy(K)
+    min_div = Inf
+    for i in 1:size(K, 1)
+        for j in i+1:size(K, 2)
+            @inbounds angle_dist[i, j] = -abs(K[i, j]) / (sqrt(K[i, i]) * sqrt(K[j, j]))
+        end
+    end
+    return angle_dist
+end
+
 function angle_batch_diversity(kernel::MLKernels.Kernel, data::Array{T, 2}) where T <: Real
     K = MLKernels.kernelmatrix(Val(:col), kernel, data)
     return angle_batch_diversity(K)
@@ -90,7 +110,8 @@ end
 
 """
 The angle batch diversity is minimal angle between all pairs in the batch and
-is calculated in the kernel space
+is calculated in the kernel space.
+No kernel matrix allocation required.
 """
 function angle_batch_diversity(K::Array{T, 2}) where T <: Real
     min_div = Inf
@@ -104,12 +125,20 @@ function angle_batch_diversity(K::Array{T, 2}) where T <: Real
 end
 
 """
-The euclidean batch diversity is the minimal euclidean distance between all pairs
-in the batch and is calculated in the feature space
+Pairwise euclidean distance with diagonal set to Inf.
 """
-function euclidean_batch_diversity(data::Array{T, 2}) where T <: Real
+function pairwise_euclidean_distance(data::Array{T, 2}) where T <: Real
     distances = Distances.pairwise(Distances.Euclidean(), data, dims=2)
     distances[LinearAlgebra.diagind(distances)] .= Inf
+    return distances
+end
+
+"""
+The euclidean batch diversity is the minimal euclidean distance between all pairs
+in the batch and is calculated in the data space
+"""
+function euclidean_batch_diversity(data::Array{T, 2}) where T <: Real
+    distances = pairwise_euclidean_distance(data)
     return minimum(distances)
 end
 
@@ -119,7 +148,7 @@ enumerative computation: compute diversity for the whole batch from scratch
 
 currently two measures are implemented:
 :AngleDiversity - Batch diversity is minimal angle between two batch samples in kernel space
-:EuclideanDistance - Batch diversity is minimal euclidean distance between two batch samples in feature space
+:EuclideanDistance - Batch diversity is minimal euclidean distance between two batch samples in data space
 """
 function get_div_measure(name::Symbol)::Function
     if (name == :AngleDiversity)
@@ -139,6 +168,27 @@ function get_div_measure(name::Symbol)::Function
         end
     else
         throw(ArgumentError("Invalid diversity measure $(name) specified."))
+    end
+end
+
+function get_pairwise_distance(name::Symbol)::Function
+    if (name == :AngleDiversity)
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, candidates::Vector{Int}) -> begin
+            if model.data == data
+                # reuse model kernel matrix
+                K = SVDD.is_K_adjusted(model) ? model.K_adjusted[candidates, candidates] : model.K[candidates, candidates]
+                return pairwise_angle_distance(K)
+            else
+                # compute a new kernel matrix because query data differs from model data
+                return pairwise_angle_distance(SVDD.get_kernel(model), data[:, candidates])
+            end
+        end
+    elseif (name == :EuclideanDistance)
+        return (model::SVDD.OCClassifier, data::Array{T, 2} where T <: Real, candidates::Vector{Int}) -> begin
+            return pairwise_euclidean_distance(data[:, candidates])
+        end
+    else
+        throw(ArgumentError("Invalid distance measure $(name) specified."))
     end
 end
 

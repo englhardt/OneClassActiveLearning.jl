@@ -34,6 +34,7 @@ include("KMedoidsBatchQs.jl")
 include("EnumerativeBatchQs.jl")
 include("EnsembleBatchQs.jl")
 include("ClusterBatchQs.jl")
+include("FilterSimilarBatchQs.jl")
 
 export
     BatchPQs,
@@ -50,6 +51,8 @@ export
 
     EnsembleBatchQs,
     ClusterBatchQs,
+
+    FilterSimilarBatchQs,
 
     select_batch,
     angle_batch_diversity,
