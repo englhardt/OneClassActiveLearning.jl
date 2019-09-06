@@ -2,7 +2,10 @@
     BQS = OneClassActiveLearning.QueryStrategies.BatchQueryStrategies
 
     dummy_data, dummy_labels = load_data(TEST_DATA_FILE)
-    classifier = SVDD.RandomOCClassifier(dummy_data)
+
+    classifier = SVDD.SVDDneg(dummy_data, dummy_labels)
+    init_strategy = SimpleCombinedStrategy(FixedGammaStrategy(MLKernels.GaussianKernel(1)), FixedCStrategy(0.5))
+    initialize!(classifier, init_strategy)
 
     empty_params = Dict{Symbol, Any}()
     sequential_strategy = Dict{Symbol, Any}(
@@ -79,14 +82,11 @@
                 :SequentialStrategy => sequential_strategy,
                 :solver => TEST_SOLVER
             )
-            model = SVDD.SVDDneg(dummy_data, dummy_labels)
-            init_strategy = SimpleCombinedStrategy(FixedGammaStrategy(MLKernels.GaussianKernel(0.1)), FixedCStrategy(0.7))
-            initialize!(model, init_strategy)
-            qs = initialize_qs(EnsembleBatchQs, model, dummy_data, params)
-            labels = labelmap(fill(:U, TEST_DATA_NUM_OBSERVATIONS))
+            qs = initialize_qs(EnsembleBatchQs, classifier, dummy_data, params)
+            labels_ensemble = labelmap(fill(:U, TEST_DATA_NUM_OBSERVATIONS))
             for candidates in candidate_indices
                 try
-                    batch_indices = select_batch(qs, dummy_data, labels, candidates)
+                    batch_indices = select_batch(qs, dummy_data, labels_ensemble, candidates)
                     @test length(batch_indices) == min(length(candidates), batch_size)
                     @test issubset(batch_indices, Set(candidates))
                 catch e
@@ -134,17 +134,14 @@
                 :λ_inf => 1,
                 :λ_rep => 1,
                 :λ_div => 1)
-            model = VanillaSVDD(dummy_data)
-            init_strategy = SimpleCombinedStrategy(FixedGammaStrategy(MLKernels.GaussianKernel(1)), FixedCStrategy(0.5))
-            initialize!(model, init_strategy)
             for qs_type in qs_types
                 @testset "$(qs_type)" begin
                     for invalid_params in [invalid_rep_params, invalid_div_params]
-                        @test_throws ArgumentError initialize_qs(qs_type, model, dummy_data, invalid_params)
+                        @test_throws ArgumentError initialize_qs(qs_type, classifier, dummy_data, invalid_params)
                     end
                     for filled_params in params
                         @testset "$(filled_params)" begin
-                            test_batch_qs(qs_type, filled_params, model, dummy_data, labels, candidate_indices)
+                            test_batch_qs(qs_type, filled_params, classifier, dummy_data, labels, candidate_indices)
                         end
                     end
                 end
@@ -169,15 +166,27 @@
                 :SequentialStrategy => sequential_strategy,
                 :representativeness => :KDE,
                 :diversity => :INVALID)
-            model = VanillaSVDD(dummy_data)
-            init_strategy = SimpleCombinedStrategy(FixedGammaStrategy(MLKernels.GaussianKernel(1)), FixedCStrategy(0.5))
-            initialize!(model, init_strategy)
             for qs_type in qs_types
                 @testset "$(qs_type)" begin
                     for invalid_params in [invalid_rep_params, invalid_div_params]
-                        @test_throws ArgumentError initialize_qs(qs_type, model, dummy_data, invalid_params)
+                        @test_throws ArgumentError initialize_qs(qs_type, classifier, dummy_data, invalid_params)
                     end
-                    test_batch_qs(qs_type, params, model, dummy_data, labels, candidate_indices)
+                    test_batch_qs(qs_type, params, classifier, dummy_data, labels, candidate_indices)
+                end
+            end
+        end
+
+        @testset "FilterSimilarBatchQs" begin
+            qs_type = FilterSimilarBatchQs
+            params = [Dict{Symbol, Any}(
+                :k => batch_size,
+                :SequentialStrategy => sequential_strategy,
+                :diversity => div
+            ) for div in [:AngleDiversity, :EuclideanDistance]]
+            @test_throws UndefVarError initialize_qs(qs_type, classifier, dummy_data, invalid_div_params)
+            for filled_params in params
+                @testset "$(filled_params)" begin
+                    test_batch_qs(qs_type, filled_params, classifier, dummy_data, labels, candidate_indices)
                 end
             end
         end
