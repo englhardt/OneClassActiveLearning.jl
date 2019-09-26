@@ -25,7 +25,7 @@ import StatsBase: sample
 include("batch_qs_base.jl")
 
 include("TopKBatchQs.jl")
-include("GappedTopkBatchQs.jl")
+include("GappedTopKBatchQs.jl")
 include("RandomBatchQs.jl")
 include("IterativeBatchQs.jl")
 include("EnumFilterHierarchicalBatchQs.jl")
@@ -39,7 +39,7 @@ include("FilterSimilarBatchQs.jl")
 export
     BatchPQs,
     ExtendingBatchQs,
-    TopKBatchQs, GappedTopkBatchQs,
+    TopKBatchQs, GappedTopKBatchQs,
     RandomBatchQs,
     ClusterBatchQs,
 

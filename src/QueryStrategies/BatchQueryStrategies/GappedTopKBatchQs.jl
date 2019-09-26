@@ -1,9 +1,9 @@
-struct GappedTopkBatchQs <: ExtendingBatchQs
+struct GappedTopKBatchQs <: ExtendingBatchQs
     sequentialQs::SequentialPQs
     k::Int
     m::Int
 
-    function GappedTopkBatchQs(sequentialQs::SequentialPQs; k::Int, m::Int=0)::RandomBatchQs
+    function GappedTopKBatchQs(sequentialQs::SequentialPQs; k::Int, m::Int=0)::RandomBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
         (m < 0) && throw(ArgumentError("Invalid batch increase m=$(m)."))
         return new(sequentialQs, k, m)
@@ -14,7 +14,7 @@ end
 Use sequential strategy, randomly select batch_size observations from batch_size + m
 observations with highest usefulness.
 """
-function select_batch(qs::GappedTopkBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
+function select_batch(qs::GappedTopKBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)
     if num_observations <= qs.k
         return candidate_indices

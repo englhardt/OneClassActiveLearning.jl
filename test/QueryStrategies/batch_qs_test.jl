@@ -45,8 +45,8 @@
             test_batch_qs(qs_type, params, classifier, dummy_data, labels, candidate_indices)
         end
 
-        @testset "GappedTopkBatchQs" begin
-            qs_type = GappedTopkBatchQs
+        @testset "GappedTopKBatchQs" begin
+            qs_type = GappedTopKBatchQs
             params = Dict{Symbol, Any}(
                 :k => batch_size,
                 :m => 0,
