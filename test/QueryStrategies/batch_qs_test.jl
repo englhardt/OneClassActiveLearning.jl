@@ -28,8 +28,8 @@
         labels = labelmap(fill(:U, 10))
         candidate_indices = [collect(inds) for inds in [1:3, 1:10]]
 
-        @testset "AllRandomBatchQs" begin
-            qs_type = AllRandomBatchQs
+        @testset "RandomBatchQs" begin
+            qs_type = RandomBatchQs
             params = Dict{Symbol, Any}(
                 :k => batch_size
             )
@@ -45,8 +45,8 @@
             test_batch_qs(qs_type, params, classifier, dummy_data, labels, candidate_indices)
         end
 
-        @testset "RandomBestBatchQs" begin
-            qs_type = RandomBestBatchQs
+        @testset "GappedTopkBatchQs" begin
+            qs_type = GappedTopkBatchQs
             params = Dict{Symbol, Any}(
                 :k => batch_size,
                 :m => 0,
@@ -56,8 +56,8 @@
             test_batch_qs(qs_type, params, classifier, dummy_data, labels, candidate_indices)
         end
 
-        @testset "KMedoidsBatchQs" begin
-            qs_type = KMedoidsBatchQs
+        @testset "ClusterBatchQs" begin
+            qs_type = ClusterBatchQs
             params = Dict{Symbol, Any}(
                 :k => batch_size
             )
@@ -65,8 +65,8 @@
             test_batch_qs(qs_type, params, classifier, dummy_data, labels, candidate_indices)
         end
 
-        @testset "ClusterBatchQs" begin
-            qs_type = ClusterBatchQs
+        @testset "ClusterTopKBatchQs" begin
+            qs_type = ClusterTopKBatchQs
             params = Dict{Symbol, Any}(
                 :k => batch_size,
                 :SequentialStrategy => sequential_strategy
@@ -149,7 +149,7 @@
         end
 
         @testset "hierarchical" begin
-            qs_types = [GreedyHierarchicalBatchQs, EnumHierarchicalBatchQs]
+            qs_types = [FilterHierarchicalBatchQs, EnumFilterHierarchicalBatchQs]
             params = Dict{Symbol, Any}(
                 :k => batch_size,
                 :SequentialStrategy => sequential_strategy,
@@ -193,7 +193,7 @@
     end
 
     @testset "get_query_objects" begin
-        qs = AllRandomBatchQs(k=4)
+        qs = RandomBatchQs(k=4)
         @testset "a" begin
             data = rand(2, 6)
             pools = fill(:U, 6)

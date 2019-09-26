@@ -1,12 +1,12 @@
-struct GreedyHierarchicalBatchQs <: MultiObjectiveBatchQs
+struct FilterHierarchicalBatchQs <: MultiObjectiveBatchQs
     model::SVDD.OCClassifier
     inf_measure::SequentialPQs
     rep_measure::Function
     div_measure::Function
     k::Int
 
-    function GreedyHierarchicalBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol, diversity::Symbol,
-        k::Int)::GreedyHierarchicalBatchQs
+    function FilterHierarchicalBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol, diversity::Symbol,
+        k::Int)::FilterHierarchicalBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
         representativeness_measure = get_rep_measure(representativeness)
@@ -21,7 +21,7 @@ Idea: Find 4*k elements with largest representativeness,
     iteratively generate batch by greedyly adding sample with maximum diversity
         to already selected batch samples
 """
-function select_batch(qs::GreedyHierarchicalBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
+function select_batch(qs::FilterHierarchicalBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)
     if num_observations <= qs.k
         return candidate_indices

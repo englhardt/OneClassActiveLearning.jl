@@ -48,7 +48,7 @@
 
         @testset "pool based batch query" begin
             exp =  deepcopy(experiment)
-            exp[:query_strategy] = Dict(:type => :(OneClassActiveLearning.QueryStrategies.AllRandomBatchQs),
+            exp[:query_strategy] = Dict(:type => :(OneClassActiveLearning.QueryStrategies.RandomBatchQs),
                                         :param => Dict{Symbol, Any}(:k => 5))
             exp[:oracle] = Dict(:type => :PoolOracle,
                                 :param => Dict{Symbol, Any}())
