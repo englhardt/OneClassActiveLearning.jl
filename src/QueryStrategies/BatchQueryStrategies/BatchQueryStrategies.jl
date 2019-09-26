@@ -25,32 +25,32 @@ import StatsBase: sample
 include("batch_qs_base.jl")
 
 include("TopKBatchQs.jl")
-include("RandomBestBatchQs.jl")
-include("AllRandomBatchQs.jl")
+include("GappedTopkBatchQs.jl")
+include("RandomBatchQs.jl")
 include("IterativeBatchQs.jl")
-include("EnumHierarchicalBatchQs.jl")
-include("GreedyHierarchicalBatchQs.jl")
-include("KMedoidsBatchQs.jl")
+include("EnumFilterHierarchicalBatchQs.jl")
+include("FilterHierarchicalBatchQs.jl")
+include("ClusterBatchQs.jl")
 include("EnumerativeBatchQs.jl")
 include("EnsembleBatchQs.jl")
-include("ClusterBatchQs.jl")
+include("ClusterTopKBatchQs.jl")
 include("FilterSimilarBatchQs.jl")
 
 export
     BatchPQs,
     ExtendingBatchQs,
-    TopKBatchQs, RandomBestBatchQs,
-    AllRandomBatchQs,
-    KMedoidsBatchQs,
+    TopKBatchQs, GappedTopkBatchQs,
+    RandomBatchQs,
+    ClusterBatchQs,
 
     MultiObjectiveBatchQs,
     IterativeBatchQs,
-    GreedyHierarchicalBatchQs,
-    EnumHierarchicalBatchQs,
+    FilterHierarchicalBatchQs,
+    EnumFilterHierarchicalBatchQs,
     EnumerativeBatchQs,
 
     EnsembleBatchQs,
-    ClusterBatchQs,
+    ClusterTopKBatchQs,
 
     FilterSimilarBatchQs,
 

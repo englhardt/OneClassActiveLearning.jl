@@ -517,7 +517,7 @@
       "param": {
         "k": 8
       },
-      "type": "AllRandomBatchQs"
+      "type": "RandomBatchQs"
     },
     "oracle": {
       "param": {},

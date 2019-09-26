@@ -14,7 +14,7 @@ experiment = Dict{Symbol, Any}(
     :model => Dict(:type => :SVDDneg,
                    :param => Dict{Symbol, Any}(),
                    :init_strategy => SimpleCombinedStrategy(RuleOfThumbScott(), BoundedTaxErrorEstimate(0.05, 0.02, 0.98))),
-    :query_strategy => Dict(:type => :AllRandomBatchQs,
+    :query_strategy => Dict(:type => :RandomBatchQs,
                             :param => Dict{Symbol, Any}(
                                 :k => 8
                             )),

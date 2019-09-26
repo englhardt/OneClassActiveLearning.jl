@@ -1,12 +1,12 @@
-struct EnumHierarchicalBatchQs <: MultiObjectiveBatchQs
+struct EnumFilterHierarchicalBatchQs <: MultiObjectiveBatchQs
     model::SVDD.OCClassifier
     inf_measure::SequentialPQs
     rep_measure::Function
     div_measure::Function
     k::Int
 
-    function EnumHierarchicalBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol, diversity::Symbol,
-        k::Int)::EnumHierarchicalBatchQs
+    function EnumFilterHierarchicalBatchQs(model::SVDD.OCClassifier, informativeness::SequentialPQs; representativeness::Symbol, diversity::Symbol,
+        k::Int)::EnumFilterHierarchicalBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
         representativeness_measure = get_rep_measure(representativeness)
@@ -20,7 +20,7 @@ Idea: Find 4*k elements with largest representativeness,
     select 2*k elements with largest informativeness,
     select batch of size k with maximum diversity
 """
-function select_batch(qs::EnumHierarchicalBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
+function select_batch(qs::EnumFilterHierarchicalBatchQs, x::Array{T, 2}, labels::Dict{Symbol, Vector{Int}}, candidate_indices::Vector{Int})::Vector{Int} where T <: Real
     num_observations = length(candidate_indices)
     if num_observations <= qs.k
         return candidate_indices
