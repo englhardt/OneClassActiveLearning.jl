@@ -37,7 +37,8 @@ function qs_score_function(qs::ExplorativeMarginQss, data::Array{T, 2}, labels::
     redirect_stdout(); redirect_stderr()
     status = SVDD.fit!(qs.occ_eps, qs.solver)
     redirect_stdout(stdout_orig); redirect_stderr(stderr_orig)
-    if status === JuMP.MathOptInterface.ALMOST_LOCALLY_SOLVED
+    if status === JuMP.MathOptInterface.ALMOST_LOCALLY_SOLVED ||
+        status == JuMP.MathOptInterface.LOCALLY_SOLVED
         warn(getlogger(@__MODULE__), "Qss occ_eps not solved to optimality. Solver status: $status.")
     elseif status !== JuMP.MathOptInterface.OPTIMAL
         error(getlogger(@__MODULE__), "Qss occ_eps not solved to optimality. Solver status: $status.")
