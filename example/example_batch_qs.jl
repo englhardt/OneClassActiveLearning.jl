@@ -1,7 +1,6 @@
-using Gurobi
 const DATA_FILE = joinpath(@__DIR__, "dummy.csv")
 const NUM_DIMENSIONS, NUM_OBSERVATIONS = size(load_data(DATA_FILE)[1])
-const SOLVER = with_optimizer(Gurobi.Optimizer; OutputFlag=0)
+const SOLVER = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 
 experiment = Dict{Symbol, Any}(
     :hash => 1,
