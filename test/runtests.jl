@@ -15,7 +15,7 @@ using Distributions
 using GaussianMixtures
 using Serialization
 
-TEST_SOLVER =  with_optimizer(Ipopt.Optimizer, print_level=0)
+TEST_SOLVER = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 TEST_DATA_FILE = joinpath(@__DIR__, "test.csv")
 TEST_OUTPUT_FILE = joinpath(@__DIR__, "output.tmp")
 TEST_DATA_NUM_DIMENSIONS, TEST_DATA_NUM_OBSERVATIONS = size(load_data(TEST_DATA_FILE)[1])

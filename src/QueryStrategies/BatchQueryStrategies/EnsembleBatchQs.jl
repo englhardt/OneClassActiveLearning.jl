@@ -2,11 +2,11 @@ struct EnsembleBatchQs <: BatchPQs
     model::SVDD.OCClassifier
     k::Int
     sequential_strategy::SequentialPQs
-    solver::JuMP.OptimizerFactory
+    solver::JuMP.MOI.OptimizerWithAttributes
     model_indices::Vector{Vector{Int}}
     batch_models::Vector{SVDD.OCClassifier}
 
-    function EnsembleBatchQs(model::SVDD.OCClassifier, sequential_strategy::SequentialPQs; k::Int, solver::JuMP.OptimizerFactory)::EnsembleBatchQs
+    function EnsembleBatchQs(model::SVDD.OCClassifier, sequential_strategy::SequentialPQs; k::Int, solver::JuMP.MOI.OptimizerWithAttributes)::EnsembleBatchQs
         (k < 1) && throw(ArgumentError("Invalid batch size k=$(k)."))
 
         labels = MLLabelUtils.labelmap2vec(model.pools)
