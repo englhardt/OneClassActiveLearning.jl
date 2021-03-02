@@ -1,6 +1,6 @@
 const DATA_FILE = joinpath(@__DIR__, "dummy.csv")
 const NUM_DIMENSIONS, NUM_OBSERVATIONS = size(load_data(DATA_FILE)[1])
-const SOLVER = with_optimizer(Ipopt.Optimizer; print_level=0)
+const SOLVER = optimizer_with_attributes(Ipopt.Optimizer, "print_level" => 0)
 const INIT_STRAT = SimpleCombinedStrategy(RuleOfThumbScott(), BoundedTaxErrorEstimate(0.05, 0.02, 0.98))
 
 experiment = Dict{Symbol, Any}(

@@ -10,15 +10,12 @@ The package has been developed as part of a benchmark suite for [active learning
 > Holger Trittenbach, Adrian Englhardt, Klemens Böhm, "An overview and a benchmark of active learning for outlier detection with one-class classifiers", DOI: [10.1016/j.eswa.2020.114372](https://doi.org/10.1016/j.eswa.2020.114372), Expert Systems with Applications, 2021.
 
 ## Installation
-This package requires at least Julia 1.0.
+This package requires at least Julia 1.0 (latest tested version is 1.5).
 This package is not registered yet. Please use the following command to add the package with Pkg3.
 ```Julia
 using Pkg
 Pkg.add("https://github.com/englhardt/OneClassActiveLearning.jl.git")
 ```
-
-The results presented in the arXiv paper base on a previous version of the package and on Julia 0.6.
-To reproduce the experiment results from the arXiv paper, use the old package manager (with Pkg.clone) and checkout OneClassActiveLearning.jl at tag `v0.1.0`.
 
 ## Overview
 [One-class classifiers](https://en.wikipedia.org/wiki/One-class_classification) learn to identify if objects belong to a specific class, often used for outlier detection.
@@ -31,17 +28,20 @@ All the results are stored in `.json` files.
 The scripts in `example` gives a jump start on how to use this package.
 To run a minimal example, execute:
 ```Julia
-> julia example/example.jl
+> julia --project example/example.jl
 ```
 The result is then stored in `example/example_pool_qs.json`.
 
 The following examples are available:
 * `pool_qs`: The default example with a pool based query strategy
 * `query_synthesis`: Use a query synthesis strategy optimized via particle swarm optimization
+* `batch_qs`: Use a TopK batch query strategy
+
 Run any of the above examples by supplying the name, e.g., `pool_qs` as command line argument:
 ```Julia
-> julia example/example.jl pool_qs
+> julia --project example/example.jl pool_qs
 ```
+When learning the classifier, the `Ipopt` solver does not always solve the SVDD optimally. We suggest to use a more sophisticated solver such as [Gurobi](https://github.com/jump-dev/Gurobi.jl) in experiments.
 
 ### Data and initial pool init_strategies
 
@@ -60,6 +60,10 @@ The package includes multiple strategies to initialize the initial pool before s
 
 ### Active learning strategies
 This is a list of the available active learning strategies:
+
+#### Pool-based Query Strategies
+Pool-based query strategies define an informativeness function for a query. They then select the most informative observation from a pool of unlabeled observations.
+
 - Data-based query strategies
   - MinimumMarginPQs and ExpectedMinimumMarginPQs [1]
   - ExpectedMaximumEntropyPQs [1]
@@ -73,6 +77,41 @@ This is a list of the available active learning strategies:
 - Baselines
   - RandomPQs
   - RandomOutlierPQs
+
+#### Batch Query Strategies
+The batch query strategies select multiple queries at once in one active learning iteration. Some of them adapt the pool-based query strategies from the previous section.
+
+- Baseline batch strategies
+  - RandomBatchQs
+  - TopKBatchQs
+  - GappedTopKBatchQs
+- Filtering batch strategies
+  - FilterSimilarBatchQs
+  - FilterHierarchicalBatchQs
+- Iterative batch strategies
+  - IterativeBatchQs
+- Partitioning batch strategies
+  - ClusterTopKBatchQs
+  - EnsembleBatchQs
+
+For more details, we refer to the following publication and the corresponding experiment code [here](https://github.com/englhardt/bocal-evaluation/):
+> Adrian Englhardt, Holger Trittenbach, Dennis Vetter, Klemens Böhm, “Finding the Sweet Spot: Batch Selection for One-Class Active Learning”. In: Proceedings of the 2020 SIAM International Conference on Data Mining (SDM), DOI: [10.1137/1.9781611976236.14](https://doi.org/10.1137/1.9781611976236.14), May 7-9, 2020, Cincinnati, Ohio, USA.
+
+#### Query Synthesis Strategies
+Query synthesis is an active learning query scenario where one does not require a pool of unlabeled observations but can query any point in the data space.
+
+- Baselines
+  - RandomQss
+  - RandomOutlierQss
+- Advanced strategies
+  - DecisionBoundaryQss
+  - NaiveExplorativeMarginQss
+  - ExplorativeMarginQss
+
+To synthesize a query with a given informativeness function, one may use particle swarm optimization or any optimizer from [BlackBoxOptim.jl](https://github.com/robertfeldt/BlackBoxOptim.jl).
+
+For more details, we refer to the following publication and the corresponding experiment code [here](https://github.com/englhardt/des-evaluation):
+> Adrian Englhardt, Klemens Böhm, “Exploring the Unknown - Query Synthesis in One-Class Active Learning”. In: Proceedings of the 2020 SIAM International Conference on Data Mining (SDM), DOI: [10.1137/1.9781611976236.17](https://doi.org/10.1137/1.9781611976236.17), May 7-9, 2020, Cincinnati, Ohio, USA.
 
 #### Extending with a new strategy
 
