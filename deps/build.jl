@@ -5,7 +5,7 @@ try
     pip = pyimport("pip")
 catch
     get_pip = joinpath(dirname(@__FILE__), "get-pip.py")
-    download("https://bootstrap.pypa.io/get-pip.py", get_pip)
+    download("https://bootstrap.pypa.io/3.5/get-pip.py", get_pip)
     run(`$(PyCall.python) $get_pip --user`)
 end
 
